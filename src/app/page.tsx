@@ -1,0 +1,344 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { CueCard } from "@/components/CueCard";
+import { BriefPanel } from "@/components/BriefPanel";
+import { CompareStrip } from "@/components/CompareStrip";
+import { ReceiptsPanel } from "@/components/ReceiptsPanel";
+import { DirectionPanel, RegionPanel } from "@/components/SignalPanels";
+import { SAMPLE_SCENES } from "@/data/fixtures";
+import type { CueSheet } from "@/lib/types";
+
+type Status = "idle" | "running" | "done" | "error";
+
+const STAGES = [
+  "Reading the scene",
+  "Resolving references to Qloo entities",
+  "Ranking artists by cross-domain affinity",
+  "Checking audience fit and momentum",
+  "Writing the cue sheet",
+];
+
+export default function StudioPage() {
+  const [scene, setScene] = useState(SAMPLE_SCENES[0].scene);
+  const [alternative, setAlternative] = useState(
+    (SAMPLE_SCENES[0].alternativeAnchors ?? []).join(", "),
+  );
+  const [activeSample, setActiveSample] = useState(SAMPLE_SCENES[0].id);
+  const [status, setStatus] = useState<Status>("idle");
+  const [stage, setStage] = useState(0);
+  const [sheet, setSheet] = useState<CueSheet | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // Advance the stage ticker while a request is in flight so the agent's work
+  // is legible rather than an indeterminate spinner.
+  useEffect(() => {
+    if (status !== "running") return;
+    const timer = setInterval(() => {
+      setStage((current) => (current + 1) % STAGES.length);
+    }, 900);
+    return () => clearInterval(timer);
+  }, [status]);
+
+  const run = useCallback(async () => {
+    setStatus("running");
+    setStage(0);
+    setError(null);
+    setSheet(null);
+
+    try {
+      const response = await fetch("/api/cue", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scene,
+          alternativeAnchors: alternative
+            .split(",")
+            .map((value) => value.trim())
+            .filter(Boolean),
+        }),
+      });
+
+      const payload = (await response.json()) as CueSheet | { error: string };
+      if (!response.ok || "error" in payload) {
+        throw new Error(
+          "error" in payload ? payload.error : `Request failed (${response.status})`,
+        );
+      }
+      setSheet(payload);
+      setStatus("done");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
+      setStatus("error");
+    }
+  }, [scene, alternative]);
+
+  const applySample = useCallback((id: string) => {
+    const sample = SAMPLE_SCENES.find((entry) => entry.id === id);
+    if (!sample) return;
+    setActiveSample(id);
+    setScene(sample.scene);
+    setAlternative((sample.alternativeAnchors ?? []).join(", "));
+    setSheet(null);
+    setStatus("idle");
+    setError(null);
+  }, []);
+
+  const maxAffinity = useMemo(
+    () => (sheet ? Math.max(...sheet.cues.map((cue) => cue.affinity), 0.0001) : 1),
+    [sheet],
+  );
+
+  const endpointCount = sheet
+    ? new Set(sheet.receipts.map((receipt) => receipt.endpoint)).size
+    : 0;
+
+  return (
+    <main className="mx-auto max-w-[1400px] px-5 py-8 lg:px-10 lg:py-12">
+      {/* Masthead */}
+      <header className="flex flex-col gap-6 border-b border-white/5 pb-8 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-ember-500/30 bg-ember-500/10 font-display text-lg text-ember-400">
+              C
+            </span>
+            <span className="font-display text-2xl tracking-tight text-haze-100">Cue</span>
+            <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] uppercase tracking-wider text-haze-500">
+              agentic music supervisor
+            </span>
+          </div>
+          <p className="mt-4 max-w-2xl text-balance font-display text-3xl leading-tight text-haze-100 sm:text-4xl">
+            A scene brief goes in. A cue sheet that&rsquo;s{" "}
+            <span className="text-ember-400">actually right</span> comes out.
+          </p>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-haze-300">
+            Generic models name the same obvious songs for every scene, because they
+            have no idea what anyone actually likes. Cue ranks every pick against the
+            Qloo Taste Graph — measured affinity across music, film and audience — so a
+            supervisor gets culturally grounded options, each with the reason attached.
+          </p>
+        </div>
+        <dl className="grid shrink-0 grid-cols-3 gap-4 lg:grid-cols-1 lg:text-right">
+          <div>
+            <dt className="text-[10px] uppercase tracking-wider text-haze-500">Engine</dt>
+            <dd className="font-mono text-sm text-signal-400">Qloo Taste Graph</dd>
+          </div>
+          <div>
+            <dt className="text-[10px] uppercase tracking-wider text-haze-500">
+              Endpoints per run
+            </dt>
+            <dd className="font-mono text-sm text-haze-100">{endpointCount || "—"}</dd>
+          </div>
+          <div>
+            <dt className="text-[10px] uppercase tracking-wider text-haze-500">Mode</dt>
+            <dd className="font-mono text-sm text-haze-100">
+              {sheet ? sheet.mode : "ready"}
+            </dd>
+          </div>
+        </dl>
+      </header>
+
+      <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
+        {/* Composer */}
+        <div className="space-y-6 lg:sticky lg:top-8 lg:self-start">
+          <section className="panel grain relative overflow-hidden p-5">
+            <div className="relative z-10">
+              <h2 className="font-display text-base text-haze-100">Scene brief</h2>
+              <p className="mt-0.5 text-xs text-haze-500">
+                Paste the script, treatment or a plain description. Mention any films,
+                directors or artists it references — those become Qloo signal entities.
+              </p>
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                {SAMPLE_SCENES.map((sample) => (
+                  <button
+                    key={sample.id}
+                    type="button"
+                    onClick={() => applySample(sample.id)}
+                    aria-pressed={activeSample === sample.id}
+                    className={`rounded-full border px-3 py-1.5 text-left text-[11px] transition ${
+                      activeSample === sample.id
+                        ? "border-ember-500/40 bg-ember-500/10 text-ember-400"
+                        : "border-white/10 bg-white/5 text-haze-300 hover:border-white/20 hover:text-haze-100"
+                    }`}
+                  >
+                    {sample.label}
+                  </button>
+                ))}
+              </div>
+
+              <label htmlFor="scene" className="mt-4 block text-[10px] uppercase tracking-wider text-haze-500">
+                The scene
+              </label>
+              <textarea
+                id="scene"
+                value={scene}
+                onChange={(event) => {
+                  setScene(event.target.value);
+                  setActiveSample("");
+                }}
+                rows={11}
+                spellCheck={false}
+                className="mt-2 w-full resize-y rounded-lg border border-white/10 bg-black/30 p-3 font-sans text-sm leading-relaxed text-haze-100 placeholder:text-haze-700 focus:border-ember-500/40"
+                placeholder="Describe the scene, the emotion, the era, the audience…"
+              />
+
+              <label
+                htmlFor="alternative"
+                className="mt-4 block text-[10px] uppercase tracking-wider text-haze-500"
+              >
+                Optional: a second direction to compare
+              </label>
+              <input
+                id="alternative"
+                value={alternative}
+                onChange={(event) => setAlternative(event.target.value)}
+                className="mt-2 w-full rounded-lg border border-white/10 bg-black/30 p-3 text-sm text-haze-100 placeholder:text-haze-700 focus:border-ember-500/40"
+                placeholder="e.g. Sault, Nils Frahm"
+              />
+              <p className="mt-1.5 text-[11px] text-haze-500">
+                Cue will run these through{" "}
+                <code className="font-mono text-haze-300">/v2/analysis/compare</code> to
+                see whether the two readings actually split the audience.
+              </p>
+
+              <button
+                type="button"
+                onClick={run}
+                disabled={status === "running" || scene.trim().length < 20}
+                className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-b from-ember-500 to-ember-600 px-4 py-3 text-sm font-medium text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {status === "running" ? (
+                  <>
+                    <span className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-white" />
+                    {STAGES[stage]}…
+                  </>
+                ) : (
+                  "Build the cue sheet"
+                )}
+              </button>
+              {scene.trim().length < 20 ? (
+                <p className="mt-2 text-[11px] text-haze-500">
+                  Add a little more detail to run the agent.
+                </p>
+              ) : null}
+            </div>
+          </section>
+
+          {sheet ? <BriefPanel sheet={sheet} /> : null}
+        </div>
+
+        {/* Output */}
+        <div className="space-y-8">
+          {error ? (
+            <div
+              role="alert"
+              className="panel border-ember-500/30 p-5 text-sm text-ember-400"
+            >
+              {error}
+            </div>
+          ) : null}
+
+          {status === "running" && !sheet ? (
+            <div className="panel p-8">
+              <ol className="space-y-3">
+                {STAGES.map((label, index) => (
+                  <li key={label} className="flex items-center gap-3 text-sm">
+                    <span
+                      className={`h-1.5 w-1.5 rounded-full ${
+                        index <= stage
+                          ? "bg-ember-500 animate-pulse-soft"
+                          : "bg-white/10"
+                      }`}
+                    />
+                    <span className={index <= stage ? "text-haze-100" : "text-haze-700"}>
+                      {label}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ) : null}
+
+          {!sheet && status !== "running" ? (
+            <div className="panel p-8">
+              <h2 className="font-display text-lg text-haze-100">Nothing scored yet</h2>
+              <p className="mt-2 max-w-xl text-sm leading-relaxed text-haze-300">
+                Pick a sample scene or paste your own, then build the cue sheet. Cue will
+                call the Qloo Insights API, rank artists by measured affinity, check them
+                against the target audience, and show you every call it made.
+              </p>
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                {[
+                  ["Cross-domain ranking", "Film taste predicts music taste. Qloo traverses it; an LLM cannot."],
+                  ["Explainable picks", "Every cue names the signal that caused it."],
+                  ["Audience-checked", "Demographic signals, not vibes."],
+                  ["Full receipts", "Endpoint, parameters, latency, result count."],
+                ].map(([title, body]) => (
+                  <div key={title} className="rounded-lg border border-white/5 bg-black/20 p-3">
+                    <h3 className="text-sm text-haze-100">{title}</h3>
+                    <p className="mt-1 text-xs leading-relaxed text-haze-500">{body}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {sheet ? (
+            <>
+              {sheet.warnings.length > 0 ? (
+                <ul className="panel space-y-2 p-4">
+                  {sheet.warnings.map((warning, index) => (
+                    <li key={index} className="flex gap-2 text-xs leading-relaxed text-ember-400">
+                      <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-ember-500" />
+                      {warning}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+
+              <section aria-label="Cue sheet">
+                <div className="mb-4 flex items-baseline justify-between gap-4">
+                  <h2 className="font-display text-xl text-haze-100">
+                    Cue sheet
+                    <span className="ml-2 font-mono text-sm text-haze-500">
+                      {sheet.cues.length} options
+                    </span>
+                  </h2>
+                  <p className="text-xs text-haze-500">
+                    Ranked by Qloo affinity, highest first.
+                  </p>
+                </div>
+                <div className="grid gap-4 xl:grid-cols-2">
+                  {sheet.cues.map((cue, index) => (
+                    <CueCard
+                      key={cue.id}
+                      cue={cue}
+                      rank={index}
+                      maxAffinity={maxAffinity}
+                    />
+                  ))}
+                </div>
+              </section>
+
+              <CompareStrip sheet={sheet} />
+              <div className="grid gap-4 xl:grid-cols-2">
+                <DirectionPanel sheet={sheet} />
+                <RegionPanel sheet={sheet} />
+              </div>
+              <ReceiptsPanel sheet={sheet} />
+            </>
+          ) : null}
+        </div>
+      </div>
+
+      <footer className="mt-12 border-t border-white/5 pt-6 text-xs text-haze-500">
+        <p>
+          Cue is an agentic music supervisor built for the Qloo Agentic Hackathon. Music
+          and film affinity, audience fit and momentum all come from the Qloo Taste Graph
+          — an LLM alone cannot produce any of them. Cue never invents affinity numbers.
+        </p>
+      </footer>
+    </main>
+  );
+}

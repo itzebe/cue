@@ -1,0 +1,155 @@
+/**
+ * Shared domain types for Cue.
+ *
+ * Qloo's taxonomy calls films/shows "entities" and returns affinity scores
+ * normalised to 0..1. We keep Qloo's own field names where they exist so the
+ * mapping between our UI and the API stays obvious.
+ */
+
+export type EntityType =
+  | "urn:entity:artist"
+  | "urn:entity:movie"
+  | "urn:entity:tv_show"
+  | "urn:entity:brand"
+  | "urn:entity:place"
+  | "urn:entity:person"
+  | "urn:entity:book"
+  | "urn:entity:podcast"
+  | "urn:entity:video_game"
+  | "urn:entity:destination";
+
+/** A trimmed Qloo entity, only the fields Cue actually renders. */
+export interface QlooEntity {
+  entity_id: string;
+  name: string;
+  type: string;
+  subtype?: string;
+  /** Affinity score 0..1 when returned from /v2/insights. */
+  affinity?: number;
+  popularity?: number;
+  description?: string;
+  image?: string;
+  properties?: Record<string, unknown>;
+  tags?: Array<{ tag_id: string; name: string }>;
+  /** Per-recommendation explainability, present when feature.explainability=true. */
+  explainability?: ExplainabilityEntry[];
+  /** Cross-domain / content-based backfill marker. */
+  backfill?: boolean;
+}
+
+/** One contributing input in a recommendation's explainability block. */
+export interface ExplainabilityEntry {
+  entity_id: string;
+  name?: string;
+  /** Normalised 0..1 contribution. Qloo always includes entries >= 0.1. */
+  score: number;
+}
+
+export interface SearchResult {
+  entity_id: string;
+  name: string;
+  type: string;
+  subtype?: string;
+  properties?: Record<string, unknown>;
+}
+
+export interface TagResult {
+  tag_id: string;
+  name: string;
+  subtype?: string;
+  types?: string[];
+}
+
+/** The structured read of a scene brief, produced by the LLM or the parser. */
+export interface SceneBrief {
+  title: string;
+  /** Raw free text the user pasted. */
+  raw: string;
+  mood: string[];
+  genre: string[];
+  era: string;
+  setting: string;
+  /** Emotional arc the scene needs to hit. */
+  arc: string;
+  /** Who this scene is made for. */
+  audience: {
+    age?: string;
+    gender?: string;
+    audiences?: string[];
+  };
+  region?: string;
+  /** Named anchors the user referenced (directors, comparable films, artists). */
+  anchors: string[];
+  /** Whether music is inside the story world (a car radio) or scoring it. */
+  diegetic: boolean;
+}
+
+/** A single music recommendation, fully grounded. */
+export interface Cue {
+  id: string;
+  artist: string;
+  artistId?: string;
+  /** Concrete track suggestion, informed by the artist's catalogue. */
+  track: string;
+  album?: string;
+  year?: string;
+  /** Qloo affinity for this artist against the scene's taste profile. */
+  affinity: number;
+  popularity: number;
+  /** Trend momentum: +1 rising, 0 flat, -1 cooling. */
+  momentum: number;
+  image?: string;
+  /** Human-readable reasons, each traceable to a Qloo signal. */
+  why: string[];
+  /** Explainability contributions from Qloo inputs. */
+  explainability: ExplainabilityEntry[];
+  /** How this cue performs against the target audience. */
+  audienceFit?: Record<string, number>;
+  /** Role in the scene: needle drop, score bed, transition, credits. */
+  placement: "needle_drop" | "score_bed" | "transition" | "title_card";
+  /** Licensing-readiness hint, useful to a real supervisor. */
+  clearance: "indie_friendly" | "major_label" | "unknown";
+  risk: string;
+  confidence: number;
+}
+
+export interface CueSheet {
+  brief: SceneBrief;
+  cues: Cue[];
+  /** Head-to-head of two creative directions via /v2/analysis/compare. */
+  directionCompare?: {
+    aLabel: string;
+    bLabel: string;
+    aTop: SearchResult[];
+    bTop: SearchResult[];
+    shared: string[];
+    verdict: string;
+  };
+  /** The generic, ungrounded answer, shown for the side-by-side. */
+  baseline: {
+    cues: Array<{ artist: string; track: string; why: string }>;
+    note: string;
+  };
+  /** Regional affinity for the brief's target market, when one was named. */
+  regionAffinity?: RegionAffinity[];
+  /** Which Qloo endpoints actually ran, with latency, for the receipt panel. */
+  receipts: Receipt[];
+  warnings: string[];
+  mode: "live" | "fixture";
+}
+
+export interface Receipt {
+  endpoint: string;
+  label: string;
+  params: Record<string, string>;
+  status: number;
+  ms: number;
+  resultCount: number;
+  note?: string;
+}
+
+/** Per-region affinity, from location-aware insights or the heatmap. */
+export interface RegionAffinity {
+  name: string;
+  affinity: number;
+}
