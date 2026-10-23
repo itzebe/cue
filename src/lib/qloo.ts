@@ -226,15 +226,27 @@ async function qlooGet<T>(
         if (timer) clearTimeout(timer);
       }
 
-      if (!res || !RETRYABLE_STATUS.has(res.status) || attempt === MAX_ATTEMPTS) break;
+      // A timeout is retryable, a non-retryable HTTP status is not.
+      //
+      // The previous condition (`!res || ...`) treated every transport failure as
+      // terminal, so a request that timed out was never retried while a 503 was.
+      // That is backwards: a timeout is the transient case. Qloo answers the same
+      // insights call in ~0.5s normally and occasionally in >12s, so one slow
+      // response permanently lost a domain — observed as the television
+      // comparables silently disappearing while films and books succeeded.
+      const timedOut = !res && lastError.startsWith("request timed out");
+      const retryable = res ? RETRYABLE_STATUS.has(res.status) : timedOut;
+      if (!retryable || attempt === MAX_ATTEMPTS) break;
 
       // Honour Retry-After when the gateway supplies it, else back off 300/900ms.
-      const header = Number(res.headers.get("retry-after"));
+      // A timeout has no response and no header, so it takes the same short backoff
+      // rather than the exponential one meant for rate limiting.
+      const header = res ? Number(res.headers.get("retry-after")) : NaN;
       const waitMs = Number.isFinite(header) && header > 0
         ? Math.min(header * 1000, 4_000)
         : 300 * 3 ** (attempt - 1);
-      lastError = `${res.status} retrying in ${waitMs}ms`;
-      await res.text().catch(() => "");
+      lastError = res ? `${res.status} retrying in ${waitMs}ms` : `timed out, retrying in ${waitMs}ms`;
+      if (res) await res.text().catch(() => "");
       await sleep(waitMs);
     }
 

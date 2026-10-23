@@ -2353,8 +2353,10 @@ await check("queue wait is not charged to the request timeout budget", async () 
   // phantom 12s timeout.
   const LATENCY = 400;
   const BUDGET = 600;
+  let calls = 0;
 
   globalThis.fetch = ((_input: RequestInfo | URL, init?: RequestInit) => {
+    calls += 1;
     return new Promise<Response>((resolve, reject) => {
       const timer = setTimeout(
         () => resolve(new Response(JSON.stringify({ results: { entities: [] } }), { status: 200 })),
@@ -2384,6 +2386,78 @@ await check("queue wait is not charged to the request timeout budget", async () 
         .map((r) => r.error)
         .join("; ")}`,
     );
+    // Counting attempts, not just successes, is what makes this guard hold now
+    // that a timeout retries: with the timer outside the slot the first attempt
+    // would abort while queued and a retry could still succeed, masking the bug.
+    // Correct accounting means no request ever needs its retry.
+    assert.equal(calls, 5, "each request should reach Qloo exactly once, with no retry");
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("a transient timeout is retried instead of losing the result", async () => {
+  const { insights } = await import("../src/lib/qloo.ts");
+  const original = globalThis.fetch;
+
+  // Qloo answers this call in ~0.5s normally and occasionally takes longer than
+  // the budget. If a timeout is treated as terminal while a 503 is retried, one
+  // slow response permanently loses a domain — the observed failure was the
+  // television comparables vanishing while films and books returned fine.
+  let attempt = 0;
+  globalThis.fetch = ((_input: RequestInfo | URL, init?: RequestInit) => {
+    attempt += 1;
+    if (attempt === 1) {
+      // First attempt hangs past the budget and must be aborted.
+      return new Promise<Response>((_resolve, reject) => {
+        init?.signal?.addEventListener("abort", () => {
+          const error = new Error("aborted");
+          error.name = "AbortError";
+          reject(error);
+        });
+      });
+    }
+    return Promise.resolve(
+      new Response(
+        JSON.stringify({
+          results: { entities: [{ entity_id: "tv-1", name: "The Shadow Line", type: "urn:entity:tv_show" }] },
+        }),
+        { status: 200 },
+      ),
+    );
+  }) as typeof fetch;
+
+  try {
+    const result = await insights({
+      filterType: "urn:entity:tv_show",
+      signalEntities: ["anchor"],
+      take: 5,
+      timeoutMs: 120,
+    });
+    assert.equal(attempt, 2, "a timeout should trigger exactly one retry here");
+    assert.equal(result.ok, true, "the retry should recover the result");
+    assert.equal(result.data.length, 1);
+    assert.equal(result.data[0].name, "The Shadow Line");
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("a non-retryable status is not retried", async () => {
+  const { insights } = await import("../src/lib/qloo.ts");
+  const original = globalThis.fetch;
+  let attempt = 0;
+  globalThis.fetch = (async () => {
+    attempt += 1;
+    return jsonResponse({ error: "bad request" }, 400);
+  }) as typeof fetch;
+
+  try {
+    // Making timeouts retryable must not turn every failure into three attempts:
+    // a 400 is a bad parameter and will fail identically each time.
+    const result = await insights({ filterType: "urn:entity:tv_show", take: 1 });
+    assert.equal(result.ok, false);
+    assert.equal(attempt, 1, "a 400 must not be retried");
   } finally {
     globalThis.fetch = original;
   }

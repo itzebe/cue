@@ -119,7 +119,7 @@ npm run dev                  # http://localhost:12000
 npm run verify
 ```
 
-78 checks covering normalisation, affinity extraction, explainability parsing, momentum derivation, failure degradation, cue assembly, concurrency limits, request-budget accounting, place-based localisation, casting, cross-domain comparables, the audience brief and licence pricing. Only `fetch` is stubbed — everything under test is the production code path.
+80 checks covering normalisation, affinity extraction, explainability parsing, momentum derivation, failure degradation, cue assembly, concurrency limits, request-budget accounting, place-based localisation, casting, cross-domain comparables, the audience brief and licence pricing. Only `fetch` is stubbed — everything under test is the production code path.
 
 ### Environment
 
