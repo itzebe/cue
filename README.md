@@ -124,7 +124,28 @@ npm run verify
 
 Qloo is the required half; the LLM is optional and only names the specific track. Without it, Cue still ranks artists from the taste graph and leaves the cut as "Track TBD" rather than inventing a title. With it, each ranked artist gets a real track, album and year plus a rationale for the placement.
 
-Set `LLM_MODEL` explicitly when your endpoint does not serve the default (`gpt-4o-mini` for OpenAI, `claude-sonnet-4-5-20250929` for the Agent Canvas proxy). A model your key cannot access returns `403`, and Cue degrades to "Track TBD" cues; the server log now names the rejected model so the cause is visible instead of silent.
+Set `LLM_MODEL` explicitly when your endpoint does not serve the default (`gpt-4o-mini` for OpenAI, `claude-sonnet-4-5-20250929` for the Agent Canvas proxy). A model your key cannot access returns `403`, and Cue degrades to "Track TBD" cues; the server log names the rejected model so the cause is visible instead of silent.
+
+#### Free OpenAI-compatible providers
+
+Track naming is optional, and a paid OpenAI key is not required to turn it on. Any OpenAI-compatible endpoint works, with no code change. Set all three of `LLM_API_KEY`, `LLM_BASE_URL` and `LLM_MODEL`:
+
+| Provider | `LLM_BASE_URL` | Example `LLM_MODEL` | Key |
+|---|---|---|---|
+| Groq | `https://api.groq.com/openai/v1` | `openai/gpt-oss-120b` | [console.groq.com](https://console.groq.com/keys) |
+| Google Gemini | `https://generativelanguage.googleapis.com/v1beta/openai/` | `gemini-3.5-flash` | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) |
+| OpenRouter | `https://openrouter.ai/api/v1` | `openai/gpt-oss-120b:free` | [openrouter.ai/keys](https://openrouter.ai/keys) |
+
+Groq and Gemini need no credit card. Free model lineups rotate and models do get retired, so check the provider's deprecation list before pinning an ID — `llama-3.3-70b-versatile`, for example, was shut down for free-tier use on 2026-08-16.
+
+To confirm what the deployed app resolved, and to see the upstream status if a call fails:
+
+```bash
+curl -s "https://<your-app>/api/cue" | jq .llm
+curl -s "https://<your-app>/api/cue?probe=1" | jq .llmProbe
+```
+
+`/api/cue` reports which source resolved, the base URL and model it will call, the key length, and whether the key arrived with surrounding whitespace. It never returns key material. `?probe=1` spends one upstream call and returns the raw status and message, which distinguishes an invalid key (`401`) from an exhausted balance (`429 insufficient_quota`).
 
 
 ## Deployment
