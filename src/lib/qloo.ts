@@ -193,17 +193,27 @@ async function qlooGet<T>(
       // A fresh controller per attempt. Reusing one across attempts means the
       // first attempt's budget silently covers the retries, so a slow-but-
       // recoverable endpoint aborts before it is ever retried.
+      //
+      // The timer starts *inside* the slot, not before it. Starting it outside
+      // means the time spent queued behind the concurrency limit is charged to
+      // the request's network budget, so a request that waits 11s for a slot and
+      // then takes 2s to answer is reported as a 12s timeout — the deadline fires
+      // while the queue is still waiting, before a socket is ever opened. That
+      // was a real failure: with the comparables pass adding three concurrent
+      // calls, the television query was starved of a slot and aborted as a
+      // "timeout" while Qloo was never asked.
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      let timer: ReturnType<typeof setTimeout> | undefined;
       try {
-        res = await withSlot(() =>
-          fetch(url, {
+        res = await withSlot(() => {
+          timer = setTimeout(() => controller.abort(), timeoutMs);
+          return fetch(url, {
             method: "GET",
             headers: { "X-Api-Key": key, accept: "application/json" },
             signal: controller.signal,
             cache: "no-store",
-          }),
-        );
+          });
+        });
       } catch (error) {
         res = undefined;
         lastError =
@@ -213,18 +223,30 @@ async function qlooGet<T>(
               ? error.message
               : "network error";
       } finally {
-        clearTimeout(timer);
+        if (timer) clearTimeout(timer);
       }
 
-      if (!res || !RETRYABLE_STATUS.has(res.status) || attempt === MAX_ATTEMPTS) break;
+      // A timeout is retryable, a non-retryable HTTP status is not.
+      //
+      // The previous condition (`!res || ...`) treated every transport failure as
+      // terminal, so a request that timed out was never retried while a 503 was.
+      // That is backwards: a timeout is the transient case. Qloo answers the same
+      // insights call in ~0.5s normally and occasionally in >12s, so one slow
+      // response permanently lost a domain — observed as the television
+      // comparables silently disappearing while films and books succeeded.
+      const timedOut = !res && lastError.startsWith("request timed out");
+      const retryable = res ? RETRYABLE_STATUS.has(res.status) : timedOut;
+      if (!retryable || attempt === MAX_ATTEMPTS) break;
 
       // Honour Retry-After when the gateway supplies it, else back off 300/900ms.
-      const header = Number(res.headers.get("retry-after"));
+      // A timeout has no response and no header, so it takes the same short backoff
+      // rather than the exponential one meant for rate limiting.
+      const header = res ? Number(res.headers.get("retry-after")) : NaN;
       const waitMs = Number.isFinite(header) && header > 0
         ? Math.min(header * 1000, 4_000)
         : 300 * 3 ** (attempt - 1);
-      lastError = `${res.status} retrying in ${waitMs}ms`;
-      await res.text().catch(() => "");
+      lastError = res ? `${res.status} retrying in ${waitMs}ms` : `timed out, retrying in ${waitMs}ms`;
+      if (res) await res.text().catch(() => "");
       await sleep(waitMs);
     }
 
@@ -416,14 +438,22 @@ function normaliseEntities(json: unknown): QlooEntity[] {
 /* Endpoints                                                           */
 /* ------------------------------------------------------------------ */
 
-/** GET /search — resolve a human name to a Qloo entity ID. */
+/**
+ * GET /v2/search — resolve a human name to a Qloo entity ID.
+ *
+ * The versioned path matters: `/search` is the legacy endpoint and returns a
+ * reduced entity, dropping `properties.audience_identity` along with eleven other
+ * fields. Measured on the same query, `/search` returns 13 property keys and
+ * `/v2/search` returns 24. The Audience Identity Brief reads that field, so the
+ * legacy path would silently produce an empty brief rather than an error.
+ */
 export function searchEntities(
   query: string,
   types: string[] = [],
   take = 5,
 ): Promise<QlooCallResult<SearchResult[]>> {
   return qlooGet(
-    "/search",
+    "/v2/search",
     { query, types, take },
     (json) => {
       const root = asRecord(json);
@@ -436,8 +466,9 @@ export function searchEntities(
           const id = str(record.entity_id ?? record.id);
           const name = str(record.name);
           if (!id || !name) return null;
-          // /search returns a `types` array and no `subtype`; other endpoints
-          // return `subtype`. Normalise both onto the same fields.
+          // /v2/search returns `subtype` (and no `types` array); other endpoints
+          // are read the same way. Normalise both onto the same fields so a
+          // caller never has to know which endpoint answered.
           const types = asArray(record.types).map((type) => String(type));
           const subtype = str(record.subtype) || types[0] || "";
           return {

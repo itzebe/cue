@@ -2,11 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CueCard } from "@/components/CueCard";
+import { AudienceBriefPanel } from "@/components/AudienceBriefPanel";
 import { BriefPanel } from "@/components/BriefPanel";
 import { CompareStrip } from "@/components/CompareStrip";
 import { ReceiptsPanel } from "@/components/ReceiptsPanel";
 import { DirectionPanel, RegionPanel } from "@/components/SignalPanels";
 import { MarketplacePanel } from "@/components/MarketplacePanel";
+import { ComparablesPanel } from "@/components/ComparablesPanel";
 import { CrossDomainPanel } from "@/components/CrossDomainPanel";
 import { SubstitutePanel } from "@/components/SubstitutePanel";
 import { SAMPLE_SCENES } from "@/data/fixtures";
@@ -137,10 +139,13 @@ export default function StudioPage() {
               cultural layer for creative decisions
             </span>
           </div>
-          <p className="mt-4 max-w-2xl text-balance font-display text-3xl leading-tight text-haze-100 sm:text-4xl">
+          {/* The page had no h1: its headline was a paragraph, so the document
+              exposed no top-level heading to assistive tech or search. Promoting
+              the same element keeps the visual design identical. */}
+          <h1 className="mt-4 max-w-2xl text-balance font-display text-3xl leading-tight text-haze-100 sm:text-4xl">
             Agencies and studios can&rsquo;t afford to{" "}
             <span className="text-ember-400">guess what resonates</span>. Cue measures it.
-          </p>
+          </h1>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-haze-300">
             A creative brief goes in. A grounded answer comes out — the cue, the cast, the
             market fit, the price and the path to signature — every ranking traced to measured
@@ -384,6 +389,10 @@ export default function StudioPage() {
                 </ul>
               ) : null}
 
+              {/* Evidence before recommendation. The audience measurement is the
+                  reason to trust everything below it, so it reads first. */}
+              <AudienceBriefPanel sheet={sheet} />
+
               <section aria-label="Cue sheet">
                 <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
                   <h2 className="font-display text-xl text-haze-100">
@@ -438,6 +447,8 @@ export default function StudioPage() {
                 />
               </div>
               <MarketplacePanel sheet={sheet} />
+              <ComparablesPanel sheet={sheet} />
+
               <CrossDomainPanel key={sheet.brief.raw} sheet={sheet} />
               <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
                 <DirectionPanel sheet={sheet} />

@@ -22,7 +22,10 @@ import {
   type GroundingContext,
 } from "./cues";
 import { hasQlooKey } from "./qloo";
+import { buildAudienceBrief } from "./audience";
+import { comparablesForBrief } from "./comparables";
 import { castForBrief, type CastingResult } from "./casting";
+import type { ComparablesResult } from "./comparables";
 import { localiseBrief, type LocalisationResult } from "./localise";
 import { FIXTURE_SHEET } from "@/data/fixtures";
 
@@ -631,7 +634,12 @@ export async function buildCueSheet(
       )
     : Promise.resolve(undefined);
 
-  const [trackMap, momentum, directionCompare, baseline, casting] = await Promise.all([
+  // The audience brief is pure computation over the anchor entities the pipeline
+  // already fetched: `audience_identity` arrives on the same /v2/search response
+  // that resolved them, so this costs no API calls and needs no promise.
+  const audienceBrief = buildAudienceBrief(brief.anchors, context.anchorEntities);
+
+  const [trackMap, momentum, directionCompare, baseline, casting, comparables] = await Promise.all([
     proposeTracks(
       selected.map((entity) => entity.name),
       brief,
@@ -648,6 +656,18 @@ export async function buildCueSheet(
     // explicitly — see /api/localise.
     castForBrief(brief, context.anchorEntities, context.tags, receipts).catch(
       (): CastingResult => ({ audience: "", candidates: [], receipts: [], warnings: [] }),
+    ),
+    // Stage 7: comparables. Film, TV and books, ranked on the same audience the
+    // cue sheet uses. Three calls, run alongside the rest so they cost latency
+    // only, not time.
+    comparablesForBrief(context.anchorEntities, context.tags, receipts).catch(
+      (): ComparablesResult => ({
+        groups: [],
+        emptyDomains: [],
+        skippedDomains: [],
+        receipts: [],
+        warnings: ["Comparables could not be retrieved for this brief."],
+      }),
     ),
   ]);
 
@@ -692,9 +712,11 @@ export async function buildCueSheet(
     baseline,
     regionAffinity: regional.length > 0 ? regional : undefined,
     receipts,
-    warnings: [...warnings, ...casting.warnings],
+    warnings: [...warnings, ...casting.warnings, ...comparables.warnings],
     mode: "live",
     casting: casting.candidates.length > 0 ? casting : undefined,
+    audienceBrief,
+    comparables: comparables.groups.length > 0 ? comparables : undefined,
   };
 }
 

@@ -49,15 +49,14 @@ function envValue(name: string): string | undefined {
   return trimmed.length > 0 ? trimmed : undefined;
 }
 
-export type LlmSource = "llm" | "openai" | "proxy" | "openrouter" | "gemini" | "groq";
+export type LlmSource = "llm" | "proxy" | "openrouter" | "gemini" | "groq";
 
 /**
  * A provider named directly by its own environment variable.
  *
- * These exist because `OPENAI_API_KEY` is the generic fallback, and a key sitting
- * there with an exhausted balance otherwise shadows a perfectly good key the
- * operator set under the provider's own name. A provider-specific variable is a
- * deliberate choice, so it outranks the generic one.
+ * A provider-specific variable is a deliberate choice, so it outranks anything
+ * generic. These presets are the only third-party endpoints Cue will call: a
+ * paid OpenAI endpoint is deliberately not among them (see `detectCandidates`).
  */
 interface ProviderPreset {
   source: LlmSource;
@@ -124,9 +123,19 @@ export interface LlmCandidate {
  *     all three are set the operator has named the endpoint, so nothing else is
  *     offered as a fallback.
  *  2. Provider-specific keys: OpenRouter, Gemini, then Groq.
- *  3. OpenAI variables.
- *  4. The Agent Canvas managed proxy, which is OpenAI-compatible and lets the
+ *  3. The Agent Canvas managed proxy, which is OpenAI-compatible and lets the
  *     app run with zero user-supplied keys during development.
+ *
+ * There is deliberately no direct `api.openai.com` endpoint in this chain. A
+ * paid OpenAI key is the one provider Cue will not silently reach for: it has no
+ * free tier, so a present-but-unfunded key turns every cue sheet into a paid call
+ * that fails. It previously did exactly that in production, shadowing the
+ * provider-specific keys and leaving the app on the deterministic fallback while
+ * a working key sat unused. OpenRouter, Gemini and Groq all have free tiers and
+ * are reached by their own variables. `OPENAI_API_KEY` is still read, but only as
+ * the credential for the Agent Canvas proxy, which is identified by its refresh
+ * URL rather than by the variable name. An operator who genuinely wants OpenAI
+ * can still have it through the terminal `LLM_*` triple.
  *
  * The source travels with the config so the report cannot drift from what the
  * pipeline actually uses.
@@ -169,33 +178,23 @@ function detectCandidates(): LlmCandidate[] {
     }
   }
 
-  const openaiKey = envValue("OPENAI_API_KEY");
-  const openaiBase = envValue("OPENAI_BASE_URL");
   // The managed proxy is identified by its refresh URL, not by the key: the same
   // OPENAI_API_KEY name is used for both, so the base URL is what disambiguates.
+  // Without a refresh URL there is no proxy, so an OPENAI_API_KEY on its own
+  // resolves to nothing rather than to a paid endpoint.
   const proxyBase = envValue("OH_LLM_API_KEY_REFRESH_BASE_URLS")?.split(",")[0]?.trim();
   const proxyModel = explicitModel || "claude-sonnet-4-5-20250929";
+  const openaiKey = envValue("OPENAI_API_KEY");
+  const proxyOnlyKey = envValue("OH_LLM_PROXY_KEY");
 
-  if (proxyBase && openaiKey && !openaiBase) {
+  if (proxyBase && openaiKey) {
     candidates.push({
       config: { baseUrl: proxyBase.replace(/\/$/, ""), apiKey: openaiKey, model: proxyModel, temperature: 0.4 },
       source: "proxy",
       keyVar: "OPENAI_API_KEY",
     });
-  } else if (openaiKey) {
-    candidates.push({
-      config: {
-        baseUrl: (openaiBase || "https://api.openai.com/v1").replace(/\/$/, ""),
-        apiKey: openaiKey,
-        model: explicitModel || "gpt-4o-mini",
-        temperature: 0.4,
-      },
-      source: "openai",
-      keyVar: "OPENAI_API_KEY",
-    });
   }
 
-  const proxyOnlyKey = envValue("OH_LLM_PROXY_KEY");
   if (proxyBase && proxyOnlyKey) {
     candidates.push({
       config: { baseUrl: proxyBase.replace(/\/$/, ""), apiKey: proxyOnlyKey, model: proxyModel, temperature: 0.4 },

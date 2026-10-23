@@ -26,7 +26,13 @@ const config: Config = {
         haze: {
           100: "#f5f4f8",
           300: "#b9b7c9",
-          500: "#7c7a92",
+          // #7c7a92 measured 4.15:1 on the lightest panel surface, below the
+          // 4.5:1 AA threshold, and this token carries 105 of the app's
+          // explanatory-text uses. #87859d is the smallest lightening that clears
+          // AA on every surface (4.82:1 worst case) while staying clearly
+          // subordinate to haze-300 (1.82:1 between them), so the hierarchy reads
+          // the same.
+          500: "#87859d",
           700: "#4a4859",
         },
       },

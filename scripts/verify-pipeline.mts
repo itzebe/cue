@@ -17,9 +17,15 @@ const QLOO_SEARCH = {
     {
       entity_id: "11111111-1111-1111-1111-111111111111",
       name: "Drive",
-      // Real /search returns a `types` array and no `subtype`.
-      types: ["urn:entity:movie"],
-      properties: { description: "A stunt driver moonlights as a getaway driver." },
+      // Real /v2/search returns `subtype` and no `types` array.
+      subtype: "urn:entity:movie",
+      // `audience_identity` is present on the versioned endpoint and absent on
+      // legacy `/search`, which is why the client targets /v2/search.
+      properties: {
+        description: "A stunt driver moonlights as a getaway driver.",
+        audience_identity:
+          "People drawn to moody, stylistic thrillers and minimalist character studies.",
+      },
     },
   ],
 };
@@ -166,7 +172,7 @@ globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
     ),
   });
 
-  if (parsed.pathname === "/search") return jsonResponse(QLOO_SEARCH);
+  if (parsed.pathname === "/v2/search") return jsonResponse(QLOO_SEARCH);
   if (parsed.pathname === "/v2/tags") return jsonResponse(QLOO_TAGS);
   if (parsed.pathname === "/v2/insights") return jsonResponse(QLOO_INSIGHTS);
   if (parsed.pathname === "/v2/trending") {
@@ -244,6 +250,18 @@ await check("search resolves an entity and sends X-Api-Key", async () => {
   assert.equal(result.ok, true);
   assert.equal(result.data[0].name, "Drive");
   assert.equal(calls[0].headers["X-Api-Key"], "test-key");
+
+  // The versioned path is load-bearing, not cosmetic. `/search` is the legacy
+  // endpoint and returns a reduced entity: measured on the same query it drops
+  // `properties.audience_identity` and eleven other fields. The Audience Identity
+  // Brief reads that field, so regressing to the legacy path would empty the
+  // panel silently — a 200 with no evidence rather than an error.
+  const path = new URL(calls[0].url).pathname;
+  assert.equal(path, "/v2/search", "entity search must use the versioned endpoint");
+  assert.ok(
+    result.data[0].properties && "audience_identity" in (result.data[0].properties as object),
+    "the resolved anchor must carry audience_identity for the audience brief",
+  );
 });
 
 await check("affinity is read from query.affinity", async () => {
@@ -728,7 +746,11 @@ await check("casting queries people and brands without a music-era filter", asyn
     assert.ok(types.includes("urn:entity:person"), "casting must query people");
     assert.ok(types.includes("urn:entity:brand"), "casting must query brands cross-domain");
     assert.equal(result.candidates.length, 2, "one person and one brand");
-    assert.equal(result.audience, "25 34", "audience is made human-readable");
+    assert.equal(
+      result.audience,
+      "taste profile of Drive",
+      "the label must name the signal actually used, not the brief's demographic",
+    );
 
     // A release-year floor is a music-catalogue concept. Applying it to people
     // would drop every living performer and leave a casting list of dead ones.
@@ -739,6 +761,38 @@ await check("casting queries people and brands without a music-era filter", asyn
         "casting must not filter people by music release year",
       );
     }
+
+    // The person query must not carry demographics. Measured against the live
+    // sandbox, `signal.demographics.age` on `urn:entity:person` replaces the
+    // brief's audience rather than narrowing it — Drive's action leads become an
+    // unrelated cluster with only 2 of 15 entities in common. A polluted result
+    // set still looks plausible, so nothing downstream can catch it.
+    const personCall = calls.find(
+      (call) => new URL(call.url).searchParams.get("filter.type") === "urn:entity:person",
+    );
+    const personParams = new URL(personCall!.url).searchParams;
+    for (const param of [
+      "signal.demographics.age",
+      "signal.demographics.gender",
+      "signal.demographics.audiences",
+    ]) {
+      assert.equal(
+        personParams.get(param),
+        null,
+        `the person query must not send ${param}`,
+      );
+    }
+
+    // Brands keep demographics: the same comparison preserves 4-8 of 10 entities
+    // and stays on-theme, so there it is a genuine refinement.
+    const brandCall = calls.find(
+      (call) => new URL(call.url).searchParams.get("filter.type") === "urn:entity:brand",
+    );
+    assert.equal(
+      new URL(brandCall!.url).searchParams.get("signal.demographics.age"),
+      "25_to_29",
+      "the brand query keeps demographics as a refinement",
+    );
   } finally {
     globalThis.fetch = original;
   }
@@ -1024,6 +1078,70 @@ await check("a provider key outranks the generic OpenAI key", async () => {
     const explicit = llmDiagnostics();
     assert.equal(explicit.source, "llm");
     assert.equal(resolveLlmConfig()?.apiKey, "sk-explicit");
+  } finally {
+    process.env = saved;
+  }
+});
+
+await check("a bare OpenAI key is not a provider endpoint", async () => {
+  // Production ran for a whole session with an unfunded OPENAI_API_KEY and no
+  // other provider: every cue sheet silently fell back to the deterministic
+  // reader while the app reported a configured model. A paid endpoint with no
+  // free tier must not be reachable just because a key happens to be present.
+  const { resolveLlmConfig, llmDiagnostics, probeLlm } = await import("../src/lib/llm.ts");
+  const saved = { ...process.env };
+  try {
+    delete process.env.LLM_API_KEY;
+    delete process.env.LLM_BASE_URL;
+    delete process.env.LLM_MODEL;
+    delete process.env.OPENROUTER_API_KEY;
+    delete process.env.GEMINI_API_KEY;
+    delete process.env.GOOGLE_API_KEY;
+    delete process.env.GROQ_API_KEY;
+    delete process.env.OH_LLM_PROXY_KEY;
+    delete process.env.OH_LLM_API_KEY_REFRESH_BASE_URLS;
+    process.env.OPENAI_API_KEY = "sk-unfunded";
+
+    assert.equal(resolveLlmConfig(), null, "an OpenAI key alone must resolve to no endpoint");
+    const diagnostics = llmDiagnostics();
+    assert.equal(diagnostics.configured, false);
+    assert.equal(diagnostics.source, "none");
+    assert.deepEqual(diagnostics.providerChain, [], "no endpoint may be offered");
+    // The variable is still reported as present, so an operator can see the key
+    // exists and is being ignored rather than wondering where it went.
+    assert.ok(
+      diagnostics.presentKeyVars.includes("OPENAI_API_KEY"),
+      "a present-but-unused key must still be visible in the report",
+    );
+    assert.ok(
+      !JSON.stringify(diagnostics).includes("sk-unfunded"),
+      "no key material may be serialised",
+    );
+
+    // And the probe must agree rather than inventing an attempt.
+    const probe = await probeLlm();
+    assert.equal(probe.ok, false);
+    assert.equal(probe.provider, null);
+    assert.deepEqual(probe.attempts, [], "no provider may be attempted");
+
+    // The Agent Canvas proxy still works through OPENAI_API_KEY when its refresh
+    // URL identifies it, so this is not a blanket ban on the variable.
+    process.env.OH_LLM_API_KEY_REFRESH_BASE_URLS = "https://proxy.test/v1";
+    const proxied = llmDiagnostics();
+    assert.equal(proxied.configured, true, "the managed proxy must still resolve");
+    assert.equal(proxied.source, "proxy");
+    assert.equal(resolveLlmConfig()?.baseUrl, "https://proxy.test/v1");
+
+    // An operator who explicitly wants OpenAI can still name it via LLM_*.
+    delete process.env.OH_LLM_API_KEY_REFRESH_BASE_URLS;
+    process.env.LLM_API_KEY = "sk-explicit";
+    process.env.LLM_BASE_URL = "https://api.openai.com/v1";
+    process.env.LLM_MODEL = "gpt-4o-mini";
+    assert.equal(
+      resolveLlmConfig()?.baseUrl,
+      "https://api.openai.com/v1",
+      "the explicit LLM_* triple is still honoured",
+    );
   } finally {
     process.env = saved;
   }
@@ -1521,7 +1639,7 @@ function restorePools() {
   globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = typeof input === "string" ? input : input.toString();
     const parsed = new URL(url);
-    if (parsed.pathname === "/search") return jsonResponse(QLOO_SEARCH);
+    if (parsed.pathname === "/v2/search") return jsonResponse(QLOO_SEARCH);
     if (parsed.pathname === "/v2/tags") return jsonResponse(QLOO_TAGS);
     if (parsed.pathname === "/v2/insights") return jsonResponse(QLOO_INSIGHTS);
     if (parsed.pathname === "/v2/analysis/compare") return jsonResponse(QLOO_COMPARE);
@@ -2018,6 +2136,330 @@ await check("the provider chain is reported without leaking keys", async () => {
     assert.ok(!serialised.includes("gsk-secret"), "no fallback key may be serialised");
   } finally {
     process.env = saved;
+  }
+});
+
+await check("the audience brief quotes Qloo and never invents a profile", async () => {
+  const { buildAudienceBrief } = await import("../src/lib/audience.ts");
+
+  const entity = (name: string, id: string, identity?: string) => ({
+    entity_id: id,
+    name,
+    type: "urn:entity:movie",
+    properties: identity ? { audience_identity: identity } : { description: "no identity" },
+  });
+
+  // The happy path: Qloo's prose is carried through verbatim, so the UI cannot
+  // paraphrase a measurement into something the data does not say.
+  const quoted = "People drawn to moody, stylistic thrillers and minimalist character studies.";
+  const brief = buildAudienceBrief(
+    ["Drive", "Portishead"],
+    [entity("Drive (2011)", "id-drive", quoted), entity("Portishead", "id-portishead", quoted)],
+  );
+  assert.equal(brief.available, true);
+  assert.equal(brief.evidence.length, 2);
+  assert.equal(brief.evidence[0].audienceIdentity, quoted, "Qloo's text must be verbatim");
+  // The brief's own spelling is kept as the label, not Qloo's qualified name.
+  assert.equal(brief.evidence[0].anchor, "Drive");
+  assert.equal(brief.evidence[0].entityName, "Drive (2011)");
+  assert.ok(brief.interpretation && brief.interpretation.length > 0);
+
+  // A resolved entity with no audience_identity is a data gap, not a profile.
+  const gap = buildAudienceBrief(["Drive"], [entity("Drive", "id-drive")]);
+  assert.equal(gap.available, false, "no identity means no evidence");
+  assert.equal(gap.evidence.length, 0);
+  assert.equal(gap.interpretation, null, "Cue must not write a profile Qloo did not supply");
+  assert.deepEqual(gap.anchorsWithoutEvidence, ["Drive"]);
+  assert.equal(gap.noAnchors, false, "a present anchor is not the same as an empty brief");
+
+  // A blank string is treated as absent rather than rendered as an empty quote.
+  const blank = buildAudienceBrief(["Drive"], [entity("Drive", "id-drive", "   ")]);
+  assert.equal(blank.available, false);
+  assert.deepEqual(blank.anchorsWithoutEvidence, ["Drive"]);
+
+  // An anchor that never resolved is reported separately from one that resolved
+  // without evidence, because the two mean different things to a supervisor.
+  const unresolved = buildAudienceBrief(
+    ["Drive", "Nonexistent Film"],
+    [entity("Drive (2011)", "id-drive", quoted)],
+  );
+  assert.deepEqual(unresolved.anchorsUnresolved, ["Nonexistent Film"]);
+  assert.deepEqual(unresolved.anchorsWithoutEvidence, []);
+
+  // A brief with no anchors is its own state, not a failure.
+  const empty = buildAudienceBrief([], []);
+  assert.equal(empty.noAnchors, true);
+  assert.equal(empty.available, false);
+  assert.equal(empty.interpretation, null);
+
+  // One anchor is not enough to claim the anchors agree, and the reading must not
+  // pretend otherwise.
+  const single = buildAudienceBrief(["Drive"], [entity("Drive", "id-drive", quoted)]);
+  assert.ok(
+    /one anchor/i.test(single.interpretation ?? ""),
+    "a single anchor must not be described as a shared audience",
+  );
+
+  // Matching is by name, not position: an anchor that failed to resolve must not
+  // shift every later anchor onto the wrong entity's audience.
+  const shifted = buildAudienceBrief(
+    ["Gone", "Drive"],
+    [entity("Drive (2011)", "id-drive", quoted)],
+  );
+  assert.equal(shifted.evidence.length, 1);
+  assert.equal(shifted.evidence[0].anchor, "Drive", "the audience must not be relabelled");
+  assert.deepEqual(shifted.anchorsUnresolved, ["Gone"]);
+});
+
+await check("the audience brief costs no extra Qloo calls", async () => {
+  // The whole point of reading `audience_identity` off the anchor search is that
+  // it is already in hand. If this ever starts fetching, a rate-limited key pays
+  // for a field it was given for free.
+  const { buildAudienceBrief } = await import("../src/lib/audience.ts");
+  const original = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = (async () => {
+    calls += 1;
+    throw new Error("the audience brief must not perform network calls");
+  }) as never;
+  try {
+    const brief = buildAudienceBrief(
+      ["Drive"],
+      [{ entity_id: "id", name: "Drive", type: "urn:entity:movie", properties: { audience_identity: "People who like cars." } }],
+    );
+    assert.equal(brief.available, true);
+    assert.equal(calls, 0, "building the brief must not call the network");
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("comparables exclude the brief's own anchors", async () => {
+  const { comparablesForBrief } = await import("../src/lib/comparables.ts");
+
+  // A film named as the reference must not come back as its own comparable. This
+  // is the invariant that keeps "more like Drive" from returning Drive, and it
+  // depends on the anchor IDs reaching filter.exclude.entities.
+  const seen: string[] = [];
+  const original = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = new URL(typeof input === "string" ? input : input.toString());
+    seen.push(url.searchParams.get("filter.exclude.entities") ?? "");
+    return jsonResponse({
+      results: {
+        entities: [
+          { entity_id: "cmp-1", name: "The Town", type: "urn:entity:movie", popularity: 0.98, properties: { release_year: 2010 } },
+        ],
+      },
+    });
+  }) as typeof fetch;
+
+  try {
+    const receipts: any[] = [];
+    const anchors = [
+      { entity_id: "anchor-drive", name: "Drive", type: "urn:entity:movie" },
+      { entity_id: "anchor-portishead", name: "Portishead", type: "urn:entity:artist" },
+    ] as never;
+    const result = await comparablesForBrief(anchors, [], receipts);
+
+    assert.equal(result.groups.length, 3, "film, television and books should each be queried");
+    assert.deepEqual(
+      result.groups.map((g) => g.domain),
+      ["movie", "tv_show", "book"],
+      "domains should be reported in a stable order",
+    );
+    assert.ok(
+      seen.every((excluded) => excluded.includes("anchor-drive") && excluded.includes("anchor-portishead")),
+      "every domain query must exclude the brief's anchors",
+    );
+    assert.equal(receipts.length, 3, "each domain call should leave a receipt");
+
+    // release_year is carried through so the panel can date a comparable.
+    assert.equal(result.groups[0].items[0].releaseYear, 2010);
+    assert.equal(result.groups[0].items[0].name, "The Town");
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("comparables report an empty domain differently from a failed one", async () => {
+  const { comparablesForBrief } = await import("../src/lib/comparables.ts");
+  const original = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = new URL(typeof input === "string" ? input : input.toString());
+    const type = url.searchParams.get("filter.type") ?? "";
+    // Books genuinely match nothing; television fails outright. These are
+    // different facts and must not be collapsed into one empty state.
+    if (type === "urn:entity:book") return jsonResponse({ results: { entities: [] } });
+    if (type === "urn:entity:tv_show") return jsonResponse({ error: "upstream" }, 500);
+    return jsonResponse({
+      results: { entities: [{ entity_id: "m1", name: "The Town", type: "urn:entity:movie" }] },
+    });
+  }) as typeof fetch;
+
+  try {
+    const result = await comparablesForBrief(
+      [{ entity_id: "anchor", name: "Drive", type: "urn:entity:movie" }] as never,
+      [],
+      [],
+    );
+    assert.deepEqual(result.emptyDomains, ["book"], "an empty result set is an empty domain");
+    assert.ok(
+      !result.emptyDomains.includes("tv_show"),
+      "a failed call is not an empty domain",
+    );
+    assert.ok(
+      result.warnings.some((w) => /television/i.test(w)),
+      "a failed domain should warn, naming the domain",
+    );
+    assert.equal(result.groups.length, 1);
+    assert.equal(result.groups[0].domain, "movie");
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("comparables skip the query when the brief gives no signal", async () => {
+  const { comparablesForBrief } = await import("../src/lib/comparables.ts");
+  const original = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = (async () => {
+    calls += 1;
+    return jsonResponse({ results: { entities: [] } });
+  }) as typeof fetch;
+
+  try {
+    // No anchors and no tags means there is no audience to rank against. Calling
+    // Qloo anyway would burn three requests to return noise.
+    const result = await comparablesForBrief([], [], []);
+    assert.equal(calls, 0, "no signal means no calls");
+    assert.deepEqual(result.skippedDomains, ["movie", "tv_show", "book"]);
+    assert.equal(result.groups.length, 0);
+    assert.ok(result.warnings.length > 0, "the skip should be explained, not silent");
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("queue wait is not charged to the request timeout budget", async () => {
+  const { insights } = await import("../src/lib/qloo.ts");
+  const original = globalThis.fetch;
+
+  // The concurrency limiter allows 4 in flight. Saturate it with slow calls, then
+  // send a fifth whose timeout is shorter than one call's latency: if the timer
+  // starts before the slot is granted, the fifth aborts while still queued and is
+  // reported as a network timeout even though Qloo was never asked. That was a
+  // real failure — the comparables pass starved the television query into a
+  // phantom 12s timeout.
+  const LATENCY = 400;
+  const BUDGET = 600;
+  let calls = 0;
+
+  globalThis.fetch = ((_input: RequestInfo | URL, init?: RequestInit) => {
+    calls += 1;
+    return new Promise<Response>((resolve, reject) => {
+      const timer = setTimeout(
+        () => resolve(new Response(JSON.stringify({ results: { entities: [] } }), { status: 200 })),
+        LATENCY,
+      );
+      // Respect the abort signal the way a real socket would, so a timeout is
+      // observable rather than silently ignored.
+      init?.signal?.addEventListener("abort", () => {
+        clearTimeout(timer);
+        const error = new Error("aborted");
+        error.name = "AbortError";
+        reject(error);
+      });
+    });
+  }) as typeof fetch;
+
+  try {
+    const requests = Array.from({ length: 5 }, () =>
+      insights({ filterType: "urn:entity:artist", take: 1, timeoutMs: BUDGET }),
+    );
+    const results = await Promise.all(requests);
+    const failed = results.filter((r) => !r.ok);
+    assert.equal(
+      failed.length,
+      0,
+      `every request should succeed once queue wait is excluded from the budget; failures: ${failed
+        .map((r) => r.error)
+        .join("; ")}`,
+    );
+    // Counting attempts, not just successes, is what makes this guard hold now
+    // that a timeout retries: with the timer outside the slot the first attempt
+    // would abort while queued and a retry could still succeed, masking the bug.
+    // Correct accounting means no request ever needs its retry.
+    assert.equal(calls, 5, "each request should reach Qloo exactly once, with no retry");
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("a transient timeout is retried instead of losing the result", async () => {
+  const { insights } = await import("../src/lib/qloo.ts");
+  const original = globalThis.fetch;
+
+  // Qloo answers this call in ~0.5s normally and occasionally takes longer than
+  // the budget. If a timeout is treated as terminal while a 503 is retried, one
+  // slow response permanently loses a domain — the observed failure was the
+  // television comparables vanishing while films and books returned fine.
+  let attempt = 0;
+  globalThis.fetch = ((_input: RequestInfo | URL, init?: RequestInit) => {
+    attempt += 1;
+    if (attempt === 1) {
+      // First attempt hangs past the budget and must be aborted.
+      return new Promise<Response>((_resolve, reject) => {
+        init?.signal?.addEventListener("abort", () => {
+          const error = new Error("aborted");
+          error.name = "AbortError";
+          reject(error);
+        });
+      });
+    }
+    return Promise.resolve(
+      new Response(
+        JSON.stringify({
+          results: { entities: [{ entity_id: "tv-1", name: "The Shadow Line", type: "urn:entity:tv_show" }] },
+        }),
+        { status: 200 },
+      ),
+    );
+  }) as typeof fetch;
+
+  try {
+    const result = await insights({
+      filterType: "urn:entity:tv_show",
+      signalEntities: ["anchor"],
+      take: 5,
+      timeoutMs: 120,
+    });
+    assert.equal(attempt, 2, "a timeout should trigger exactly one retry here");
+    assert.equal(result.ok, true, "the retry should recover the result");
+    assert.equal(result.data.length, 1);
+    assert.equal(result.data[0].name, "The Shadow Line");
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("a non-retryable status is not retried", async () => {
+  const { insights } = await import("../src/lib/qloo.ts");
+  const original = globalThis.fetch;
+  let attempt = 0;
+  globalThis.fetch = (async () => {
+    attempt += 1;
+    return jsonResponse({ error: "bad request" }, 400);
+  }) as typeof fetch;
+
+  try {
+    // Making timeouts retryable must not turn every failure into three attempts:
+    // a 400 is a bad parameter and will fail identically each time.
+    const result = await insights({ filterType: "urn:entity:tv_show", take: 1 });
+    assert.equal(result.ok, false);
+    assert.equal(attempt, 1, "a 400 must not be retried");
+  } finally {
+    globalThis.fetch = original;
   }
 });
 

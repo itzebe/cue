@@ -6,6 +6,8 @@
  * mapping between our UI and the API stays obvious.
  */
 
+import type { AudienceBrief } from "./audience";
+import type { ComparablesResult } from "./comparables";
 import type { CastingResult } from "./casting";
 import type { LocalisationResult } from "./localise";
 import type { LicenseQuote } from "./rights";
@@ -189,6 +191,18 @@ export interface CueSheet {
    */
   casting?: CastingResult;
   localisation?: LocalisationResult;
+  /**
+   * Qloo's own description of who each anchor's audience is. The most direct
+   * evidence in the response that cultural data is doing work an LLM cannot, and
+   * it costs no extra API calls — it arrives on the anchor search.
+   */
+  audienceBrief?: AudienceBrief;
+  /**
+   * Film, TV and book references whose measured audience overlaps the brief's.
+   * The same question the cue sheet asks about artists, pointed at the three
+   * domains a director actually names when describing a reference.
+   */
+  comparables?: ComparablesResult;
   /** Marketplace quotes, keyed by cue id, generated on demand from the sheet. */
   quotes?: LicenseQuote[];
 }
