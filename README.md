@@ -119,12 +119,38 @@ npm run verify
 |---|---|---|
 | `QLOO_API_KEY` | for live mode | Your Qloo hackathon key |
 | `QLOO_API_BASE_URL` | no | Defaults to `https://hackathon.api.qloo.com` |
-| `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL` | no | Any OpenAI-compatible endpoint |
-| `OPENAI_API_KEY` / `OPENAI_BASE_URL` / `LLM_MODEL` | no | Alternative to the above |
+| `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL` | no | Any OpenAI-compatible endpoint (all three, to override everything else) |
+| `OPENROUTER_API_KEY` / `GEMINI_API_KEY` / `GROQ_API_KEY` | no | Set one and Cue infers the base URL and model |
+| `OPENAI_API_KEY` / `OPENAI_BASE_URL` | no | Alternative to the above |
+
+Resolution order, highest first: the `LLM_*` triple, then `OPENROUTER_API_KEY`, `GEMINI_API_KEY` (or `GOOGLE_API_KEY`), `GROQ_API_KEY`, then `OPENAI_*`. A provider-specific key deliberately outranks `OPENAI_API_KEY`: an OpenAI key with an exhausted balance would otherwise shadow a working key set under the provider's own name.
 
 Qloo is the required half; the LLM is optional and only names the specific track. Without it, Cue still ranks artists from the taste graph and leaves the cut as "Track TBD" rather than inventing a title. With it, each ranked artist gets a real track, album and year plus a rationale for the placement.
 
-Set `LLM_MODEL` explicitly when your endpoint does not serve the default (`gpt-4o-mini` for OpenAI, `claude-sonnet-4-5-20250929` for the Agent Canvas proxy). A model your key cannot access returns `403`, and Cue degrades to "Track TBD" cues; the server log now names the rejected model so the cause is visible instead of silent.
+Set `LLM_MODEL` explicitly when your endpoint does not serve the default (`gpt-4o-mini` for OpenAI, `claude-sonnet-4-5-20250929` for the Agent Canvas proxy). A model your key cannot access returns `403`, and Cue degrades to "Track TBD" cues; the server log names the rejected model so the cause is visible instead of silent.
+
+#### Free OpenAI-compatible providers
+
+Track naming is optional, and a paid OpenAI key is not required to turn it on. Set the provider's own key and Cue infers the rest:
+
+| Provider | Key variable | Default model | Where to get a key |
+|---|---|---|---|
+| Groq | `GROQ_API_KEY` | `openai/gpt-oss-120b` | [console.groq.com](https://console.groq.com/keys) |
+| Google Gemini | `GEMINI_API_KEY` | `gemini-3.5-flash` | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) |
+| OpenRouter | `OPENROUTER_API_KEY` | `openai/gpt-oss-120b:free` | [openrouter.ai/keys](https://openrouter.ai/keys) |
+
+Any other OpenAI-compatible endpoint also works with no code change: set all three of `LLM_API_KEY`, `LLM_BASE_URL` and `LLM_MODEL` to override every preset.
+
+Groq, Gemini and OpenRouter's free tier need no credit card. Free model lineups rotate and models do get retired, so check the provider's deprecation list before pinning an ID — `llama-3.3-70b-versatile`, for example, was shut down for free-tier use on 2026-08-16.
+
+To confirm what the deployed app resolved, and to see the upstream status if a call fails:
+
+```bash
+curl -s "https://<your-app>/api/cue" | jq .llm
+curl -s "https://<your-app>/api/cue?probe=1" | jq .llmProbe
+```
+
+`/api/cue` reports which source resolved, the base URL and model it will call, the key length, and whether the key arrived with surrounding whitespace. It never returns key material. `?probe=1` spends one upstream call and returns the raw status and message, which distinguishes an invalid key (`401`) from an exhausted balance (`429 insufficient_quota`).
 
 
 ## Deployment

@@ -110,26 +110,26 @@ export function CrossDomainPanel({ sheet }: { sheet: CueSheet }) {
             do not.
           </p>
 
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
             <input
               value={reference}
               onChange={(event) => setReferenceMarket(event.target.value)}
               aria-label="Reference market"
               placeholder="Reference market"
-              className="w-40 rounded-md border border-white/10 bg-black/30 px-3 py-1.5 text-xs text-haze-100 placeholder:text-haze-700 focus:border-ember-500/40"
+              className="w-full rounded-md border border-white/10 bg-black/30 px-3 py-1.5 text-xs text-haze-100 placeholder:text-haze-700 focus:border-ember-500/40 sm:w-40"
             />
             <input
               value={markets}
               onChange={(event) => setMarkets(event.target.value)}
               aria-label="Markets to compare"
               placeholder="Sao Paulo, Seoul, Tokyo"
-              className="min-w-[16rem] flex-1 rounded-md border border-white/10 bg-black/30 px-3 py-1.5 text-xs text-haze-100 placeholder:text-haze-700 focus:border-ember-500/40"
+              className="w-full rounded-md border border-white/10 bg-black/30 px-3 py-1.5 text-xs text-haze-100 placeholder:text-haze-700 focus:border-ember-500/40 sm:min-w-[16rem] sm:flex-1"
             />
             <button
               type="button"
               onClick={localise}
               disabled={status === "running" || !reference}
-              className="rounded-md border border-ember-500/40 bg-ember-500/10 px-3 py-1.5 text-xs text-ember-400 transition hover:bg-ember-500/20 disabled:opacity-50"
+              className="w-full rounded-md border border-ember-500/40 bg-ember-500/10 px-3 py-2 text-xs text-ember-400 transition hover:bg-ember-500/20 disabled:opacity-50 sm:w-auto sm:py-1.5"
             >
               {status === "running" ? "Measuring…" : "Localise"}
             </button>

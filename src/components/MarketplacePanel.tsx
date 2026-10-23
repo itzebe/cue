@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Cue, CueSheet } from "@/lib/types";
 import { DEFAULT_TERMS, type LicenseTerms, type QuoteSummary } from "@/lib/rights";
 
@@ -49,14 +49,19 @@ export function MarketplacePanel({ sheet }: { sheet: CueSheet }) {
   const [summary, setSummary] = useState<QuoteSummary | null>(null);
   const [status, setStatus] = useState<"idle" | "running" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
-
   const cues = sheet.cues;
+
+  // Every basket or grant change fires a new price. Only the newest response may
+  // be shown, or a slow earlier request can overwrite the current basket's total.
+  const requestSeq = useRef(0);
 
   const price = useCallback(
     async (nextSelected: Set<string>, nextTerms: LicenseTerms) => {
       const chosen: Cue[] = cues.filter((cue) => nextSelected.has(cue.id));
+      const seq = ++requestSeq.current;
       if (chosen.length === 0) {
         setSummary(null);
+        setStatus("idle");
         return;
       }
       setStatus("running");
@@ -68,10 +73,12 @@ export function MarketplacePanel({ sheet }: { sheet: CueSheet }) {
           body: JSON.stringify({ cues: chosen, terms: nextTerms }),
         });
         const data = await response.json();
+        if (seq !== requestSeq.current) return;
         if (!response.ok) throw new Error(data.error ?? "Pricing failed.");
         setSummary(data as QuoteSummary);
         setStatus("idle");
       } catch (caught) {
+        if (seq !== requestSeq.current) return;
         setError(caught instanceof Error ? caught.message : "Pricing failed.");
         setStatus("error");
       }
@@ -115,14 +122,14 @@ export function MarketplacePanel({ sheet }: { sheet: CueSheet }) {
             <button
               type="button"
               onClick={() => selectTop(3)}
-              className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] text-haze-300 transition hover:border-white/20 hover:text-haze-100"
+              className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[11px] text-haze-300 transition hover:border-white/20 hover:text-haze-100 sm:py-1.5"
             >
               Top 3
             </button>
             <button
               type="button"
               onClick={() => setSelected(new Set())}
-              className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] text-haze-300 transition hover:border-white/20 hover:text-haze-100"
+              className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[11px] text-haze-300 transition hover:border-white/20 hover:text-haze-100 sm:py-1.5"
             >
               Clear
             </button>
@@ -179,7 +186,19 @@ export function MarketplacePanel({ sheet }: { sheet: CueSheet }) {
 
           {/* Grant terms */}
           <div className="space-y-3">
-            <h3 className="text-[10px] uppercase tracking-wider text-haze-500">The grant</h3>
+            <div className="flex items-baseline justify-between gap-2">
+              <h3 className="text-[10px] uppercase tracking-wider text-haze-500">The grant</h3>
+              {status === "running" ? (
+                <span
+                  className="flex items-center gap-1.5 text-[10px] text-haze-400"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <span className="h-1 w-1 animate-pulse-soft rounded-full bg-signal-400" />
+                  Pricing…
+                </span>
+              ) : null}
+            </div>
 
             <label className="block">
               <span className="block text-[11px] text-haze-300">Media</span>
