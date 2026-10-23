@@ -139,10 +139,13 @@ export default function StudioPage() {
               cultural layer for creative decisions
             </span>
           </div>
-          <p className="mt-4 max-w-2xl text-balance font-display text-3xl leading-tight text-haze-100 sm:text-4xl">
+          {/* The page had no h1: its headline was a paragraph, so the document
+              exposed no top-level heading to assistive tech or search. Promoting
+              the same element keeps the visual design identical. */}
+          <h1 className="mt-4 max-w-2xl text-balance font-display text-3xl leading-tight text-haze-100 sm:text-4xl">
             Agencies and studios can&rsquo;t afford to{" "}
             <span className="text-ember-400">guess what resonates</span>. Cue measures it.
-          </p>
+          </h1>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-haze-300">
             A creative brief goes in. A grounded answer comes out — the cue, the cast, the
             market fit, the price and the path to signature — every ranking traced to measured
