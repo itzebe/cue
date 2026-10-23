@@ -51,12 +51,19 @@ export function CueCard({
   rank,
   maxAffinity,
   trackPendingHint,
+  onFindAlternative,
 }: {
   cue: Cue;
   rank: number;
   maxAffinity: number;
   /** Why no track was named, so the card never blames the wrong cause. */
   trackPendingHint?: string | null;
+  /**
+   * Opens the substitution workflow for this cue. Only the top-ranked grounded
+   * cue offers it: the alternative is a decision about *the* pick, and offering
+   * it on every card would turn a considered action into visual noise.
+   */
+  onFindAlternative?: (() => void) | null;
 }) {
   const clearance = CLEARANCE_LABEL[cue.clearance];
   const width = maxAffinity > 0 ? Math.max(6, (cue.affinity / maxAffinity) * 100) : 0;
@@ -137,6 +144,21 @@ export function CueCard({
             popularity {cue.popularity.toFixed(2)}
           </span>
         </div>
+
+        {onFindAlternative ? (
+          <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1.5 border-t border-white/5 pt-4">
+            <button
+              type="button"
+              onClick={onFindAlternative}
+              className="rounded-md border border-ember-500/40 bg-ember-500/10 px-3 py-1.5 text-xs text-ember-400 transition hover:bg-ember-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember-500"
+            >
+              Find a lower-cost alternative
+            </button>
+            <span className="text-[11px] leading-relaxed text-haze-500">
+              Keeps the audience this pick earns, inside your budget.
+            </span>
+          </div>
+        ) : null}
 
         <section className="mt-4">
           <h4 className="text-[10px] font-medium uppercase tracking-wider text-haze-500">

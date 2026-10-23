@@ -1,10 +1,12 @@
 import type { Cue, CueSheet, Receipt, SceneBrief } from "./types";
 import {
-  chatDetailed,
+  chatWithFallback,
   extractJson,
   hasLlm,
-  resolveLlmConfig,
+  runLlm,
+  type LlmAttempt,
   type LlmFailure,
+  type LlmSource,
   type ToolSpec,
 } from "./llm";
 import {
@@ -329,14 +331,14 @@ export type SceneParseSource = "llm" | "deterministic";
 /** Use the LLM to read the scene, falling back to the deterministic parser. */
 async function readScene(
   raw: string,
-): Promise<{ brief: SceneBrief; source: SceneParseSource; failure: LlmFailure | null }> {
-  const config = resolveLlmConfig();
-  if (!config) {
-    return { brief: parseSceneBrief(raw), source: "deterministic", failure: null };
-  }
-
-  const { message: response, failure } = await chatDetailed(
-    config,
+): Promise<{
+  brief: SceneBrief;
+  source: SceneParseSource;
+  failure: LlmFailure | null;
+  provider: LlmSource | null;
+  attempts: LlmAttempt[];
+}> {
+  const { message: response, failure, provider, attempts } = await chatWithFallback(
     [
       { role: "system", content: SYSTEM_PROMPT },
       {
@@ -350,7 +352,7 @@ async function readScene(
   if (response === null) {
     // A configured provider that did not answer is a different situation from
     // no provider at all. Carry the reason up so the sheet can name it.
-    return { brief: parseSceneBrief(raw), source: "deterministic", failure };
+    return { brief: parseSceneBrief(raw), source: "deterministic", failure, provider: null, attempts };
   }
 
   const toolCall = response.tool_calls?.find(
@@ -366,6 +368,8 @@ async function readScene(
     return {
       brief: parseSceneBrief(raw),
       source: "deterministic",
+      provider: null,
+      attempts,
       failure: {
         reason: "empty_response",
         status: 200,
@@ -388,6 +392,8 @@ async function readScene(
     },
     source: "llm",
     failure: null,
+    provider,
+    attempts,
   };
 }
 
@@ -403,11 +409,9 @@ async function proposeTracks(
     string,
     { track: string; album?: string; year?: string; rationale?: string }
   >();
-  const config = resolveLlmConfig();
-  if (!config || artists.length === 0) return out;
+  if (artists.length === 0) return out;
 
-  const { message: response } = await chatDetailed(
-    config,
+  const response = await runLlm(
     [
       { role: "system", content: SYSTEM_PROMPT },
       {
@@ -450,7 +454,6 @@ Artists: ${artists.join("; ")}`,
 async function buildBaseline(
   brief: SceneBrief,
 ): Promise<CueSheet["baseline"]> {
-  const config = resolveLlmConfig();
   // The point of this panel is that the model has no cultural data. It must not
   // also claim to have produced output it did not: when the call fails, the
   // panel says the lines are a fixed sample instead.
@@ -462,12 +465,11 @@ async function buildBaseline(
     { artist: "Well-known 90s hit", track: "The obvious needle drop", why: "First song anyone names for this decade." },
   ];
 
-  if (!config) {
+  if (!hasLlm()) {
     return { cues: samples, note, source: "sample" };
   }
 
-  const { message: response } = await chatDetailed(
-    config,
+  const response = await runLlm(
     [
       { role: "system", content: SYSTEM_PROMPT },
       {
@@ -523,7 +525,13 @@ export async function buildCueSheet(
     };
   }
 
-  const { brief, source: sceneSource, failure: sceneFailure } = await readScene(options.scene);
+  const {
+    brief,
+    source: sceneSource,
+    failure: sceneFailure,
+    provider: sceneProvider,
+    attempts: sceneAttempts,
+  } = await readScene(options.scene);
   if (sceneSource === "deterministic") {
     if (!hasLlm()) {
       warnings.push(
@@ -533,13 +541,29 @@ export async function buildCueSheet(
       // Name the fault. A generic "fell back" line hides an exhausted balance
       // behind a message that reads like an outage, which is what made this
       // invisible in production.
+      const tried =
+        sceneAttempts.length > 1
+          ? ` (tried ${sceneAttempts.map((attempt) => attempt.source).join(", ")})`
+          : "";
       warnings.push(
         `Scene parsing fell back to the deterministic reader because ${sceneFailure.message}` +
           (sceneFailure.status ? ` (HTTP ${sceneFailure.status})` : "") +
-          ". Track titles are left for you to choose.",
+          `${tried}. Track titles are left for you to choose.`,
       );
     } else {
       warnings.push("Scene parsing fell back to the deterministic reader.");
+    }
+  } else if (sceneProvider && sceneAttempts.length > 1) {
+    // A provider answered only after an earlier one failed. Saying which one
+    // succeeded is the difference between "the model ran" and knowing whether
+    // the deployment's primary provider is actually healthy.
+    const failed = sceneAttempts
+      .filter((attempt) => attempt.failure)
+      .map((attempt) => `${attempt.source} (${attempt.failure!.message})`);
+    if (failed.length > 0) {
+      warnings.push(
+        `Scene parsed by ${sceneProvider} after ${failed.join(", ")}. The brief below is model-generated.`,
+      );
     }
   }
 
@@ -657,9 +681,12 @@ export async function buildCueSheet(
     cues,
     sceneParse: {
       source: sceneSource,
+      provider: sceneProvider,
       failureReason: sceneFailure?.reason,
       failureStatus: sceneFailure?.status ?? null,
       failureMessage: sceneFailure?.message,
+      /** Providers tried, in order. Only set when more than one was available. */
+      triedProviders: sceneAttempts.length > 1 ? sceneAttempts.map((a) => a.source) : undefined,
     },
     directionCompare,
     baseline,

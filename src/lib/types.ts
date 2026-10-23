@@ -143,11 +143,15 @@ export interface CueSheet {
    */
   sceneParse?: {
     source: "llm" | "deterministic";
+    /** The provider that supplied the brief. Null when the model did not run. */
+    provider?: string | null;
     /** Present when a configured provider was tried and failed. */
     failureReason?: string;
     failureStatus?: number | null;
     /** Operator-facing sentence, e.g. "the provider reports no remaining credits". */
     failureMessage?: string;
+    /** Providers tried, in order, when more than one was configured. */
+    triedProviders?: string[];
   };
   /** Head-to-head of two creative directions via /v2/analysis/compare. */
   directionCompare?: {
