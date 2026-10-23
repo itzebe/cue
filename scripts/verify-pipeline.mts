@@ -1047,6 +1047,261 @@ await check("a stray space in a provider key is reported", async () => {
   }
 });
 
+await check("an exhausted provider balance is named in the fallback warning", async () => {
+  // The production defect: a configured key with no credits made the pipeline
+  // fall back silently behind a generic "fell back" line, so the operator could
+  // not tell an exhausted balance from a missing key. The warning must name it.
+  const { buildCueSheet } = await import("../src/lib/planner.ts");
+  const saved = { ...process.env };
+  const original = globalThis.fetch;
+  try {
+    process.env.LLM_API_KEY = "sk-test-dead-key";
+    process.env.LLM_BASE_URL = "https://api.openai.example/v1";
+    process.env.LLM_MODEL = "gpt-4o-mini";
+    delete process.env.OPENAI_API_KEY;
+    delete process.env.OPENROUTER_API_KEY;
+
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url.startsWith("https://api.openai.example")) {
+        // This is exactly what OpenAI returns for an exhausted balance.
+        return jsonResponse(
+          {
+            error: {
+              message:
+                "You exceeded your current quota, please check your plan and billing details.",
+              type: "insufficient_quota",
+              code: "credit_balance_exhausted",
+            },
+          },
+          429,
+        );
+      }
+      return original(input as RequestInfo, init);
+    }) as typeof fetch;
+
+    const sheet = await buildCueSheet({
+      scene: 'A 90s noir thriller. Rain on the glass. Reference "Drive". Los Angeles, audience 25-34.',
+    });
+
+    assert.equal(sheet.sceneParse?.source, "deterministic", "the parser must be used");
+    assert.equal(
+      sheet.sceneParse?.failureReason,
+      "insufficient_quota",
+      "an exhausted balance must be classified, not reported as a rate limit",
+    );
+    const named = sheet.warnings.find((w) => /fell back/i.test(w));
+    assert.ok(named, "a fallback warning must be present");
+    assert.ok(
+      /credit/i.test(named) || /quota/i.test(named),
+      `the warning must name the cause, got: ${named}`,
+    );
+    assert.ok(
+      !/set an LLM key|no llm configured/i.test(named),
+      "an exhausted balance must not be described as a missing key",
+    );
+    // Qloo data is unaffected by an LLM outage; the sheet must still rank.
+    assert.ok(sheet.cues.length >= 3, "Qloo ranking must survive an LLM failure");
+  } finally {
+    process.env = saved;
+    globalThis.fetch = original;
+  }
+});
+
+await check("a rejected key is distinguished from an exhausted balance", async () => {
+  const { buildCueSheet } = await import("../src/lib/planner.ts");
+  const saved = { ...process.env };
+  const original = globalThis.fetch;
+  try {
+    process.env.LLM_API_KEY = "sk-test-revoked";
+    process.env.LLM_BASE_URL = "https://api.openai.example/v1";
+    process.env.LLM_MODEL = "gpt-4o-mini";
+    delete process.env.OPENAI_API_KEY;
+    delete process.env.OPENROUTER_API_KEY;
+
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url.startsWith("https://api.openai.example")) {
+        return jsonResponse({ error: { message: "Incorrect API key provided." } }, 401);
+      }
+      return original(input as RequestInfo, init);
+    }) as typeof fetch;
+
+    const sheet = await buildCueSheet({
+      scene: 'A 90s noir thriller referencing "Drive". Los Angeles, audience 25-34.',
+    });
+    assert.equal(sheet.sceneParse?.failureReason, "invalid_key");
+    const named = sheet.warnings.find((w) => /fell back/i.test(w));
+    assert.ok(/rejected|key/i.test(named ?? ""), `warning must name the key fault: ${named}`);
+  } finally {
+    process.env = saved;
+    globalThis.fetch = original;
+  }
+});
+
+await check("a static baseline is never attributed to the LLM", async () => {
+  // The comparison panel claims to show "what the LLM would say". When the model
+  // is unavailable it shows a fixed sample, and must say so instead of borrowing
+  // the model's authority for text the model never produced.
+  const { buildCueSheet } = await import("../src/lib/planner.ts");
+  const saved = { ...process.env };
+  const original = globalThis.fetch;
+  try {
+    process.env.LLM_API_KEY = "sk-test-dead-key";
+    process.env.LLM_BASE_URL = "https://api.openai.example/v1";
+    process.env.LLM_MODEL = "gpt-4o-mini";
+    delete process.env.OPENAI_API_KEY;
+    delete process.env.OPENROUTER_API_KEY;
+
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url.startsWith("https://api.openai.example")) {
+        return jsonResponse({ error: { code: "credit_balance_exhausted" } }, 429);
+      }
+      return original(input as RequestInfo, init);
+    }) as typeof fetch;
+
+    const sheet = await buildCueSheet({
+      scene: 'A 90s noir thriller referencing "Drive". Los Angeles, audience 25-34.',
+    });
+    assert.equal(sheet.baseline.source, "sample", "a failed generation must be marked as a sample");
+    assert.ok(sheet.baseline.cues.length > 0, "the panel must still show something");
+    assert.ok(
+      /did not return|fixed example/i.test(sheet.baseline.note),
+      `the note must not claim the LLM produced it: ${sheet.baseline.note}`,
+    );
+  } finally {
+    process.env = saved;
+    globalThis.fetch = original;
+  }
+});
+
+await check("the fixture baseline is marked as a sample too", async () => {
+  const { FIXTURE_SHEET } = await import("../src/data/fixtures.ts");
+  assert.equal(
+    FIXTURE_SHEET.baseline.source,
+    "sample",
+    "pre-computed fixture text is not LLM output",
+  );
+});
+
+await check("concurrent LLM calls do not cross-contaminate their outcomes", async () => {
+  // A single cue sheet issues the track-naming call and the baseline call
+  // concurrently, and the two can fail differently. Failure state must belong to
+  // the call that produced it, or the UI blames the wrong call and reports a
+  // fault that never happened.
+  const { chatDetailed, resolveLlmConfig } = await import("../src/lib/llm.ts");
+  const saved = { ...process.env };
+  const original = globalThis.fetch;
+  try {
+    process.env.LLM_API_KEY = "sk-test-partial";
+    process.env.LLM_BASE_URL = "https://api.openai.example/v1";
+    process.env.LLM_MODEL = "gpt-4o-mini";
+    delete process.env.OPENAI_API_KEY;
+    delete process.env.OPENROUTER_API_KEY;
+
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url.startsWith("https://api.openai.example")) {
+        const body = String(init?.body ?? "");
+        if (body.includes("NO cultural data")) {
+          return jsonResponse({ error: { code: "credit_balance_exhausted" } }, 429);
+        }
+        return jsonResponse({
+          choices: [{ message: { content: '{"ok":true}' } }],
+        });
+      }
+      return original(input as RequestInfo, init);
+    }) as typeof fetch;
+
+    const config = resolveLlmConfig();
+    assert.ok(config, "a config must resolve for this test to mean anything");
+
+    const good = chatDetailed(config, [{ role: "user", content: "name some tracks" }]);
+    const bad = chatDetailed(config, [{ role: "user", content: "NO cultural data here" }]);
+    const [goodResult, badResult] = await Promise.all([good, bad]);
+
+    assert.ok(goodResult.message, "the successful call must return its message");
+    assert.equal(
+      goodResult.failure,
+      null,
+      "a successful call must not inherit a concurrent call's failure",
+    );
+    assert.equal(badResult.message, null, "the failing call must return no message");
+    assert.equal(
+      badResult.failure?.reason,
+      "insufficient_quota",
+      "the failing call must carry its own classified reason",
+    );
+  } finally {
+    process.env = saved;
+    globalThis.fetch = original;
+  }
+});
+
+await check("a successful scene read is not blamed for a concurrent baseline failure", async () => {
+  const { buildCueSheet } = await import("../src/lib/planner.ts");
+  const saved = { ...process.env };
+  const original = globalThis.fetch;
+  try {
+    process.env.LLM_API_KEY = "sk-test-partial";
+    process.env.LLM_BASE_URL = "https://api.openai.example/v1";
+    process.env.LLM_MODEL = "gpt-4o-mini";
+    delete process.env.OPENAI_API_KEY;
+    delete process.env.OPENROUTER_API_KEY;
+
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url.startsWith("https://api.openai.example")) {
+        const body = String(init?.body ?? "");
+        if (body.includes("NO cultural data")) {
+          return jsonResponse({ error: { code: "credit_balance_exhausted" } }, 429);
+        }
+        return jsonResponse({
+          choices: [
+            {
+              message: {
+                content: JSON.stringify({
+                  setting: "Rain on glass",
+                  mood: ["wistful"],
+                  era: "1990s",
+                  arc: "dread to resolve",
+                  anchors: ["Drive"],
+                  audience: { ageMin: 25, ageMax: 34 },
+                }),
+              },
+            },
+          ],
+        });
+      }
+      return original(input as RequestInfo, init);
+    }) as typeof fetch;
+
+    const sheet = await buildCueSheet({
+      scene: 'A 90s noir thriller referencing "Drive". Los Angeles, audience 25-34.',
+    });
+
+    // The scene read succeeded while the baseline call failed. The sheet must
+    // report the success, and must not carry the other call's failure.
+    assert.equal(sheet.sceneParse?.source, "llm", "the successful scene read must be reported");
+    assert.equal(
+      sheet.sceneParse?.failureReason,
+      undefined,
+      "a call that succeeded must not be given a failure reason",
+    );
+    assert.equal(
+      sheet.warnings.some((w) => /fell back/i.test(w)),
+      false,
+      "no fallback warning may be raised when the scene read succeeded",
+    );
+    // The failure that did happen must still be labelled honestly.
+    assert.equal(sheet.baseline.source, "sample", "the failed baseline must be a sample");
+  } finally {
+    process.env = saved;
+    globalThis.fetch = original;
+  }
+});
+
 console.log(`\n${passed} passed, ${failures.length} failed.\n`);
 if (failures.length > 0) {
   for (const failure of failures) console.error(`  - ${failure}`);

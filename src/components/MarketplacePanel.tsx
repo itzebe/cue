@@ -136,7 +136,7 @@ export function MarketplacePanel({ sheet }: { sheet: CueSheet }) {
           </div>
         </header>
 
-        <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,300px)]">
+        <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,300px)]">
           {/* Basket */}
           <div>
             <h3 className="text-[10px] uppercase tracking-wider text-haze-500">
@@ -167,9 +167,12 @@ export function MarketplacePanel({ sheet }: { sheet: CueSheet }) {
                       >
                         ✓
                       </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm text-haze-100">{cue.artist}</span>
-                        <span className="block truncate text-[11px] text-haze-500">
+                      <span className="min-w-0 flex-1 text-left">
+                        {/* This list is what gets priced and licensed, so the
+                            exact title has to stay readable rather than
+                            truncated at narrow widths. */}
+                        <span className="block break-words text-sm text-haze-100">{cue.artist}</span>
+                        <span className="block break-words text-[11px] text-haze-500">
                           {cue.trackUnverified ? "Track TBD" : cue.track} ·{" "}
                           {cue.placement.replace(/_/g, " ")}
                         </span>
@@ -186,7 +189,7 @@ export function MarketplacePanel({ sheet }: { sheet: CueSheet }) {
 
           {/* Grant terms */}
           <div className="space-y-3">
-            <div className="flex items-baseline justify-between gap-2">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
               <h3 className="text-[10px] uppercase tracking-wider text-haze-500">The grant</h3>
               {status === "running" ? (
                 <span
@@ -278,7 +281,7 @@ export function MarketplacePanel({ sheet }: { sheet: CueSheet }) {
         {/* Totals */}
         {summary && selectedQuotes.length > 0 ? (
           <div className="mt-5 border-t border-white/5 pt-4">
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <div>
                 <p className="text-[10px] uppercase tracking-wider text-haze-500">
                   Clearance budget

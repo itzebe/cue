@@ -12,7 +12,7 @@ import type { CueSheet } from "@/lib/types";
 export function CompareStrip({ sheet }: { sheet: CueSheet }) {
   return (
     <section aria-label="LLM-only versus Qloo-grounded comparison">
-      <div className="mb-3 flex items-baseline justify-between gap-4">
+      <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
         <h2 className="font-display text-xl text-haze-100">
           The difference is the whole point
         </h2>
@@ -21,13 +21,13 @@ export function CompareStrip({ sheet }: { sheet: CueSheet }) {
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="panel relative overflow-hidden p-5">
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-sm font-medium uppercase tracking-wider text-haze-500">
               LLM alone
             </h3>
-            <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] uppercase tracking-wider text-haze-500">
+            <span className="shrink-0 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] uppercase tracking-wider text-haze-500">
               no cultural data
             </span>
           </div>
@@ -36,23 +36,28 @@ export function CompareStrip({ sheet }: { sheet: CueSheet }) {
               <li key={index} className="border-b border-white/5 pb-3 last:border-0 last:pb-0">
                 <p className="text-sm text-haze-300">
                   <span className="text-haze-100">{cue.artist}</span>
-                  <span className="text-haze-500"> — “{cue.track}”</span>
+                  <span className="text-haze-500"> — &ldquo;{cue.track}&rdquo;</span>
                 </p>
                 <p className="mt-0.5 text-xs leading-relaxed text-haze-500">{cue.why}</p>
               </li>
             ))}
           </ul>
           <p className="mt-4 rounded-lg border border-white/5 bg-black/20 p-3 text-xs leading-relaxed text-haze-500">
+            {sheet.baseline.source === "sample" ? (
+              <span className="mb-1 block font-medium uppercase tracking-wider text-ember-400/80">
+                Fixed sample — the model did not run
+              </span>
+            ) : null}
             {sheet.baseline.note}
           </p>
         </div>
 
         <div className="panel relative overflow-hidden border-ember-500/20 p-5 shadow-glow">
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-sm font-medium uppercase tracking-wider text-ember-400">
               Cue + Qloo
             </h3>
-            <span className="rounded-full border border-ember-500/30 bg-ember-500/10 px-2.5 py-1 text-[10px] uppercase tracking-wider text-ember-400">
+            <span className="shrink-0 rounded-full border border-ember-500/30 bg-ember-500/10 px-2.5 py-1 text-[10px] uppercase tracking-wider text-ember-400">
               taste graph grounded
             </span>
           </div>

@@ -223,12 +223,96 @@ export function llmDiagnostics() {
 }
 
 /**
+ * Why an LLM call failed, in terms an operator can act on.
+ *
+ * The pipeline degrades gracefully to the deterministic reader, which is right,
+ * but a bare "fell back" warning is indistinguishable from "no LLM configured"
+ * and hides the actual fault. Classifying the upstream response is what lets the
+ * UI say *why* a configured model was not used.
+ */
+export type LlmFailureReason =
+  | "insufficient_quota"
+  | "invalid_key"
+  | "model_not_permitted"
+  | "rate_limited"
+  | "timeout"
+  | "empty_response"
+  | "transport"
+  | "http_error";
+
+export interface LlmFailure {
+  reason: LlmFailureReason;
+  status: number | null;
+  /** Short human sentence for the cue-sheet warning. */
+  message: string;
+  /** Upstream text, truncated. For the server log, not the public response. */
+  detail: string;
+}
+
+/**
+ * A completion together with why it is absent. `chat()` returns just the
+ * message for the call sites that only need the happy path; the pipeline uses
+ * this so it can explain a failure without sharing mutable state across the
+ * concurrent requests that a single cue sheet issues.
+ */
+export interface ChatResult {
+  message: ChatMessage | null;
+  failure: LlmFailure | null;
+}
+
+function classifyFailure(status: number, detail: string): LlmFailure {
+  const body = detail.toLowerCase();
+
+  if (status === 401 || status === 403) {
+    return {
+      reason: "invalid_key",
+      status,
+      message: "the configured API key was rejected",
+      detail,
+    };
+  }
+  // OpenAI reports an exhausted balance as 429, which is easy to misread as a
+  // rate limit. The code is the only reliable discriminator.
+  if (
+    body.includes("insufficient_quota") ||
+    body.includes("credit_balance") ||
+    body.includes("no credits remaining") ||
+    body.includes("exceeded your current quota")
+  ) {
+    return {
+      reason: "insufficient_quota",
+      status,
+      message: "the provider reports no remaining credits",
+      detail,
+    };
+  }
+  if (body.includes("rate limit") || body.includes("rate_limit") || status === 429) {
+    return {
+      reason: "rate_limited",
+      status,
+      message: "the provider rate-limited the request",
+      detail,
+    };
+  }
+  if (status === 404 || body.includes("does not exist") || body.includes("model_not_found")) {
+    return {
+      reason: "model_not_permitted",
+      status,
+      message: "the configured model is not available to this key",
+      detail,
+    };
+  }
+  return { reason: "http_error", status, message: `the provider returned ${status}`, detail };
+}
+
+/**
  * One minimal round trip to the configured endpoint, reporting the upstream
  * status so a misconfiguration is visible from outside the deployment.
  */
 export async function probeLlm(): Promise<{
   ok: boolean;
   status: number | null;
+  reason?: LlmFailureReason;
   detail: string;
 }> {
   const config = resolveLlmConfig();
@@ -250,11 +334,22 @@ export async function probeLlm(): Promise<{
       signal: controller.signal,
     });
     const text = await res.text().catch(() => "");
-    return { ok: res.ok, status: res.status, detail: text.slice(0, 300) };
+    if (res.ok) return { ok: true, status: res.status, detail: text.slice(0, 300) };
+    // Reuse the same classifier as the pipeline so the health check and the
+    // cue-sheet warning can never disagree about why a call failed.
+    const failure = classifyFailure(res.status, text);
+    return {
+      ok: false,
+      status: res.status,
+      reason: failure.reason,
+      detail: text.slice(0, 300),
+    };
   } catch (error) {
+    const aborted = error instanceof Error && error.name === "AbortError";
     return {
       ok: false,
       status: null,
+      reason: aborted ? "timeout" : "transport",
       detail: error instanceof Error ? error.message : "Unknown transport error",
     };
   } finally {
@@ -278,12 +373,12 @@ interface ChatCompletionChoice {
  * One turn of chat completion. Returns null instead of throwing so callers can
  * fall back to the deterministic planner.
  */
-export async function chat(
+export async function chatDetailed(
   config: LlmConfig,
   messages: ChatMessage[],
   tools: ToolSpec[] = [],
   timeoutMs = 45_000,
-): Promise<ChatMessage | null> {
+): Promise<ChatResult> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -320,15 +415,28 @@ export async function chat(
       // Without this the pipeline silently degrades to "no LLM" and the operator
       // sees unexplained "Track TBD" cues with no hint as to why.
       const detail = await res.text().catch(() => "");
+      const failure = classifyFailure(res.status, detail);
       console.warn(
-        `[cue] LLM call failed: ${res.status} model=${config.model} ${detail.slice(0, 300)}`,
+        `[cue] LLM call failed: ${res.status} ${failure.reason} model=${config.model} ${detail.slice(0, 300)}`,
       );
-      return null;
+      return { message: null, failure };
     }
 
     const json = (await res.json()) as { choices?: ChatCompletionChoice[] };
     const choice = json.choices?.[0];
-    if (!choice?.message) return null;
+    if (!choice?.message) {
+      // A 200 with no message is a silent failure; record it so the caller can
+      // distinguish "the model declined to answer" from "the network broke".
+      return {
+        message: null,
+        failure: {
+          reason: "empty_response",
+          status: res.status,
+          message: "the provider returned no completion",
+          detail: JSON.stringify(json).slice(0, 300),
+        },
+      };
+    }
 
     const toolCalls = (choice.message.tool_calls ?? [])
       .filter((call) => call.function?.name)
@@ -342,15 +450,42 @@ export async function chat(
       }));
 
     return {
-      role: "assistant",
-      content: choice.message.content ?? null,
-      tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
+      message: {
+        role: "assistant",
+        content: choice.message.content ?? null,
+        tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
+      },
+      failure: null,
     };
-  } catch {
-    return null;
+  } catch (error) {
+    // An abort is a timeout, not a transport fault, and the two need different
+    // fixes. Recording it here is what lets the warning say which happened.
+    const aborted = error instanceof Error && error.name === "AbortError";
+    return {
+      message: null,
+      failure: {
+        reason: aborted ? "timeout" : "transport",
+        status: null,
+        message: aborted
+          ? `the provider did not answer within ${Math.round(timeoutMs / 1000)}s`
+          : "the request to the provider failed",
+        detail: error instanceof Error ? error.message : "Unknown transport error",
+      },
+    };
   } finally {
     clearTimeout(timer);
   }
+}
+
+/** The message, or `null`. Use `chatDetailed` when the reason matters. */
+export async function chat(
+  config: LlmConfig,
+  messages: ChatMessage[],
+  tools: ToolSpec[] = [],
+  timeoutMs = 45_000,
+): Promise<ChatMessage | null> {
+  const { message } = await chatDetailed(config, messages, tools, timeoutMs);
+  return message;
 }
 
 /**
