@@ -24,6 +24,54 @@ const DEFAULT_TIMEOUT_MS = 12_000;
 const MAX_ATTEMPTS = 3;
 
 /**
+ * The only age values Qloo accepts. `signal.demographics.age` rejects anything
+ * else with a 400, which silently empties the whole response — so a raw brief
+ * value like "25-34" is not merely imprecise, it fails the call. Anything
+ * sending a demographic age must run it through `normaliseAgeBucket` first.
+ */
+export const QLOO_AGE_BUCKETS = [
+  "24_and_younger",
+  "25_to_29",
+  "30_to_34",
+  "35_to_44",
+  "45_to_54",
+  "55_and_older",
+] as const;
+
+export type QlooAgeBucket = (typeof QLOO_AGE_BUCKETS)[number];
+
+/**
+ * Coerce a brief's age into a bucket Qloo will accept, or undefined.
+ *
+ * The LLM is constrained to the bucket enum, but a brief can also arrive from
+ * the deterministic parser or a direct API caller, so this is the last line of
+ * defence. An unrecognised value becomes undefined rather than being passed
+ * through: dropping the demographic narrows the result set, whereas forwarding
+ * it fails the request outright.
+ */
+export function normaliseAgeBucket(age: string | undefined): QlooAgeBucket | undefined {
+  if (!age) return undefined;
+  const value = age.trim().toLowerCase().replace(/\s+/g, "_");
+  if ((QLOO_AGE_BUCKETS as readonly string[]).includes(value)) {
+    return value as QlooAgeBucket;
+  }
+  // Accept a bare range like "25-34" or "25 to 34" and take the lower bound, the
+  // same way the deterministic parser reads one.
+  const range = value.match(/^(\d{1,2})[_-]*(?:to[_-]*)?(\d{1,2})$/);
+  if (range) {
+    const floor = Number(range[1]);
+    if (floor <= 24) return "24_and_younger";
+    if (floor <= 29) return "25_to_29";
+    if (floor <= 34) return "30_to_34";
+    if (floor <= 44) return "35_to_44";
+    if (floor <= 54) return "45_to_54";
+    return "55_and_older";
+  }
+  return undefined;
+}
+
+
+/**
  * Qloo rate-limits the hackathon key aggressively, and a cue sheet fires a
  * dozen-plus calls at once. A 429 or 5xx is retried with exponential backoff so
  * a burst degrades into a slower run rather than empty cues.
@@ -442,7 +490,10 @@ export function insights(
     "filter.tags": params.filterTags,
     "filter.exclude.tags": params.excludeTags,
     "filter.exclude.entities": params.excludeEntities,
-    "signal.demographics.age": params.demographics?.age,
+    // Normalised here rather than at each call site: an invalid age fails the
+    // entire request with a 400, so this is the one place that must not be
+    // bypassed. See normaliseAgeBucket.
+    "signal.demographics.age": normaliseAgeBucket(params.demographics?.age),
     "signal.demographics.gender": params.demographics?.gender,
     "signal.demographics.audiences": params.demographics?.audiences,
     "filter.location.query": params.locationQuery,

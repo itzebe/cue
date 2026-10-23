@@ -8,6 +8,7 @@ import { ReceiptsPanel } from "@/components/ReceiptsPanel";
 import { DirectionPanel, RegionPanel } from "@/components/SignalPanels";
 import { MarketplacePanel } from "@/components/MarketplacePanel";
 import { CrossDomainPanel } from "@/components/CrossDomainPanel";
+import { SubstitutePanel } from "@/components/SubstitutePanel";
 import { SAMPLE_SCENES } from "@/data/fixtures";
 import type { CueSheet } from "@/lib/types";
 
@@ -381,6 +382,10 @@ export default function StudioPage() {
               </section>
 
               <CompareStrip sheet={sheet} />
+              {/* Substitution sits immediately after the comparison because it is
+                  the same argument continued: the LLM could rank, and now Qloo
+                  answers the question the ranking creates. */}
+              <SubstitutePanel key={sheet.brief.raw} sheet={sheet} />
               <MarketplacePanel sheet={sheet} />
               <CrossDomainPanel key={sheet.brief.raw} sheet={sheet} />
               <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">

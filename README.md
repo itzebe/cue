@@ -27,6 +27,7 @@ Paste a scene brief — a script page, a treatment, or two sentences — and Cue
 - **Placement and clearance notes.** Which cue is the needle drop, which is the score bed, and what each will cost to clear.
 - **A creative A/B.** Two competing directions run through `/v2/analysis/compare` to see whether they split the audience or share it.
 - **A clearance desk.** Select the cues you want and Cue prices the grant: fee band, rights holders, one-stop or two negotiations, the path to signature, and the day the campaign is gated.
+- **A substitute when the answer is unaffordable.** The top pick costs more than the budget, or the label refuses. Cue inverts the budget into a popularity ceiling, searches the taste graph for artists the same audience already loves inside it, and reports each one's measured audience overlap with the original. This is the question a ranked list cannot answer, and the one supervisors actually get stuck on.
 - **Cross-domain answers.** The same audience measurement ranks people and brands for casting, and returns the cultural touchpoints each market would reference.
 - **Full receipts.** Every Qloo endpoint called, with parameters, status, latency and row count.
 
@@ -39,6 +40,7 @@ Cue is built for a hackathon with a live API, so the boundary between measured a
 | Affinity, popularity, momentum, audience fit | Qloo | Measured |
 | Market touchpoints | Qloo (`urn:entity:place` + location) | Measured |
 | Casting and brand candidates | Qloo (`urn:entity:person`, `urn:entity:brand`) | Measured |
+| Audience overlap between two artists | Qloo (`/v2/analysis/compare`) | Measured |
 | Track titles | Optional LLM, else left for the supervisor | Never invented |
 | Fees, splits, clearance timelines | Cue's own model | Estimated, labelled as such |
 
@@ -170,6 +172,7 @@ vercel --prod
 | `POST /api/cue` | Scene brief in, grounded cue sheet out. The core call. |
 | `POST /api/localise` | Compare the brief's cultural touchpoints across markets. Slow by nature, so it is opt-in. |
 | `POST /api/quote` | Price a selected basket: fee bands, rights holders, clearance path, gating day. |
+| `POST /api/substitute` | Find what else serves the scene inside a budget. Opt-in, because it costs several calls. |
 | `GET /api/cue` | Health check: whether Qloo and an LLM are configured, and against which base URL. |
 
 ## Notes for reviewers
@@ -186,6 +189,9 @@ vercel --prod
 - **The key rate-limits in bursts, and the client absorbs it.** A cue sheet issues 20+ calls, and the hackathon key returns `429` under that load. Requests are capped at four in flight and retried up to three times with exponential backoff, honouring `Retry-After` when present. A rate-limited run comes back complete instead of half-empty.
 - **Location does not move artist affinity.** See "What is honest and what is not" above. This was measured, not assumed, and it is the reason localisation targets places.
 - **Market calls are slow and are budgeted for.** A location-filtered `urn:entity:place` query ran between 3.6s and 19.2s against the sandbox, well past the 12s default, so `/api/localise` runs its markets in parallel with a 25s per-call budget rather than serialising them inside the cue sheet.
+- **A retained-affinity ratio is not a quantity, so Cue does not show one.** The obvious way to describe a cheaper substitute is "keeps 90% of the original's audience fit". That number is meaningless here. The original's affinity comes from an uncapped `/v2/insights` call and a substitute's comes from a `filter.popularity.max`-capped one, so each is a rank within a *different* candidate set. Measured live, capped-pool affinities ran *above* the uncapped target's, which is how a first draft reported "keeps 115%" and recommended an artist sharing 13% of the audience. Cue removed the ratio entirely and leads with audience overlap from `/v2/analysis/compare`, which is measured against the target directly and is therefore comparable. Affinity still orders the candidates *within* one pool, where the candidate set is shared.
+- **The audience-overlap floor is calibrated, not guessed.** Overlap separates real substitutes from lookalikes far more sharply than shared genre tags do. Measured against the hackathon API: Portishead and Lamb `0.563`, Portishead and Hooverphonic `0.545`, Massive Attack and Tricky `0.531` — all genuine same-audience pairs — while Portishead and Kendrick Lamar `0.185` and Portishead and Gogo `0.125`, which share a genre tag but not an audience. Cue treats `0.30` as the floor for calling something a substitute, and says so in the warnings when nothing clears it rather than letting the closest option read as a swap.
+- **`signal.demographics.age` rejects anything but its own bucket names.** A raw brief value like `25-34` returns `400`, which fails the *entire* request rather than narrowing it — so an unnormalised age silently empties every response that carries one. This was found by probing the API directly, not from the docs. Cue normalises at the single `insights()` choke point, so no caller can bypass it, and drops an unrecognised value rather than forwarding it: losing a demographic narrows a query, whereas passing one through destroys it.
 - **Typo tolerance is off on purpose.** With `feature.typo_tolerance=true`, Qloo fuzzy-matches unrelated tags — `tension` → *Venison*, `dark` → *Park*, `open` → *Oven* — which silently corrupts the grounding. Tag resolution pins `feature.typo_tolerance=false` so a tag means what it says.
 
 ## License

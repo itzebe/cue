@@ -1302,6 +1302,437 @@ await check("a successful scene read is not blamed for a concurrent baseline fai
   }
 });
 
+// ---------------------------------------------------------------------------
+// Substitution: budget inversion and the honesty invariants.
+//
+// The substitution path adds a second kind of claim to the product — not "this
+// is what the scene wants" but "this other artist serves the same people for
+// less money". These checks guard the arithmetic behind that claim and the two
+// ways it could lie: inventing a saving, or calling a different audience a
+// substitute.
+// ---------------------------------------------------------------------------
+
+const { popularityCeilingForBudget, quoteLicense: quote, DEFAULT_TERMS: TERMS } = await import(
+  "../src/lib/rights.ts"
+);
+
+function cueAt(popularity: number, momentum = 0) {
+  return {
+    id: "cue-1",
+    artistId: "aaaaaaaa-0000-0000-0000-000000000001",
+    artist: "Target",
+    track: "Track",
+    affinity: 0.9,
+    popularity,
+    momentum,
+    why: [],
+    explainability: [],
+    placement: "needle_drop" as const,
+    clearance: "unknown" as const,
+    risk: "",
+    confidence: 0.8,
+  };
+}
+
+await check("a budget inverts to the popularity ceiling that fits it", () => {
+  const cue = cueAt(0.99);
+  const ceiling = popularityCeilingForBudget(cue, TERMS, 2500);
+  assert.ok(ceiling > 0 && ceiling < 1, `ceiling must be interior, got ${ceiling}`);
+  // The ceiling must be the most expensive catalogue the budget allows: pricing
+  // exactly at it fits, and pricing just above it does not.
+  assert.ok(
+    quote({ ...cue, popularity: ceiling }, TERMS).fee.recommended <= 2500,
+    "the ceiling itself must fit the budget",
+  );
+  assert.ok(
+    quote({ ...cue, popularity: Math.min(1, ceiling + 0.02) }, TERMS).fee.recommended > 2500,
+    "just above the ceiling must exceed the budget",
+  );
+});
+
+await check("a budget too small for any catalogue returns zero, not a fake ceiling", () => {
+  // Below the floor of the fee model, no popularity can satisfy the budget. The
+  // caller must be able to tell that apart from "the cheapest option happens to
+  // be free", which is why this returns 0 rather than a small number.
+  assert.equal(popularityCeilingForBudget(cueAt(0.99), TERMS, 1), 0);
+});
+
+await check("a budget above every catalogue returns the whole range", () => {
+  assert.equal(popularityCeilingForBudget(cueAt(0.99), TERMS, 10_000_000), 1);
+});
+
+await check("the ceiling is monotonic in the budget", () => {
+  const cue = cueAt(0.99);
+  let previous = -1;
+  for (const budget of [250, 1000, 2500, 5000, 20_000, 200_000]) {
+    const ceiling = popularityCeilingForBudget(cue, TERMS, budget);
+    assert.ok(ceiling >= previous, `ceiling fell as the budget rose at $${budget}`);
+    previous = ceiling;
+  }
+});
+
+const { normaliseAgeBucket, QLOO_AGE_BUCKETS } = await import("../src/lib/qloo.ts");
+
+await check("a raw age range is coerced into a bucket Qloo accepts", () => {
+  // Qloo answers a non-bucket age with a 400 that empties the whole response, so
+  // passing one through does not degrade a query — it destroys it.
+  // A range spans two buckets; the lower bound wins, which is the convention the
+  // deterministic parser already uses for the same input.
+  assert.equal(normaliseAgeBucket("25-34"), "25_to_29");
+  assert.equal(normaliseAgeBucket("25 to 34"), "25_to_29");
+  assert.equal(normaliseAgeBucket("30-34"), "30_to_34");
+  assert.equal(normaliseAgeBucket("18-24"), "24_and_younger");
+  assert.equal(normaliseAgeBucket("65-70"), "55_and_older");
+  assert.equal(normaliseAgeBucket("30_to_34"), "30_to_34");
+  assert.equal(normaliseAgeBucket(" 45_TO_54 "), "45_to_54");
+});
+
+await check("an unusable age is dropped rather than forwarded", () => {
+  // Forwarding an unknown value fails the request; dropping the demographic only
+  // narrows it, which is the recoverable failure.
+  assert.equal(normaliseAgeBucket("middle aged"), undefined);
+  assert.equal(normaliseAgeBucket(undefined), undefined);
+});
+
+await check("every normalised age is a value Qloo documents", () => {
+  const inputs = [
+    "24_and_younger",
+    "25_to_29",
+    "30_to_34",
+    "35_to_44",
+    "45_to_54",
+    "55_and_older",
+    "22-30",
+    "40s",
+  ];
+  for (const input of inputs) {
+    const bucket = normaliseAgeBucket(input);
+    if (bucket !== undefined) {
+      assert.ok(
+        (QLOO_AGE_BUCKETS as readonly string[]).includes(bucket),
+        `${input} normalised to ${bucket}, which is not a Qloo bucket`,
+      );
+    }
+  }
+});
+
+await check("insights never sends an invalid age to Qloo", async () => {
+  const before = calls.length;
+  await insights({ filterType: "urn:entity:artist", demographics: { age: "25-34" }, take: 3 });
+  const call = calls.slice(before).find((entry) => entry.url.includes("/v2/insights"));
+  assert.ok(call, "an insights call must have been made");
+  const age = new URL(call.url).searchParams.get("signal.demographics.age");
+  assert.equal(age, "25_to_29", `Qloo received age=${age}`);
+});
+
+const { findSubstitutes } = await import("../src/lib/substitute.ts");
+
+/** A brief shaped like the ones the pipeline produces. */
+function testBrief() {
+  return {
+    title: "Test",
+    raw: "A rain-soaked neo-noir in 1990s Los Angeles. Reference: Drive. Audience 25-34.",
+    mood: ["dark"],
+    genre: ["thriller"],
+    era: "1990s",
+    setting: "Los Angeles",
+    arc: "dread",
+    audience: { age: "30_to_34" },
+    anchors: ["Drive"],
+    diegetic: false,
+  };
+}
+
+/**
+ * Serve a substitution run from controlled pools. The popularity of each
+ * candidate is set explicitly so the price each one carries is known before the
+ * assertions run, which is what lets a test claim "the cheaper option is the one
+ * the model actually priced cheaper".
+ */
+function serveSubstitutionPools(forceStrangers = false) {
+  const original = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = typeof input === "string" ? input : input.toString();
+    const parsed = new URL(url);
+    if (parsed.pathname === "/v2/insights") {
+      const max = Number(parsed.searchParams.get("filter.popularity.max") ?? 1);
+      // Cheap, mid and expensive candidates, each only visible under a cap that
+      // admits it. The expensive one is excluded entirely at a tight budget.
+      const pool = [
+        { id: "sub-cheap", name: "Cheap Act", popularity: 0.15 },
+        { id: "sub-mid", name: "Mid Act", popularity: 0.5 },
+        { id: "sub-rich", name: "Rich Act", popularity: 0.95 },
+      ].filter((candidate) => candidate.popularity <= max);
+      return jsonResponse({
+        success: true,
+        results: {
+          entities: pool.map((candidate) => ({
+            entity_id: candidate.id,
+            name: candidate.name,
+            type: "urn:entity",
+            subtype: "urn:entity:artist",
+            popularity: candidate.popularity,
+            properties: {},
+            tags: [],
+            query: { affinity: 0.8 },
+          })),
+        },
+      });
+    }
+    if (parsed.pathname === "/v2/analysis/compare") {
+      // Overlap is shared tags over the smaller tag set, so the tag lists are
+      // built to land on specific fractions. That matters: a stub that only
+      // produced 0 and 1 would pass whatever the audience floor was set to, and
+      // would not actually test the threshold.
+      const b = parsed.searchParams.get("b.signal.interests.entities") ?? "";
+      // Two candidates clear the floor with different overlaps, and the one with
+      // the better overlap is the more expensive of the two. That inversion is
+      // deliberate: it is what distinguishes ranking by audience match from
+      // ranking by price.
+      // sub-mid shares 3 of 4 tags (0.75) and costs more; sub-cheap 2 of 4 (0.50)
+      // and costs less; a stranger shares nothing.
+      const sharedTags = forceStrangers ? 0 : b === "sub-mid" ? 3 : b === "sub-cheap" ? 2 : 0;
+      const aTags = ["t1", "t2", "t3", "t4"];
+      const bTags = [
+        ...aTags.slice(0, sharedTags),
+        ...["t5", "t6", "t7", "t8"].slice(0, 4 - sharedTags),
+      ];
+      return jsonResponse({
+        results: {
+          a: aTags.map((tag, index) => ({
+            tag_id: tag,
+            name: `A Tag ${index}`,
+            query: { score: 0.9 - index * 0.1 },
+          })),
+          b: bTags.map((tag, index) => ({
+            tag_id: tag,
+            name: `B Tag ${index}`,
+            query: { score: 0.8 - index * 0.1 },
+          })),
+        },
+      });
+    }
+    return original(input as RequestInfo, init);
+  }) as typeof fetch;
+}
+
+/** Restore the suite's default Qloo stub after a substitution test. */
+function restorePools() {
+  globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = typeof input === "string" ? input : input.toString();
+    const parsed = new URL(url);
+    if (parsed.pathname === "/search") return jsonResponse(QLOO_SEARCH);
+    if (parsed.pathname === "/v2/tags") return jsonResponse(QLOO_TAGS);
+    if (parsed.pathname === "/v2/insights") return jsonResponse(QLOO_INSIGHTS);
+    if (parsed.pathname === "/v2/analysis/compare") return jsonResponse(QLOO_COMPARE);
+    if (parsed.pathname === "/v2/trending") return jsonResponse(QLOO_TRENDING);
+    return jsonResponse({ error: "unexpected path" }, 404);
+  }) as typeof fetch;
+}
+
+await check("substitution prices every option with the real fee model", async () => {
+  serveSubstitutionPools();
+  try {
+    const result = await findSubstitutes({
+      brief: testBrief() as never,
+      target: cueAt(0.99) as never,
+      budget: 2500,
+    });
+    assert.ok(result.options.length > 0, "the frontier must not be empty");
+    for (const option of result.options) {
+      // An option's fee must equal what the fee model says for its own
+      // popularity, or the panel is quoting a number nothing produced.
+      const expected = quote({ ...cueAt(option.popularity), artist: option.artist }, TERMS).fee;
+      assert.equal(
+        option.fee.recommended,
+        expected.recommended,
+        `${option.artist} carries a fee the model does not produce`,
+      );
+      assert.equal(option.savings, result.target.fee.recommended - option.fee.recommended);
+    }
+  } finally {
+    restorePools();
+  }
+});
+
+await check("a candidate the budget cannot afford is never offered", async () => {
+  serveSubstitutionPools();
+  try {
+    const result = await findSubstitutes({
+      brief: testBrief() as never,
+      target: cueAt(0.99) as never,
+      budget: 2500,
+    });
+    for (const option of result.options) {
+      assert.ok(
+        option.fee.recommended <= result.budget,
+        `${option.artist} costs ${option.fee.recommended}, over the ${result.budget} budget`,
+      );
+    }
+  } finally {
+    restorePools();
+  }
+});
+
+await check("a different audience is not presented as a substitute", async () => {
+  serveSubstitutionPools();
+  try {
+    const result = await findSubstitutes({
+      brief: testBrief() as never,
+      target: cueAt(0.99) as never,
+      budget: 2500,
+    });
+    // The recommendation must be the better audience match even though it is the
+    // more expensive option. Ranking on price instead would recommend a weaker
+    // substitute to save money the supervisor did not ask to save.
+    assert.equal(result.pick?.id, "sub-mid", "the better audience match must be recommended");
+    const mid = result.options.find((option) => option.id === "sub-mid");
+    const cheap = result.options.find((option) => option.id === "sub-cheap");
+    assert.ok(mid && cheap, "both viable options must be listed");
+    assert.ok(
+      (mid?.audienceOverlap ?? 0) > (cheap?.audienceOverlap ?? 0),
+      "the stub must invert overlap and price for this test to mean anything",
+    );
+    assert.ok(
+      (mid?.fee.recommended ?? 0) > (cheap?.fee.recommended ?? 0),
+      "the better match must be the dearer option",
+    );
+  } finally {
+    restorePools();
+  }
+});
+
+await check("a candidate above the audience floor is offered without a refusal", async () => {
+  serveSubstitutionPools();
+  try {
+    const result = await findSubstitutes({
+      brief: testBrief() as never,
+      target: cueAt(0.99) as never,
+      budget: 2500,
+    });
+    // Mid Act clears the floor, so the run must read as a normal success. This is
+    // the other side of the floor: raising the threshold must silence this, which
+    // is what makes the threshold itself under test.
+    assert.ok(result.pick, "a clearing candidate must be offered");
+    assert.equal(
+      result.warnings.some((warning) => /audience overlap/i.test(warning)),
+      false,
+      "a clearing candidate must not raise the refusal warning",
+    );
+  } finally {
+    restorePools();
+  }
+});
+
+await check("when nothing clears the audience floor, the refusal is stated", async () => {
+  serveSubstitutionPools(true);
+  try {
+    const result = await findSubstitutes({
+      brief: testBrief() as never,
+      target: cueAt(0.99) as never,
+      budget: 2500,
+    });
+    // The calibrated floor exists to stop a stranger being sold as a swap. When
+    // no candidate reaches it, the panel must say so rather than let the closest
+    // one read as a genuine substitute.
+    assert.ok(
+      result.warnings.some((warning) => /audience overlap/i.test(warning)),
+      `no warning named the audience floor: ${JSON.stringify(result.warnings)}`,
+    );
+    // It must still offer the closest option — refusing outright would hide the
+    // only information the supervisor has.
+    assert.ok(result.pick, "the closest available option must still be offered");
+    assert.ok(
+      (result.pick?.audienceOverlap ?? 0) < 0.3,
+      "this scenario is only meaningful when every candidate is below the floor",
+    );
+  } finally {
+    restorePools();
+  }
+});
+
+await check("the headline claims overlap, never a retained-affinity ratio", async () => {
+  serveSubstitutionPools();
+  try {
+    const result = await findSubstitutes({
+      brief: testBrief() as never,
+      target: cueAt(0.99) as never,
+      budget: 2500,
+    });
+    // Affinity from a capped pool is measured against a different candidate set
+    // than the target's uncapped affinity, so a ratio of the two is not a
+    // quantity. It can exceed 100%, and saying "keeps 115% of the audience fit"
+    // would be the same class of error as inventing a track title.
+    assert.ok(
+      !/keeps \d+%/.test(result.summary),
+      `the summary claims a retention ratio: ${result.summary}`,
+    );
+    assert.ok(
+      /shares \d+%/.test(result.summary),
+      `the summary does not state the measured overlap: ${result.summary}`,
+    );
+    assert.equal(
+      Object.prototype.hasOwnProperty.call(result.pick, "affinityRetained"),
+      false,
+      "the misleading retention ratio must not be exposed at all",
+    );
+  } finally {
+    restorePools();
+  }
+});
+
+await check("substitution reports a receipt for every Qloo call it made", async () => {
+  serveSubstitutionPools();
+  try {
+    const result = await findSubstitutes({
+      brief: testBrief() as never,
+      target: cueAt(0.99) as never,
+      budget: 2500,
+    });
+    assert.ok(result.receipts.length >= 2, "the search must be receipted");
+    for (const receipt of result.receipts) {
+      assert.ok(receipt.endpoint.startsWith("GET /"), `bad endpoint: ${receipt.endpoint}`);
+      assert.ok(receipt.status > 0, `unreported status for ${receipt.label}`);
+    }
+    assert.ok(
+      result.receipts.some((receipt) => receipt.endpoint.includes("/v2/analysis/compare")),
+      "the audience-overlap call must be receipted",
+    );
+  } finally {
+    restorePools();
+  }
+});
+
+await check("a budget that fits nothing says so instead of inventing a pick", async () => {
+  serveSubstitutionPools();
+  try {
+    const result = await findSubstitutes({
+      brief: testBrief() as never,
+      target: cueAt(0.99) as never,
+      budget: 5,
+    });
+    assert.equal(result.pick, null, "no pick may be offered when nothing fits the budget");
+    assert.ok(result.warnings.length > 0, "the refusal must be explained");
+    assert.ok(result.summary.length > 0, "the refusal must be stated in words");
+  } finally {
+    restorePools();
+  }
+});
+
+await check("an ungrounded target is refused rather than silently empty", async () => {
+  const ungrounded = { ...cueAt(0.99), artistId: undefined };
+  const result = await findSubstitutes({
+    brief: testBrief() as never,
+    target: ungrounded as never,
+    budget: 2500,
+  });
+  assert.equal(result.pick, null);
+  assert.ok(
+    result.warnings.some((warning) => /entity id/i.test(warning)),
+    "the refusal must name the missing grounding",
+  );
+});
+
 console.log(`\n${passed} passed, ${failures.length} failed.\n`);
 if (failures.length > 0) {
   for (const failure of failures) console.error(`  - ${failure}`);
