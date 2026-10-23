@@ -2463,6 +2463,414 @@ await check("a non-retryable status is not retried", async () => {
   }
 });
 
+
+// --- Groq tool-protocol recovery ---------------------------------------------
+//
+// The defect these guard: Cue sends `tools` + `tool_choice: "auto"` to
+// `openai/gpt-oss-120b`. That reasoning model intermittently emits a malformed
+// tool call, and Groq rejects the whole request with HTTP 400 (`tool_use_failed`)
+// rather than returning a message. Production showed the identical scene
+// returning a brief, then a 400, then a brief. Two things were wrong: the 400
+// collapsed into "the provider returned 400" with the provider's own code
+// discarded, and the scene read was lost even though a plain-JSON answer would
+// have parsed.
+
+/** Groq's real rejection body for a malformed tool call. */
+function groqToolUseFailed() {
+  return jsonResponse(
+    {
+      error: {
+        message: "Failed to validate JSON. Please adjust your prompt. See 'failed_generation' for more details.",
+        type: "invalid_request_error",
+        code: "tool_use_failed",
+      },
+    },
+    400,
+  );
+}
+
+await check("a tool-protocol 400 names the provider's own error code", async () => {
+  // A bare "the provider returned 400" is what made this undiagnosable in
+  // production: it names the status and hides the cause.
+  const { chatDetailed } = await import("../src/lib/llm.ts");
+  const original = globalThis.fetch;
+  try {
+    globalThis.fetch = (async () =>
+      jsonResponse(
+        { error: { message: "Failed to validate JSON.", type: "invalid_request_error", code: "tool_use_failed" } },
+        400,
+      )) as typeof fetch;
+
+    const { failure } = await chatDetailed(
+      { baseUrl: "https://api.groq.com/openai/v1", apiKey: "gsk-test", model: "openai/gpt-oss-120b" },
+      [{ role: "user", content: "read this scene" }],
+      [{ name: "emit_scene_brief", description: "x", parameters: { type: "object" } }],
+      5_000,
+    );
+
+    assert.equal(failure?.reason, "tool_format", "a tool rejection is its own reason, not a generic http_error");
+    assert.equal(failure?.providerCode, "tool_use_failed", "the provider's code must survive");
+    assert.match(failure?.message ?? "", /tool call/i, "the message must describe the actual fault");
+    assert.ok(
+      !/returned 400$/.test(failure?.message ?? ""),
+      "the generic status-only message is exactly what must not be produced",
+    );
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("a malformed tool call is retried at a lower temperature and recovers", async () => {
+  // Groq's documented mitigation for this exact error. Without it the scene read
+  // is lost even though the model answers correctly on a second attempt.
+  const { chatDetailed } = await import("../src/lib/llm.ts");
+  const original = globalThis.fetch;
+  const temperatures: number[] = [];
+  let calls = 0;
+  try {
+    globalThis.fetch = (async (_input: RequestInfo | URL, init?: RequestInit) => {
+      const body = JSON.parse(String(init?.body ?? "{}"));
+      temperatures.push(body.temperature);
+      calls += 1;
+      if (calls === 1) return groqToolUseFailed();
+      return jsonResponse({
+        choices: [
+          {
+            message: {
+              content: null,
+              tool_calls: [
+                {
+                  id: "call_1",
+                  type: "function",
+                  function: {
+                    name: "emit_scene_brief",
+                    arguments: JSON.stringify({ title: "Neon Chase", mood: ["tense"], genre: ["synth"], era: "1980s", arc: "pursuit", anchors: ["Drive"] }),
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      });
+    }) as typeof fetch;
+
+    const { message, failure } = await chatDetailed(
+      { baseUrl: "https://api.groq.com/openai/v1", apiKey: "gsk-test", model: "openai/gpt-oss-120b", temperature: 0.4 },
+      [{ role: "user", content: "read this scene" }],
+      [{ name: "emit_scene_brief", description: "x", parameters: { type: "object" } }],
+      20_000,
+    );
+
+    assert.equal(failure, null, "the retry must recover, not report a failure");
+    assert.ok(message?.tool_calls?.length, "the recovered tool call must be returned");
+    assert.equal(calls, 2, "exactly one retry, not a retry loop");
+    assert.ok(
+      temperatures[1] < temperatures[0],
+      `the retry must lower the temperature (got ${temperatures.join(" then ")})`,
+    );
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("a provider that rejects tools twice is asked once without them", async () => {
+  // The final recovery drops the tool schema and asks for the same object as
+  // JSON, which the caller's existing extractJson path already parses.
+  const { chatDetailed, extractJson } = await import("../src/lib/llm.ts");
+  const original = globalThis.fetch;
+  let calls = 0;
+  let lastHadTools = true;
+  try {
+    globalThis.fetch = (async (_input: RequestInfo | URL, init?: RequestInit) => {
+      const body = JSON.parse(String(init?.body ?? "{}"));
+      lastHadTools = Array.isArray(body.tools) && body.tools.length > 0;
+      calls += 1;
+      if (lastHadTools) return groqToolUseFailed();
+      return jsonResponse({
+        choices: [{ message: { content: '{"title":"Neon Chase","anchors":["Drive"]}' } }],
+      });
+    }) as typeof fetch;
+
+    const { message, failure } = await chatDetailed(
+      { baseUrl: "https://api.groq.com/openai/v1", apiKey: "gsk-test", model: "openai/gpt-oss-120b" },
+      [{ role: "user", content: "read this scene" }],
+      [{ name: "emit_scene_brief", description: "x", parameters: { type: "object" } }],
+      20_000,
+    );
+
+    assert.equal(failure, null, "the tool-free attempt must succeed");
+    assert.equal(calls, 3, "two tool attempts then one tool-free attempt");
+    assert.equal(lastHadTools, false, "the final attempt must omit the tool schema");
+    const parsed = extractJson<{ title: string }>(message?.content ?? null);
+    assert.equal(parsed?.title, "Neon Chase", "the tool-free JSON must be parseable by the existing path");
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("a 403 about model access is not reported as a rejected key", async () => {
+  // Observed live against the managed proxy: a valid key with a restricted model
+  // list returned 403 "team not allowed to access model", which Cue reported as
+  // "the configured API key was rejected". That sends the operator to rotate a
+  // working credential while the real fix is a different model.
+  const { chatDetailed } = await import("../src/lib/llm.ts");
+  const original = globalThis.fetch;
+  try {
+    globalThis.fetch = (async () =>
+      jsonResponse(
+        {
+          error: {
+            message:
+              "team not allowed to access model. This team can only access models=['deepseek-v4.1-flash']",
+            code: "403",
+          },
+        },
+        403,
+      )) as typeof fetch;
+
+    const { failure } = await chatDetailed(
+      { baseUrl: "https://llm-proxy.app.all-hands.dev/v1", apiKey: "sk-live", model: "claude-sonnet-4-5-20250929" },
+      [{ role: "user", content: "x" }],
+      [],
+      5_000,
+    );
+    assert.equal(
+      failure?.reason,
+      "model_not_permitted",
+      "a model-entitlement 403 must not be reported as a bad key",
+    );
+
+    // A 403 that really is about the credential must still say so.
+    globalThis.fetch = (async () =>
+      jsonResponse({ error: { message: "Invalid API key provided.", code: "invalid_api_key" } }, 403)) as typeof fetch;
+    const { failure: keyFailure } = await chatDetailed(
+      { baseUrl: "https://llm-proxy.app.all-hands.dev/v1", apiKey: "sk-live", model: "claude-sonnet-4-5-20250929" },
+      [{ role: "user", content: "x" }],
+      [],
+      5_000,
+    );
+    assert.equal(keyFailure?.reason, "invalid_key", "a genuine credential 403 must still be a key failure");
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("a permanent 400 is not retried with the same request", async () => {
+  // The brief is explicit: do not repeatedly retry permanent 400s. Only a
+  // tool-protocol rejection is recoverable; a bad parameter is not.
+  const { chatDetailed } = await import("../src/lib/llm.ts");
+  const original = globalThis.fetch;
+  let calls = 0;
+  try {
+    globalThis.fetch = (async () => {
+      calls += 1;
+      return jsonResponse(
+        { error: { message: "Unsupported value for parameter 'n'.", type: "invalid_request_error", code: "invalid_request_error" } },
+        400,
+      );
+    }) as typeof fetch;
+
+    const { failure } = await chatDetailed(
+      { baseUrl: "https://api.groq.com/openai/v1", apiKey: "gsk-test", model: "openai/gpt-oss-120b" },
+      [{ role: "user", content: "read this scene" }],
+      [{ name: "emit_scene_brief", description: "x", parameters: { type: "object" } }],
+      20_000,
+    );
+
+    assert.equal(calls, 1, "an unrelated 400 must be tried exactly once");
+    assert.equal(failure?.reason, "http_error");
+    assert.equal(failure?.providerCode, "invalid_request_error", "the code must still be reported");
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("a failed Groq tool call falls back to the deterministic reader, and Qloo ranking survives", async () => {
+  // The end-to-end guarantee: recovery exhausted, the sheet still builds, the
+  // fallback is disclosed, and nothing about Qloo's ranking changes.
+  const { buildCueSheet } = await import("../src/lib/planner.ts");
+  const saved = { ...process.env };
+  const original = globalThis.fetch;
+  const qlooCalls: string[] = [];
+  try {
+    delete process.env.LLM_API_KEY;
+    delete process.env.LLM_BASE_URL;
+    delete process.env.LLM_MODEL;
+    delete process.env.OPENROUTER_API_KEY;
+    delete process.env.GEMINI_API_KEY;
+    delete process.env.GOOGLE_API_KEY;
+    delete process.env.OPENAI_API_KEY;
+    process.env.GROQ_API_KEY = "gsk-test";
+    process.env.QLOO_API_KEY = "qloo-test";
+    process.env.QLOO_API_BASE_URL = "https://hackathon.api.qloo.com";
+
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url.startsWith("https://api.groq.com")) return groqToolUseFailed();
+      qlooCalls.push(url);
+      if (url.includes("/v2/search")) return jsonResponse(QLOO_SEARCH);
+      if (url.includes("/v2/tags")) return jsonResponse(QLOO_TAGS);
+      if (url.includes("/v2/insights")) return jsonResponse(QLOO_INSIGHTS);
+      if (url.includes("/v2/analysis/compare")) return jsonResponse({ success: true, results: { overlap: 0.5 } });
+      return jsonResponse({ success: true, results: { entities: [] } });
+    }) as typeof fetch;
+
+    const sheet = await buildCueSheet({
+      scene: "A neon-soaked chase through Los Angeles at night. Tense, brooding, 1980s synth pulse.",
+      budget: 5000,
+    });
+
+    assert.equal(sheet.sceneParse?.source, "deterministic", "an exhausted provider must fall back, not fabricate");
+    assert.equal(sheet.sceneParse?.provider, null, "no provider may be credited with the read");
+    assert.equal(sheet.sceneParse?.failureReason, "tool_format", "the real cause must be reported");
+    assert.equal(sheet.sceneParse?.failureProviderCode, "tool_use_failed");
+    assert.ok(qlooCalls.length > 0, "Qloo must still have been queried");
+    assert.ok(sheet.cues.length > 0, "Qloo ranking must survive a scene-reader failure");
+    assert.equal(sheet.mode, "live");
+  } finally {
+    globalThis.fetch = original;
+    for (const key of Object.keys(process.env)) {
+      if (!(key in saved)) delete process.env[key];
+    }
+    Object.assign(process.env, saved);
+  }
+});
+
+await check("a missing Groq key is not treated as a configured provider", async () => {
+  const { llmDiagnostics, hasLlm } = await import("../src/lib/llm.ts");
+  const saved = { ...process.env };
+  try {
+    delete process.env.LLM_API_KEY;
+    delete process.env.LLM_BASE_URL;
+    delete process.env.LLM_MODEL;
+    delete process.env.OPENROUTER_API_KEY;
+    delete process.env.GEMINI_API_KEY;
+    delete process.env.GOOGLE_API_KEY;
+    delete process.env.OPENAI_API_KEY;
+    delete process.env.OH_LLM_PROXY_KEY;
+    delete process.env.OH_LLM_API_KEY_REFRESH_BASE_URLS;
+    delete process.env.GROQ_API_KEY;
+
+    assert.equal(hasLlm(), false, "an absent key is not a configured provider");
+    assert.deepEqual(llmDiagnostics().providerChain, []);
+    assert.equal(llmDiagnostics().source, "none");
+
+    // Whitespace-only counts as absent: a paste artifact must not look like a key.
+    process.env.GROQ_API_KEY = "   ";
+    assert.equal(hasLlm(), false, "a blank key must not be treated as configured");
+    assert.ok(
+      !llmDiagnostics().presentKeyVars.includes("GROQ_API_KEY"),
+      "a blank value must not be reported as present",
+    );
+  } finally {
+    for (const key of Object.keys(process.env)) {
+      if (!(key in saved)) delete process.env[key];
+    }
+    Object.assign(process.env, saved);
+  }
+});
+
+await check("a Groq timeout and a Groq outage are reported distinctly and do not retry forever", async () => {
+  const { chatDetailed } = await import("../src/lib/llm.ts");
+  const original = globalThis.fetch;
+  try {
+    // A timeout is an abort, not a tool-format fault, so it must not trigger the
+    // tool-recovery path.
+    let timeoutCalls = 0;
+    globalThis.fetch = (async () => {
+      timeoutCalls += 1;
+      const err = new Error("The operation was aborted.");
+      err.name = "AbortError";
+      throw err;
+    }) as typeof fetch;
+    const timedOut = await chatDetailed(
+      { baseUrl: "https://api.groq.com/openai/v1", apiKey: "gsk-test", model: "openai/gpt-oss-120b" },
+      [{ role: "user", content: "x" }],
+      [{ name: "emit_scene_brief", description: "x", parameters: { type: "object" } }],
+      3_000,
+    );
+    assert.equal(timedOut.failure?.reason, "timeout");
+    assert.equal(timeoutCalls, 1, "a timeout must not be retried inside one provider");
+
+    // A 503 is transient but is not a tool-format fault either.
+    let outageCalls = 0;
+    globalThis.fetch = (async () => {
+      outageCalls += 1;
+      return jsonResponse({ error: { message: "Service Unavailable", code: "server_error" } }, 503);
+    }) as typeof fetch;
+    const outage = await chatDetailed(
+      { baseUrl: "https://api.groq.com/openai/v1", apiKey: "gsk-test", model: "openai/gpt-oss-120b" },
+      [{ role: "user", content: "x" }],
+      [{ name: "emit_scene_brief", description: "x", parameters: { type: "object" } }],
+      3_000,
+    );
+    assert.equal(outage.failure?.status, 503);
+    assert.equal(outageCalls, 1, "a provider outage must not be retried inside one provider");
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("provider error text is scrubbed of anything key-shaped", async () => {
+  // Provider errors are upstream data. An echoed Authorization header is exactly
+  // the kind of thing that ends up in a screenshot or a public response.
+  const { sanitiseDiagnostic, extractProviderError } = await import("../src/lib/llm.ts");
+
+  const scrubbed = sanitiseDiagnostic(
+    "Bad request: Authorization: Bearer gsk_abcdefghijklmnopqrstuvwxyz012345 for key sk-proj-ABCDEFGHIJKLMNOPQRSTUV",
+  );
+  assert.ok(!scrubbed.includes("gsk_abcdefghijklmnopqrstuvwxyz012345"), "a Groq key must not survive");
+  assert.ok(!scrubbed.includes("sk-proj-ABCDEFGHIJKLMNOPQRSTUV"), "an OpenAI key must not survive");
+  assert.ok(scrubbed.includes("[redacted]"), "the redaction must be visible");
+
+  const parsed = extractProviderError(
+    JSON.stringify({ error: { message: "invalid api key gsk_1234567890abcdefghijklmnop", code: "invalid_api_key" } }),
+  );
+  assert.equal(parsed.code, "invalid_api_key");
+  assert.ok(!parsed.message.includes("gsk_1234567890abcdefghijklmnop"), "the message must be scrubbed too");
+});
+
+await check("no configured secret value is shipped to the client bundle", async () => {
+  // A variable NAME appearing in the client bundle is not a leak: the UI
+  // legitimately tells the operator "This deployment has no QLOO_API_KEY". A
+  // secret VALUE appearing there is. So this asserts on values, and reads them
+  // from the environment rather than hardcoding anything.
+  const { readdirSync, readFileSync, existsSync } = await import("node:fs");
+  const staticDir = ".next/static";
+  if (!existsSync(staticDir)) {
+    // A build is a separate gate; skip rather than fail when it has not run.
+    return;
+  }
+
+  const secrets = ["QLOO_API_KEY", "GROQ_API_KEY", "OPENROUTER_API_KEY", "GEMINI_API_KEY", "LLM_API_KEY"]
+    .map((name) => process.env[name])
+    .filter((value): value is string => typeof value === "string" && value.trim().length >= 12)
+    .map((value) => value.trim());
+
+  const walk = (dir: string): string[] =>
+    readdirSync(dir, { withFileTypes: true }).flatMap((entry) =>
+      entry.isDirectory() ? walk(`${dir}/${entry.name}`) : [`${dir}/${entry.name}`],
+    );
+
+  const files = walk(staticDir);
+  const offenders: string[] = [];
+  for (const value of secrets) {
+    for (const file of files) {
+      if (readFileSync(file, "utf8").includes(value)) offenders.push(`${file} (contains a configured secret)`);
+    }
+  }
+  assert.deepEqual(
+    offenders,
+    [],
+    "no configured secret value may appear in the client bundle",
+  );
+
+  // Independently, the llm module itself must never be reachable from a client
+  // chunk with its key-reading code intact: it is server-only by construction.
+  const llmInClient = files.filter((file) => readFileSync(file, "utf8").includes("api.groq.com"));
+  assert.deepEqual(llmInClient, [], "the provider module must not be bundled for the browser");
+});
+
 console.log(`\n${passed} passed, ${failures.length} failed.\n`);
 if (failures.length > 0) {
   for (const failure of failures) console.error(`  - ${failure}`);
