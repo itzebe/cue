@@ -9,6 +9,8 @@ import { ReceiptsPanel } from "@/components/ReceiptsPanel";
 import { DirectionPanel, RegionPanel } from "@/components/SignalPanels";
 import { MarketplacePanel } from "@/components/MarketplacePanel";
 import { ComparablesPanel } from "@/components/ComparablesPanel";
+import { WorkflowBand } from "@/components/WorkflowBand";
+import { SectionNav } from "@/components/SectionNav";
 import { CrossDomainPanel } from "@/components/CrossDomainPanel";
 import { SubstitutePanel } from "@/components/SubstitutePanel";
 import { SAMPLE_SCENES } from "@/data/fixtures";
@@ -128,7 +130,7 @@ export default function StudioPage() {
   return (
     <main className="mx-auto max-w-[1400px] px-5 py-8 lg:px-10 lg:py-12">
       {/* Masthead */}
-      <header className="flex flex-col gap-6 border-b border-white/5 pb-8 lg:flex-row lg:items-end lg:justify-between">
+      <header className="flex flex-col gap-6 border-b border-white/5 pb-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <div className="flex items-center gap-3">
             <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-ember-500/30 bg-ember-500/10 font-display text-lg text-ember-400">
@@ -175,16 +177,16 @@ export default function StudioPage() {
 
       <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
         {/* Composer */}
-        <div className="min-w-0 space-y-6 lg:sticky lg:top-8 lg:self-start">
+        <div className="min-w-0 space-y-4 lg:sticky lg:top-8 lg:self-start">
           <section className="panel grain relative overflow-hidden p-5">
             <div className="relative z-10">
               <h2 className="font-display text-base text-haze-100">Scene brief</h2>
               <p className="mt-0.5 text-xs text-haze-500">
-                Paste the script, treatment or a plain description. Mention any films,
-                directors or artists it references — those become Qloo signal entities.
+                Paste the script or a plain description. Named films and artists become
+                Qloo signal entities.
               </p>
 
-              <div className="mt-4 flex flex-wrap gap-2">
+              <div className="mt-3 flex flex-wrap gap-2">
                 {SAMPLE_SCENES.map((sample) => (
                   <button
                     key={sample.id}
@@ -202,7 +204,7 @@ export default function StudioPage() {
                 ))}
               </div>
 
-              <label htmlFor="scene" className="mt-4 block text-[10px] uppercase tracking-wider text-haze-500">
+              <label htmlFor="scene" className="mt-3 block text-[10px] uppercase tracking-wider text-haze-500">
                 The scene
               </label>
               <textarea
@@ -212,15 +214,35 @@ export default function StudioPage() {
                   setScene(event.target.value);
                   setActiveSample("");
                 }}
-                rows={11}
+                rows={5}
                 spellCheck={false}
-                className="mt-2 w-full resize-y rounded-lg border border-white/10 bg-black/30 p-3 font-sans text-sm leading-relaxed text-haze-100 placeholder:text-haze-700 focus:border-ember-500/40"
+                className="mt-1.5 w-full resize-y rounded-lg border border-white/10 bg-black/30 p-3 font-sans text-sm leading-relaxed text-haze-100 placeholder:text-haze-700 focus:border-ember-500/40"
                 placeholder="Describe the scene, the emotion, the era, the audience…"
               />
 
+              <button
+                type="button"
+                onClick={run}
+                disabled={status === "running" || scene.trim().length < 20}
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-b from-ember-500 to-ember-600 px-4 py-3 text-sm font-medium text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {status === "running" ? (
+                  <>
+                    <span className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-white" />
+                    {STAGES[stage]}…
+                  </>
+                ) : (
+                  "Build the cue sheet"
+                )}
+              </button>
+              {scene.trim().length < 20 ? (
+                <p className="mt-2 text-[11px] text-haze-500">
+                  Add a little more detail to run the agent.
+                </p>
+              ) : null}
               <label
                 htmlFor="alternative"
-                className="mt-4 block text-[10px] uppercase tracking-wider text-haze-500"
+                className="mt-5 block text-[10px] uppercase tracking-wider text-haze-500"
               >
                 Optional: a second direction to compare
               </label>
@@ -237,26 +259,6 @@ export default function StudioPage() {
                 see whether the two readings actually split the audience.
               </p>
 
-              <button
-                type="button"
-                onClick={run}
-                disabled={status === "running" || scene.trim().length < 20}
-                className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-b from-ember-500 to-ember-600 px-4 py-3 text-sm font-medium text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                {status === "running" ? (
-                  <>
-                    <span className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-white" />
-                    {STAGES[stage]}…
-                  </>
-                ) : (
-                  "Build the cue sheet"
-                )}
-              </button>
-              {scene.trim().length < 20 ? (
-                <p className="mt-2 text-[11px] text-haze-500">
-                  Add a little more detail to run the agent.
-                </p>
-              ) : null}
             </div>
           </section>
 
@@ -265,6 +267,12 @@ export default function StudioPage() {
 
         {/* Output */}
         <div className="space-y-8">
+          {/* The pipeline is the pitch, so it opens the page rather than sitting in
+              a panel further down. It shares the first screen with the input. */}
+          <WorkflowBand sheet={sheet} />
+
+          {sheet ? <SectionNav /> : null}
+
           {error ? (
             <div
               role="alert"
@@ -393,7 +401,12 @@ export default function StudioPage() {
                   reason to trust everything below it, so it reads first. */}
               <AudienceBriefPanel sheet={sheet} />
 
-              <section aria-label="Cue sheet">
+              {/* The comparison sits directly under the evidence that supports it,
+                  and above the full cue sheet. It is the clearest demonstration of
+                  what Qloo changes, and it was previously six panels deep. */}
+              <CompareStrip sheet={sheet} />
+
+              <section id="cue-sheet" className="scroll-mt-20" aria-label="Cue sheet">
                 <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
                   <h2 className="font-display text-xl text-haze-100">
                     Cue sheet
@@ -435,10 +448,9 @@ export default function StudioPage() {
                 </div>
               </section>
 
-              <CompareStrip sheet={sheet} />
-              {/* Substitution sits immediately after the comparison because it is
-                  the same argument continued: the LLM could rank, and now Qloo
-                  answers the question the ranking creates. */}
+              {/* Substitution follows the cue sheet because it is the same argument
+                  continued: the ranking creates a budget question, and Qloo answers
+                  it with measured audience overlap. */}
               <div ref={substitutionRef}>
                 <SubstitutePanel
                   key={sheet.brief.raw}

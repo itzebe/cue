@@ -20,7 +20,7 @@ export function AudienceBriefPanel({ sheet }: { sheet: CueSheet }) {
   const hasEvidence = brief.available && brief.evidence.length > 0;
 
   return (
-    <section className="panel grain relative overflow-hidden p-5" aria-label="Audience identity brief">
+    <section id="audience" className="panel grain relative scroll-mt-20 overflow-hidden p-5" aria-label="Audience identity brief">
       <header className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
         <h2 className="font-display text-xl text-haze-100">Who this is for</h2>
         <p className="text-xs text-haze-500">

@@ -87,7 +87,7 @@ export function CrossDomainPanel({ sheet }: { sheet: CueSheet }) {
   if (!casting && !sheet.brief.raw) return null;
 
   return (
-    <section className="panel grain relative overflow-hidden p-5" aria-label="Cross-domain">
+    <section id="cross-domain" className="panel grain relative scroll-mt-20 overflow-hidden p-5" aria-label="Cross-domain">
       <div className="relative z-10">
         <header>
           <h2 className="font-display text-xl text-haze-100">

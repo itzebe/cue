@@ -456,6 +456,200 @@ await check("full cue sheet assembles from live Qloo data", async () => {
   assert.ok(sheet.receipts.length >= 5, "receipts should cover the call chain");
 });
 
+await check("a model-written rationale is never presented as Qloo evidence", async () => {
+  // Regression: planner.ts used to prepend the scene reader's rationale to
+  // `cue.why`, an array documented as Qloo-traceable. The cue card then rendered it
+  // under the heading "Why Qloo ranked this", which credited the taste graph with
+  // the model's words. The two sources must stay separate fields.
+  //
+  // Driven through the real merge path with a mocked provider: the track-naming call
+  // returns a rationale, and the assertion is on what buildCueSheet does with it.
+  const { buildCueSheet } = await import("../src/lib/planner.ts");
+  const original = globalThis.fetch;
+  const saved = { ...process.env };
+  try {
+    process.env.LLM_API_KEY = "sk-test-rationale";
+    process.env.LLM_BASE_URL = "https://api.groq.com/openai/v1";
+    process.env.LLM_MODEL = "openai/gpt-oss-120b";
+
+    const RATIONALE = "A slow, rain-slicked pulse that sits under dialogue without crowding it.";
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url.includes("api.groq.com")) {
+        const body = JSON.parse(String(init?.body ?? "{}"));
+        const toolName = body?.tools?.[0]?.function?.name;
+        if (toolName === "emit_tracks") {
+          return jsonResponse({
+            choices: [
+              {
+                message: {
+                  tool_calls: [
+                    {
+                      function: {
+                        name: "emit_tracks",
+                        arguments: JSON.stringify({
+                          tracks: [{ artist: "Cliff Martinez", track: "Sonata", rationale: RATIONALE }],
+                        }),
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          });
+        }
+        // Every other LLM call in this test is irrelevant to the assertion; a 500
+        // keeps the pipeline on its deterministic path without inventing data.
+        return jsonResponse({ error: "not under test" }, 500);
+      }
+      return original(input as RequestInfo, init);
+    }) as typeof fetch;
+
+    const sheet = await buildCueSheet({
+      scene:
+        'A 90s noir thriller. Rain on the glass. Reference "Drive" and Sicario. Los Angeles, audience 25-34.',
+    });
+
+    const target = sheet.cues.find((cue) => cue.proposalRationale === RATIONALE);
+    assert.ok(target, "the mocked rationale should reach exactly one cue");
+
+    assert.equal(
+      target.why.includes(RATIONALE),
+      false,
+      "the model's rationale must not appear in the Qloo evidence trail",
+    );
+
+    // Every entry rendered under "Why Qloo ranked this" has to read as Qloo-sourced.
+    for (const reason of target.why) {
+      assert.ok(
+        /Qloo|audience|affinit|population rank|backfill|Over-indexes/i.test(reason),
+        `every reason under "Why Qloo ranked this" must be Qloo-traceable: ${reason}`,
+      );
+    }
+  } finally {
+    globalThis.fetch = original;
+    process.env = saved;
+  }
+});
+
+await check("the comparison only attributes figures Qloo actually returned", async () => {
+  // The comparison panel must never invent an affinity, an overlap or a cultural
+  // relationship. This asserts the data the panel reads is the data Qloo returned.
+  const sheet = await buildCueSheet({
+    scene:
+      'A 90s noir thriller. Rain on the glass. Reference "Drive" and Sicario. Los Angeles, audience 25-34.',
+  });
+
+  for (const cue of sheet.cues) {
+    assert.equal(typeof cue.affinity, "number");
+    assert.ok(cue.affinity >= 0 && cue.affinity <= 1, "affinity must be a real 0..1 measurement");
+    assert.ok(
+      Number.isFinite(cue.affinity),
+      "an affinity the panel prints must be finite, never NaN or Infinity",
+    );
+  }
+
+  // The baseline carries no affinity at all, which is exactly why the panel says
+  // the left column has no comparable figure.
+  for (const cue of sheet.baseline.cues) {
+    assert.equal(
+      Object.prototype.hasOwnProperty.call(cue, "affinity"),
+      false,
+      "a baseline cue must not carry an affinity it never had",
+    );
+  }
+});
+
+await check("an anchor with no audience description yields an empty state, not an invented one", async () => {
+  // The audience brief must show nothing rather than fabricate a profile when Qloo
+  // returns no audience_identity for an anchor. The field arrives on /v2/search
+  // (the call that resolves anchors), so that is the response this strips.
+  const { buildCueSheet } = await import("../src/lib/planner.ts");
+  const original = globalThis.fetch;
+  try {
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input.toString();
+      const parsed = new URL(url);
+      if (parsed.pathname === "/v2/search") {
+        // Same entities, same ids, no audience_identity: the real shape when Qloo
+        // resolves an entity but holds no description for it.
+        const stripped = {
+          results: (QLOO_SEARCH.results ?? []).map((entity) => {
+            const clone = JSON.parse(JSON.stringify(entity));
+            if (clone.properties) delete clone.properties.audience_identity;
+            return clone;
+          }),
+        };
+        return jsonResponse(stripped);
+      }
+      return original(input as RequestInfo, init);
+    }) as typeof fetch;
+
+    const sheet = await buildCueSheet({
+      scene: 'A 90s noir thriller. Reference "Drive" and Sicario. Los Angeles, audience 25-34.',
+    });
+
+    const brief = sheet.audienceBrief;
+    assert.ok(brief, "the audience brief should be present as a structure even when empty");
+    assert.equal(
+      brief.available,
+      false,
+      "with no audience_identity in the response, the brief must not claim to be available",
+    );
+    assert.deepEqual(
+      brief.evidence,
+      [],
+      "no evidence may be manufactured when Qloo returned no description",
+    );
+    assert.equal(
+      brief.interpretation,
+      null,
+      "Cue must not write its own reading of an audience it never received",
+    );
+    assert.ok(
+      brief.anchorsWithoutEvidence.length > 0,
+      "the anchors that lacked a description should be recorded, so the UI can explain the gap",
+    );
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("a scene-reader failure leaves the Qloo results intact", async () => {
+  // The comparison and the sheet must survive a provider outage: Qloo ranking does
+  // not depend on the model. This is the property the UI relies on when it says
+  // rankings are unaffected.
+  const { buildCueSheet } = await import("../src/lib/planner.ts");
+  const original = globalThis.fetch;
+  const saved = { ...process.env };
+  try {
+    process.env.LLM_API_KEY = "sk-test-outage";
+    process.env.LLM_BASE_URL = "https://api.groq.com/openai/v1";
+    process.env.LLM_MODEL = "openai/gpt-oss-120b";
+
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url.includes("api.groq.com")) return jsonResponse({ error: { message: "upstream down" } }, 503);
+      return original(input as RequestInfo, init);
+    }) as typeof fetch;
+
+    const sheet = await buildCueSheet({
+      scene: 'A 90s noir thriller. Reference "Drive" and Sicario. Los Angeles, audience 25-34.',
+    });
+
+    assert.equal(sheet.sceneParse?.source, "deterministic", "the reader must fall back, not pretend");
+    assert.ok(sheet.cues.length > 0, "Qloo ranking must survive a model outage");
+    assert.ok(
+      sheet.cues.every((cue) => Number.isFinite(cue.affinity)),
+      "every surviving cue must still carry a real Qloo affinity",
+    );
+    assert.ok(sheet.baseline.cues.length > 0, "the comparison needs a baseline to show");
+  } finally {
+    globalThis.fetch = original;
+    process.env = saved;
+  }
+});
+
 await check("every receipt is inspectable and carries parameters", async () => {
   const sheet = await buildCueSheet({
     scene: 'A 90s noir thriller referencing "Drive". Los Angeles, audience 25-34.',

@@ -108,7 +108,7 @@ export function MarketplacePanel({ sheet }: { sheet: CueSheet }) {
   const selectedQuotes = summary?.quotes ?? [];
 
   return (
-    <section className="panel grain relative overflow-hidden p-5" aria-label="Clearance marketplace">
+    <section id="marketplace" className="panel grain relative scroll-mt-20 overflow-hidden p-5" aria-label="Clearance marketplace">
       <div className="relative z-10">
         <header className="flex flex-wrap items-start justify-between gap-4">
           <div>

@@ -108,7 +108,7 @@ export function RegionPanel({ sheet }: { sheet: CueSheet }) {
   const max = Math.max(...sheet.regionAffinity.map((row) => row.affinity), 0.0001);
 
   return (
-    <section className="panel grain relative overflow-hidden p-5" aria-label="Regional affinity">
+    <section id="market-check" className="panel grain relative scroll-mt-20 overflow-hidden p-5" aria-label="Regional affinity">
       <div className="relative z-10">
         <header>
           <h3 className="font-display text-base text-haze-100">
