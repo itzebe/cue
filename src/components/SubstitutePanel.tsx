@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
+import type { RefObject } from "react";
 import type { CueSheet } from "@/lib/types";
 import type { SubstitutionResult, SubstitutionReason } from "@/lib/substitute";
 
@@ -20,16 +21,28 @@ import type { SubstitutionResult, SubstitutionReason } from "@/lib/substitute";
  * next to the recommendation rather than replacing it — the supervisor needs to
  * see what they are giving up, not just what they are getting.
  */
-export function SubstitutePanel({ sheet }: { sheet: CueSheet }) {
+export function SubstitutePanel({
+  sheet,
+  budgetInputRef,
+}: {
+  sheet: CueSheet;
+  /** Lets the top cue card send focus to the budget field it opens. */
+  budgetInputRef?: RefObject<HTMLInputElement>;
+}) {
   const target = sheet.cues.find((cue) => !cue.discovery && cue.artistId) ?? sheet.cues[0];
   const [result, setResult] = useState<SubstitutionResult | null>(null);
   const [budget, setBudget] = useState("");
   const [reason, setReason] = useState<SubstitutionReason>("budget");
   const [status, setStatus] = useState<"idle" | "running" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
+  // Each run claims a sequence number. A response is only applied if it belongs
+  // to the newest run, so a slow first search cannot overwrite a faster second
+  // one and leave the panel describing an artist the user already moved past.
+  const runId = useRef(0);
 
   const run = useCallback(async () => {
     if (!target) return;
+    const id = ++runId.current;
     setStatus("running");
     setError(null);
     try {
@@ -45,10 +58,12 @@ export function SubstitutePanel({ sheet }: { sheet: CueSheet }) {
         }),
       });
       const data = await response.json();
+      if (id !== runId.current) return;
       if (!response.ok) throw new Error(data.error ?? "Substitution failed.");
       setResult(data as SubstitutionResult);
       setStatus("idle");
     } catch (caught) {
+      if (id !== runId.current) return;
       setError(caught instanceof Error ? caught.message : "Substitution failed.");
       setStatus("error");
     }
@@ -83,6 +98,7 @@ export function SubstitutePanel({ sheet }: { sheet: CueSheet }) {
             <span className="text-[10px] uppercase tracking-wider text-haze-500">Budget</span>
             <span className="text-xs text-haze-500">$</span>
             <input
+              ref={budgetInputRef}
               value={budget}
               onChange={(event) => setBudget(event.target.value.replace(/[^0-9]/g, ""))}
               inputMode="numeric"

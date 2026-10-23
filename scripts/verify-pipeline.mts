@@ -1733,6 +1733,294 @@ await check("an ungrounded target is refused rather than silently empty", async 
   );
 });
 
+await check("a failed primary hands the request to the next provider", async () => {
+  // The defect this guards: a configured primary that refuses the call meant no
+  // model at all, even with a second working key in the environment. The chain
+  // must move on rather than give up while a usable key sits unused.
+  const { chatWithFallback } = await import("../src/lib/llm.ts");
+  const saved = { ...process.env };
+  const original = globalThis.fetch;
+  const called: string[] = [];
+  try {
+    delete process.env.LLM_API_KEY;
+    delete process.env.LLM_BASE_URL;
+    delete process.env.LLM_MODEL;
+    delete process.env.OPENAI_API_KEY;
+    process.env.OPENROUTER_API_KEY = "sk-or-exhausted";
+    process.env.GROQ_API_KEY = "gsk-working";
+
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url.startsWith("https://openrouter.ai")) {
+        called.push("openrouter");
+        return jsonResponse({ error: { message: "Insufficient credits." } }, 402);
+      }
+      if (url.startsWith("https://api.groq.com")) {
+        called.push("groq");
+        return jsonResponse({
+          choices: [{ message: { content: "pong" } }],
+        });
+      }
+      return original(input as RequestInfo, init);
+    }) as typeof fetch;
+
+    const result = await chatWithFallback([{ role: "user", content: "hi" }]);
+
+    assert.deepEqual(
+      called,
+      ["openrouter", "groq"],
+      "the exhausted primary must be tried first, then the fallback",
+    );
+    assert.ok(result.message, "the fallback answer must be used");
+    assert.equal(result.provider, "groq", "the result must name the provider that answered");
+    assert.equal(result.failure, null, "a successful chain has no failure to report");
+    assert.deepEqual(
+      result.attempts.map((attempt) => attempt.source),
+      ["openrouter", "groq"],
+    );
+    // A 402 is a balance problem, not a rate limit. Misreading it sends the
+    // operator to the wrong fix.
+    assert.equal(result.attempts[0].failure?.reason, "insufficient_quota");
+  } finally {
+    process.env = saved;
+    globalThis.fetch = original;
+  }
+});
+
+await check("a fallback that answers is disclosed in the cue sheet", async () => {
+  const { buildCueSheet } = await import("../src/lib/planner.ts");
+  const saved = { ...process.env };
+  const original = globalThis.fetch;
+  try {
+    delete process.env.LLM_API_KEY;
+    delete process.env.LLM_BASE_URL;
+    delete process.env.LLM_MODEL;
+    delete process.env.OPENAI_API_KEY;
+    process.env.OPENROUTER_API_KEY = "sk-or-exhausted";
+    process.env.GROQ_API_KEY = "gsk-working";
+
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url.startsWith("https://openrouter.ai")) {
+        return jsonResponse({ error: { message: "Insufficient credits." } }, 402);
+      }
+      if (url.startsWith("https://api.groq.com")) {
+        return jsonResponse({
+          choices: [
+            {
+              message: {
+                content: JSON.stringify({
+                  setting: "A rain-slicked Los Angeles street at night",
+                  mood: ["moody", "restrained"],
+                  genre: ["synthwave"],
+                  era: "1990s",
+                  anchors: ["Drive"],
+                }),
+              },
+            },
+          ],
+        });
+      }
+      return original(input as RequestInfo, init);
+    }) as typeof fetch;
+
+    const sheet = await buildCueSheet({
+      scene: 'A 90s noir thriller. Rain on the glass. Reference "Drive". Los Angeles, audience 25-34.',
+    });
+
+    assert.equal(sheet.sceneParse?.source, "llm", "the fallback answer must be used");
+    assert.equal(sheet.sceneParse?.provider, "groq", "the sheet must name the provider that answered");
+    assert.deepEqual(sheet.sceneParse?.triedProviders, ["openrouter", "groq"]);
+    assert.ok(
+      sheet.warnings.some((w) => /parsed by groq/i.test(w)),
+      "the sheet must disclose that a fallback answered",
+    );
+  } finally {
+    process.env = saved;
+    globalThis.fetch = original;
+  }
+});
+
+await check("each provider is tried at most once, then the chain stops", async () => {
+  // Retrying a dead provider adds latency without changing the outcome. Every
+  // provider must be attempted exactly once and then the chain must give up.
+  const { chatWithFallback } = await import("../src/lib/llm.ts");
+  const saved = { ...process.env };
+  const original = globalThis.fetch;
+  const counts: Record<string, number> = {};
+  try {
+    delete process.env.LLM_API_KEY;
+    delete process.env.LLM_BASE_URL;
+    delete process.env.LLM_MODEL;
+    delete process.env.OPENAI_API_KEY;
+    process.env.OPENROUTER_API_KEY = "sk-or-exhausted";
+    process.env.GROQ_API_KEY = "gsk-exhausted";
+
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url.startsWith("https://openrouter.ai")) {
+        counts.openrouter = (counts.openrouter ?? 0) + 1;
+        return jsonResponse({ error: { message: "Insufficient credits." } }, 402);
+      }
+      if (url.startsWith("https://api.groq.com")) {
+        counts.groq = (counts.groq ?? 0) + 1;
+        return jsonResponse({ error: { message: "Rate limit reached." } }, 429);
+      }
+      return original(input as RequestInfo, init);
+    }) as typeof fetch;
+
+    const result = await chatWithFallback([{ role: "user", content: "hi" }]);
+
+    assert.equal(counts.openrouter, 1, "the primary must be tried exactly once");
+    assert.equal(counts.groq, 1, "the fallback must be tried exactly once");
+    assert.equal(result.message, null, "no provider answered");
+    assert.equal(result.provider, null);
+    // The reported failure is the last one tried, so the operator sees the most
+    // recent reason rather than the oldest.
+    assert.equal(result.failure?.reason, "rate_limited");
+    assert.deepEqual(
+      result.attempts.map((attempt) => attempt.source),
+      ["openrouter", "groq"],
+    );
+  } finally {
+    process.env = saved;
+    globalThis.fetch = original;
+  }
+});
+
+await check("a total LLM outage is disclosed and Qloo ranking survives", async () => {
+  const { buildCueSheet } = await import("../src/lib/planner.ts");
+  const saved = { ...process.env };
+  const original = globalThis.fetch;
+  try {
+    delete process.env.LLM_API_KEY;
+    delete process.env.LLM_BASE_URL;
+    delete process.env.LLM_MODEL;
+    delete process.env.OPENAI_API_KEY;
+    process.env.OPENROUTER_API_KEY = "sk-or-exhausted";
+    process.env.GROQ_API_KEY = "gsk-exhausted";
+
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url.startsWith("https://openrouter.ai")) {
+        return jsonResponse({ error: { message: "Insufficient credits." } }, 402);
+      }
+      if (url.startsWith("https://api.groq.com")) {
+        return jsonResponse({ error: { message: "Rate limit reached." } }, 429);
+      }
+      return original(input as RequestInfo, init);
+    }) as typeof fetch;
+
+    const sheet = await buildCueSheet({
+      scene: 'A 90s noir thriller referencing "Drive". Los Angeles, audience 25-34.',
+    });
+
+    assert.equal(sheet.sceneParse?.source, "deterministic", "no provider answered");
+    assert.deepEqual(sheet.sceneParse?.triedProviders, ["openrouter", "groq"]);
+    const named = sheet.warnings.find((w) => /fell back/i.test(w));
+    assert.ok(
+      /openrouter, groq/.test(named ?? ""),
+      `the warning must list every provider tried: ${named}`,
+    );
+    // Qloo ranking must survive a total LLM outage.
+    assert.ok(sheet.cues.length >= 3, "Qloo ranking must not depend on the model");
+  } finally {
+    process.env = saved;
+    globalThis.fetch = original;
+  }
+});
+
+await check("the LLM_* triple is terminal and is not chained", async () => {
+  // Setting all three LLM_* variables names an endpoint deliberately. Silently
+  // falling through to a preset would send the request somewhere the operator
+  // did not choose.
+  const { chatWithFallback } = await import("../src/lib/llm.ts");
+  const saved = { ...process.env };
+  const original = globalThis.fetch;
+  const called: string[] = [];
+  try {
+    process.env.LLM_API_KEY = "sk-explicit";
+    process.env.LLM_BASE_URL = "https://custom.test/v1";
+    process.env.LLM_MODEL = "custom-model";
+    process.env.GROQ_API_KEY = "gsk-working";
+
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input.toString();
+      called.push(new URL(url).host);
+      return jsonResponse({ error: { message: "Incorrect API key provided." } }, 401);
+    }) as typeof fetch;
+
+    const result = await chatWithFallback([{ role: "user", content: "hi" }]);
+
+    assert.deepEqual(called, ["custom.test"], "only the explicit endpoint may be called");
+    assert.equal(result.attempts.length, 1, "the explicit endpoint is not a chain");
+    assert.equal(result.message, null);
+  } finally {
+    process.env = saved;
+    globalThis.fetch = original;
+  }
+});
+
+await check("a provider id is a real id, not a retired one", async () => {
+  // Two presets shipped pointing at ids the provider does not serve, which fails
+  // in a way that reads like an outage. These are regression guards.
+  const { llmDiagnostics } = await import("../src/lib/llm.ts");
+  const saved = { ...process.env };
+  try {
+    delete process.env.LLM_API_KEY;
+    delete process.env.LLM_BASE_URL;
+    delete process.env.LLM_MODEL;
+    delete process.env.OPENAI_API_KEY;
+
+    process.env.OPENROUTER_API_KEY = "sk-or-good";
+    const openrouter = llmDiagnostics();
+    assert.ok(
+      !openrouter.model?.includes(":free"),
+      `OpenRouter's :free suffix is not a catalogue id: ${openrouter.model}`,
+    );
+
+    delete process.env.OPENROUTER_API_KEY;
+    process.env.GEMINI_API_KEY = "AIza-test";
+    const gemini = llmDiagnostics();
+    assert.notEqual(
+      gemini.model,
+      "gemini-3.5-flash",
+      "gemini-3.5-flash is not in Google's published model table",
+    );
+    assert.ok(
+      /^gemini-\d/.test(gemini.model ?? ""),
+      `the Gemini default must be a real Gemini id: ${gemini.model}`,
+    );
+  } finally {
+    process.env = saved;
+  }
+});
+
+await check("the provider chain is reported without leaking keys", async () => {
+  const { llmDiagnostics } = await import("../src/lib/llm.ts");
+  const saved = { ...process.env };
+  try {
+    delete process.env.LLM_API_KEY;
+    delete process.env.LLM_BASE_URL;
+    delete process.env.LLM_MODEL;
+    delete process.env.OPENAI_API_KEY;
+    process.env.OPENROUTER_API_KEY = "sk-or-secret";
+    process.env.GROQ_API_KEY = "gsk-secret";
+
+    const diagnostics = llmDiagnostics();
+    assert.deepEqual(
+      diagnostics.providerChain,
+      ["openrouter", "groq"],
+      "the chain must reflect the order providers will be tried",
+    );
+    const serialised = JSON.stringify(diagnostics);
+    assert.ok(!serialised.includes("sk-or-secret"), "no key may be serialised");
+    assert.ok(!serialised.includes("gsk-secret"), "no fallback key may be serialised");
+  } finally {
+    process.env = saved;
+  }
+});
+
 console.log(`\n${passed} passed, ${failures.length} failed.\n`);
 if (failures.length > 0) {
   for (const failure of failures) console.error(`  - ${failure}`);

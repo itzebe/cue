@@ -70,13 +70,20 @@ const PROVIDER_PRESETS: ProviderPreset[] = [
   {
     source: "openrouter",
     baseUrl: "https://openrouter.ai/api/v1",
-    model: "openai/gpt-oss-120b:free",
+    // Must be an id OpenRouter actually serves. The `:free` suffix is a rotating
+    // allowance, not a modifier on an otherwise valid slug: `openai/gpt-oss-120b:free`
+    // is not in the catalogue and 404s, while the bare slug is a real, tool-capable,
+    // low-cost model. Set LLM_MODEL to pick a different one.
+    model: "openai/gpt-oss-120b",
     keyVars: ["OPENROUTER_API_KEY"],
   },
   {
     source: "gemini",
     baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai/",
-    model: "gemini-3.5-flash",
+    // `gemini-3.5-flash` is not in the published model table (only
+    // `gemini-3.5-flash-lite` is), so it resolves to a model the key cannot serve.
+    // 2.5-flash is long-standing GA, free-tier eligible and function-calling capable.
+    model: "gemini-2.5-flash",
     keyVars: ["GEMINI_API_KEY", "GOOGLE_API_KEY"],
   },
   {
@@ -96,40 +103,60 @@ const KNOWN_KEY_VARS = [
 ];
 
 /**
- * Resolve LLM credentials from the environment.
+ * A resolved provider plus the variable that supplied it.
+ *
+ * The list form exists so a failed primary can hand the same request to the next
+ * provider. A single resolved config cannot express "and then try this instead",
+ * which is why an OpenRouter outage previously meant no model at all even with a
+ * working Gemini key sitting in the environment.
+ */
+export interface LlmCandidate {
+  config: LlmConfig;
+  source: LlmSource;
+  keyVar: string;
+}
+
+/**
+ * Resolve every usable provider, highest priority first.
  *
  * Preference order:
- *  1. Explicit LLM_* variables (any OpenAI-compatible provider).
- *  2. A provider-specific key: OpenRouter, Gemini, then Groq.
+ *  1. Explicit LLM_* variables (any OpenAI-compatible provider). Terminal: when
+ *     all three are set the operator has named the endpoint, so nothing else is
+ *     offered as a fallback.
+ *  2. Provider-specific keys: OpenRouter, Gemini, then Groq.
  *  3. OpenAI variables.
  *  4. The Agent Canvas managed proxy, which is OpenAI-compatible and lets the
  *     app run with zero user-supplied keys during development.
  *
- * The source is returned alongside the config so the report cannot drift from
- * what the pipeline actually uses.
+ * The source travels with the config so the report cannot drift from what the
+ * pipeline actually uses.
  */
-function detectLlm(): { config: LlmConfig; source: LlmSource; keyVar: string } | null {
+function detectCandidates(): LlmCandidate[] {
   const explicitKey = envValue("LLM_API_KEY");
   const explicitBase = envValue("LLM_BASE_URL");
   const explicitModel = envValue("LLM_MODEL");
 
   if (explicitKey && explicitBase && explicitModel) {
-    return {
-      config: {
-        baseUrl: explicitBase.replace(/\/$/, ""),
-        apiKey: explicitKey,
-        model: explicitModel,
-        temperature: 0.4,
+    return [
+      {
+        config: {
+          baseUrl: explicitBase.replace(/\/$/, ""),
+          apiKey: explicitKey,
+          model: explicitModel,
+          temperature: 0.4,
+        },
+        source: "llm",
+        keyVar: "LLM_API_KEY",
       },
-      source: "llm",
-      keyVar: "LLM_API_KEY",
-    };
+    ];
   }
+
+  const candidates: LlmCandidate[] = [];
 
   for (const preset of PROVIDER_PRESETS) {
     const keyVar = preset.keyVars.find((name) => envValue(name) !== undefined);
     if (keyVar) {
-      return {
+      candidates.push({
         config: {
           baseUrl: preset.baseUrl.replace(/\/$/, ""),
           apiKey: envValue(keyVar)!,
@@ -138,7 +165,7 @@ function detectLlm(): { config: LlmConfig; source: LlmSource; keyVar: string } |
         },
         source: preset.source,
         keyVar,
-      };
+      });
     }
   }
 
@@ -150,15 +177,13 @@ function detectLlm(): { config: LlmConfig; source: LlmSource; keyVar: string } |
   const proxyModel = explicitModel || "claude-sonnet-4-5-20250929";
 
   if (proxyBase && openaiKey && !openaiBase) {
-    return {
+    candidates.push({
       config: { baseUrl: proxyBase.replace(/\/$/, ""), apiKey: openaiKey, model: proxyModel, temperature: 0.4 },
       source: "proxy",
       keyVar: "OPENAI_API_KEY",
-    };
-  }
-
-  if (openaiKey) {
-    return {
+    });
+  } else if (openaiKey) {
+    candidates.push({
       config: {
         baseUrl: (openaiBase || "https://api.openai.com/v1").replace(/\/$/, ""),
         apiKey: openaiKey,
@@ -167,19 +192,24 @@ function detectLlm(): { config: LlmConfig; source: LlmSource; keyVar: string } |
       },
       source: "openai",
       keyVar: "OPENAI_API_KEY",
-    };
+    });
   }
 
   const proxyOnlyKey = envValue("OH_LLM_PROXY_KEY");
   if (proxyBase && proxyOnlyKey) {
-    return {
+    candidates.push({
       config: { baseUrl: proxyBase.replace(/\/$/, ""), apiKey: proxyOnlyKey, model: proxyModel, temperature: 0.4 },
       source: "proxy",
       keyVar: "OH_LLM_PROXY_KEY",
-    };
+    });
   }
 
-  return null;
+  return candidates;
+}
+
+/** The primary provider, or null when nothing is configured. */
+function detectLlm(): LlmCandidate | null {
+  return detectCandidates()[0] ?? null;
 }
 
 export function resolveLlmConfig(): LlmConfig | null {
@@ -188,6 +218,11 @@ export function resolveLlmConfig(): LlmConfig | null {
 
 export function hasLlm(): boolean {
   return detectLlm() !== null;
+}
+
+/** How many distinct providers are configured, for the config report. */
+export function llmProviderCount(): number {
+  return detectCandidates().length;
 }
 
 /**
@@ -199,7 +234,8 @@ export function hasLlm(): boolean {
  * log access. Only lengths and booleans are exposed, never key material.
  */
 export function llmDiagnostics() {
-  const detected = detectLlm();
+  const candidates = detectCandidates();
+  const detected = candidates[0] ?? null;
   // Check the variable that actually supplied the key, so a stray space in a
   // provider-specific var is reported rather than masked by a clean generic one.
   const rawKey = detected ? process.env[detected.keyVar] : undefined;
@@ -219,6 +255,10 @@ export function llmDiagnostics() {
     // Which variables exist, so a key set under an unexpected name is visible
     // rather than silently ignored. Presence only, never values.
     presentKeyVars: KNOWN_KEY_VARS.filter((name) => envValue(name) !== undefined),
+    // The full fallback chain, in the order it will be tried. A second configured
+    // provider is what makes a primary outage recoverable, so whether one exists
+    // is worth reporting rather than leaving to inference.
+    providerChain: candidates.map((candidate) => candidate.source),
   };
 }
 
@@ -272,11 +312,16 @@ function classifyFailure(status: number, detail: string): LlmFailure {
     };
   }
   // OpenAI reports an exhausted balance as 429, which is easy to misread as a
-  // rate limit. The code is the only reliable discriminator.
+  // rate limit. The code is the only reliable discriminator. OpenRouter uses
+  // 402 for the same condition, so both have to land on "out of credits" rather
+  // than being reported as a rate limit or a generic HTTP error.
   if (
+    status === 402 ||
     body.includes("insufficient_quota") ||
+    body.includes("insufficient_credits") ||
     body.includes("credit_balance") ||
     body.includes("no credits remaining") ||
+    body.includes("requires more credits") ||
     body.includes("exceeded your current quota")
   ) {
     return {
@@ -294,7 +339,15 @@ function classifyFailure(status: number, detail: string): LlmFailure {
       detail,
     };
   }
-  if (status === 404 || body.includes("does not exist") || body.includes("model_not_found")) {
+  if (
+    status === 404 ||
+    body.includes("does not exist") ||
+    body.includes("model_not_found") ||
+    body.includes("not found") ||
+    body.includes("unknown model") ||
+    body.includes("not supported") ||
+    body.includes("unsupported model")
+  ) {
     return {
       reason: "model_not_permitted",
       status,
@@ -308,16 +361,68 @@ function classifyFailure(status: number, detail: string): LlmFailure {
 /**
  * One minimal round trip to the configured endpoint, reporting the upstream
  * status so a misconfiguration is visible from outside the deployment.
+ *
+ * This walks the same chain the pipeline walks, so "the probe passed" means a
+ * real cue sheet will get a model. Probing only the primary would report a
+ * failure while a healthy fallback was available.
  */
 export async function probeLlm(): Promise<{
   ok: boolean;
   status: number | null;
   reason?: LlmFailureReason;
+  provider: LlmSource | null;
+  attempts: Array<{ source: LlmSource; ok: boolean; status: number | null; reason?: LlmFailureReason }>;
   detail: string;
 }> {
-  const config = resolveLlmConfig();
-  if (!config) return { ok: false, status: null, detail: "No LLM configured." };
+  const candidates = detectCandidates();
+  if (candidates.length === 0) {
+    return { ok: false, status: null, provider: null, attempts: [], detail: "No LLM configured." };
+  }
 
+  const attempts: Array<{ source: LlmSource; ok: boolean; status: number | null; reason?: LlmFailureReason }> = [];
+  let lastStatus: number | null = null;
+  let lastReason: LlmFailureReason | undefined;
+  let lastDetail = "";
+
+  for (const candidate of candidates) {
+    const result = await probeOne(candidate.config);
+    attempts.push({
+      source: candidate.source,
+      ok: result.ok,
+      status: result.status,
+      reason: result.reason,
+    });
+    if (result.ok) {
+      return {
+        ok: true,
+        status: result.status,
+        provider: candidate.source,
+        attempts,
+        detail: result.detail,
+      };
+    }
+    lastStatus = result.status;
+    lastReason = result.reason;
+    lastDetail = result.detail;
+  }
+
+  return {
+    ok: false,
+    status: lastStatus,
+    reason: lastReason,
+    provider: null,
+    attempts,
+    detail: lastDetail,
+  };
+}
+
+/** A single endpoint's probe. */
+async function probeOne(config: LlmConfig): Promise<{
+  ok: boolean;
+  status: number | null;
+  reason?: LlmFailureReason;
+  detail: string;
+}> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 20_000);
   try {
@@ -485,6 +590,114 @@ export async function chat(
   timeoutMs = 45_000,
 ): Promise<ChatMessage | null> {
   const { message } = await chatDetailed(config, messages, tools, timeoutMs);
+  return message;
+}
+
+/** One provider's turn at the request, and how it went. */
+export interface LlmAttempt {
+  source: LlmSource;
+  keyVar: string;
+  model: string;
+  failure: LlmFailure | null;
+}
+
+export interface LlmRunResult {
+  message: ChatMessage | null;
+  /** The provider that answered. `null` when every provider failed. */
+  provider: LlmSource | null;
+  /** Every provider tried, in order, with why each one failed. */
+  attempts: LlmAttempt[];
+  /** The failure to report when nothing answered. */
+  failure: LlmFailure | null;
+}
+
+/**
+ * Run one request against the configured providers, in priority order.
+ *
+ * Each provider is tried at most once, and the first usable answer wins. This is
+ * the whole point of the list: a rate-limited or unfunded primary is a reason to
+ * ask the next provider, not a reason to give up and read the scene
+ * deterministically while a working key sits unused in the environment.
+ *
+ * Retrying the *same* provider is deliberately absent. A rejected key or an
+ * exhausted balance is permanent for that provider, so repeating the call only
+ * adds latency; moving on to a different provider is what actually recovers.
+ *
+ * The caller's `timeoutMs` is a budget for the whole chain, not per attempt, so
+ * a fallback cannot silently double the wall-clock cost of a cue sheet. Each
+ * attempt gets whatever is left, with a floor so a slow primary cannot starve
+ * the secondary entirely.
+ */
+export async function chatWithFallback(
+  messages: ChatMessage[],
+  tools: ToolSpec[] = [],
+  timeoutMs = 45_000,
+): Promise<LlmRunResult> {
+  const candidates = detectCandidates();
+  if (candidates.length === 0) {
+    return { message: null, provider: null, attempts: [], failure: null };
+  }
+
+  const deadline = Date.now() + timeoutMs;
+  const attempts: LlmAttempt[] = [];
+  let lastFailure: LlmFailure | null = null;
+
+  for (let index = 0; index < candidates.length; index++) {
+    const candidate = candidates[index];
+    const remaining = deadline - Date.now();
+    const isLast = index === candidates.length - 1;
+    // A provider with no time left is not tried: reporting a timeout we chose to
+    // cause would misattribute the fault to the provider.
+    if (remaining <= 1_000) {
+      attempts.push({
+        source: candidate.source,
+        keyVar: candidate.keyVar,
+        model: candidate.config.model,
+        failure: {
+          reason: "timeout",
+          status: null,
+          message: "the request ran out of time before this provider was tried",
+          detail: "",
+        },
+      });
+      continue;
+    }
+    const budget = isLast ? remaining : Math.max(10_000, Math.floor(remaining / 2));
+
+    const { message, failure } = await chatDetailed(
+      candidate.config,
+      messages,
+      tools,
+      Math.min(budget, remaining),
+    );
+    attempts.push({
+      source: candidate.source,
+      keyVar: candidate.keyVar,
+      model: candidate.config.model,
+      failure,
+    });
+
+    if (message) {
+      return { message, provider: candidate.source, attempts, failure: null };
+    }
+    lastFailure = failure;
+  }
+
+  return { message: null, provider: null, attempts, failure: lastFailure };
+}
+
+/**
+ * The message from whichever provider answers first, or `null`.
+ *
+ * Used by the calls that only need the content; `chatWithFallback` is for the
+ * ones that must explain which provider spoke and which ones did not.
+ */
+export async function runLlm(
+  messages: ChatMessage[],
+  tools: ToolSpec[] = [],
+  timeoutMs = 45_000,
+): Promise<ChatMessage | null> {
+  const { message } = await chatWithFallback(messages, tools, timeoutMs);
   return message;
 }
 
