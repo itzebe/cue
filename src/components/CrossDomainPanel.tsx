@@ -78,13 +78,13 @@ export function CrossDomainPanel({ sheet }: { sheet: CueSheet }) {
             <h3 className="text-[10px] uppercase tracking-wider text-haze-500">
               Casting and partner fit · audience {casting.audience}
             </h3>
-            <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {casting.candidates.slice(0, 9).map((candidate) => (
                 <div
                   key={candidate.entityId}
                   className="rounded-lg border border-white/5 bg-black/20 p-3"
                 >
-                  <div className="flex items-baseline justify-between gap-2">
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
                     <p className="truncate text-sm text-haze-100">{candidate.name}</p>
                     <span className="shrink-0 font-mono text-xs text-signal-400">
                       {candidate.affinity.toFixed(3)}
@@ -147,7 +147,7 @@ export function CrossDomainPanel({ sheet }: { sheet: CueSheet }) {
                 Reference {localisation.referenceMarket} · {localisation.markets.length} markets
                 measured
               </p>
-              <div className="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {localisation.markets.map((market) => {
                   const isReference = market.market === localisation.referenceMarket;
                   return (
@@ -159,7 +159,7 @@ export function CrossDomainPanel({ sheet }: { sheet: CueSheet }) {
                           : "border-white/5 bg-black/20"
                       }`}
                     >
-                      <div className="flex items-baseline justify-between gap-2">
+                      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
                         <p className="truncate text-sm text-haze-100">{market.market}</p>
                         {isReference ? (
                           <span className="shrink-0 text-[10px] text-signal-400">reference</span>

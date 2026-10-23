@@ -50,10 +50,13 @@ export function CueCard({
   cue,
   rank,
   maxAffinity,
+  trackPendingHint,
 }: {
   cue: Cue;
   rank: number;
   maxAffinity: number;
+  /** Why no track was named, so the card never blames the wrong cause. */
+  trackPendingHint?: string | null;
 }) {
   const clearance = CLEARANCE_LABEL[cue.clearance];
   const width = maxAffinity > 0 ? Math.max(6, (cue.affinity / maxAffinity) * 100) : 0;
@@ -66,19 +69,17 @@ export function CueCard({
     >
       <div className="relative z-10">
         <header className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-3">
+          <div className="flex min-w-0 items-start gap-3">
             <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/5 font-mono text-xs text-haze-300">
               {String(rank + 1).padStart(2, "0")}
             </span>
-            <div>
+            <div className="min-w-0">
               <h3 className="font-display text-lg leading-tight text-haze-100">
                 {cue.artist}
               </h3>
               <p className="mt-0.5 text-sm text-haze-300">
                 {cue.trackUnverified ? (
-                  <span className="text-haze-500 italic">
-                    {cue.track} — set an LLM key to name the exact cut
-                  </span>
+                  <span className="text-haze-500 italic">{cue.track}</span>
                 ) : (
                   <>
                     <span className="text-ember-400">“{cue.track}”</span>
@@ -87,6 +88,11 @@ export function CueCard({
                   </>
                 )}
               </p>
+              {cue.trackUnverified && trackPendingHint ? (
+                <p className="mt-1 text-[11px] leading-relaxed text-haze-500">
+                  {trackPendingHint}
+                </p>
+              ) : null}
             </div>
           </div>
           <div className="shrink-0 text-right">

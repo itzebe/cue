@@ -18,7 +18,7 @@ export function ReceiptsPanel({ sheet }: { sheet: CueSheet }) {
   return (
     <section className="panel grain relative overflow-hidden p-5" aria-label="Qloo call receipts">
       <div className="relative z-10">
-        <header className="flex items-center justify-between gap-3">
+        <header className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h3 className="font-display text-base text-haze-100">Qloo receipts</h3>
             <p className="mt-0.5 text-xs text-haze-500">
@@ -59,8 +59,11 @@ export function ReceiptsPanel({ sheet }: { sheet: CueSheet }) {
               key={`${receipt.endpoint}-${index}`}
               className="rounded-lg border border-white/5 bg-black/20 p-2.5"
             >
-              <div className="flex items-center justify-between gap-2">
-                <code className="truncate font-mono text-[11px] text-signal-300">
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
+                {/* Endpoint paths must stay fully readable: this panel is the
+                    evidence that every number came from a real Qloo call, so
+                    truncating the path would undercut the whole claim. */}
+                <code className="break-all font-mono text-[11px] text-signal-300">
                   {receipt.endpoint}
                 </code>
                 <span className="flex shrink-0 items-center gap-2 font-mono text-[10px]">

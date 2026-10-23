@@ -129,6 +129,8 @@ Qloo is the required half; the LLM is optional and only names the specific track
 
 Set `LLM_MODEL` explicitly when your endpoint does not serve the default (`gpt-4o-mini` for OpenAI, `claude-sonnet-4-5-20250929` for the Agent Canvas proxy). A model your key cannot access returns `403`, and Cue degrades to "Track TBD" cues; the server log names the rejected model so the cause is visible instead of silent.
 
+**A configured key is not assumed to work.** Cue spends one call and, if the provider refuses it, classifies the refusal — exhausted balance, rejected key, unavailable model, rate limit, timeout — and says which one in the cue sheet, in the cue cards, and in `GET /api/cue?probe=1`. Rankings, market fit and pricing are unaffected, because those come from Qloo and not the model. The deterministic parser runs instead of the LLM, and the sheet labels it as such. `GET /api/cue` reports the resolved provider, base URL and model without spending a call.
+
 #### Free OpenAI-compatible providers
 
 Track naming is optional, and a paid OpenAI key is not required to turn it on. Set the provider's own key and Cue infers the rest:

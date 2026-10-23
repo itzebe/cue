@@ -136,6 +136,19 @@ export interface Cue {
 export interface CueSheet {
   brief: SceneBrief;
   cues: Cue[];
+  /**
+   * How the scene brief was actually produced, and why, when it was not the
+   * model. The UI reports this so "the LLM read your scene" is never implied
+   * when the deterministic parser ran instead.
+   */
+  sceneParse?: {
+    source: "llm" | "deterministic";
+    /** Present when a configured provider was tried and failed. */
+    failureReason?: string;
+    failureStatus?: number | null;
+    /** Operator-facing sentence, e.g. "the provider reports no remaining credits". */
+    failureMessage?: string;
+  };
   /** Head-to-head of two creative directions via /v2/analysis/compare. */
   directionCompare?: {
     aLabel: string;
@@ -153,6 +166,11 @@ export interface CueSheet {
   baseline: {
     cues: Array<{ artist: string; track: string; why: string }>;
     note: string;
+    /**
+     * Whether these lines came from the model or are a fixed sample. The panel
+     * must not attribute sample text to the LLM when the call did not happen.
+     */
+    source?: "llm" | "sample";
   };
   /** Regional affinity for the brief's target market, when one was named. */
   regionAffinity?: RegionAffinity[];

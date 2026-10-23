@@ -24,7 +24,7 @@ export function DirectionPanel({ sheet }: { sheet: CueSheet }) {
           </p>
         </header>
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="rounded-lg border border-white/5 bg-black/20 p-3">
             <h4 className="text-[10px] uppercase tracking-wider text-haze-500">Direction A</h4>
             <p className="mt-1 text-sm text-haze-300">{aLabel}</p>
@@ -61,7 +61,7 @@ export function DirectionPanel({ sheet }: { sheet: CueSheet }) {
         </div>
 
         {(aOnly.length > 0 || bOnly.length > 0) && (
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <h4 className="text-[10px] uppercase tracking-wider text-haze-500">
                 Only A

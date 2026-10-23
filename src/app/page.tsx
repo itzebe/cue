@@ -95,6 +95,14 @@ export default function StudioPage() {
     ? new Set(sheet.receipts.map((receipt) => receipt.endpoint)).size
     : 0;
 
+  // The cue cards say why a track is pending, so they never blame a missing key
+  // when the real cause is an exhausted balance or a rejected credential.
+  const trackPendingHint = sheet
+    ? sheet.sceneParse?.source === "deterministic" && sheet.sceneParse.failureMessage
+      ? `No track named: the scene reader fell back because ${sheet.sceneParse.failureMessage}.`
+      : "No track named: connect a working model to propose the exact cut."
+    : null;
+
   return (
     <main className="mx-auto max-w-[1400px] px-5 py-8 lg:px-10 lg:py-12">
       {/* Masthead */}
@@ -140,9 +148,9 @@ export default function StudioPage() {
         </dl>
       </header>
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
+      <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
         {/* Composer */}
-        <div className="space-y-6 lg:sticky lg:top-8 lg:self-start">
+        <div className="min-w-0 space-y-6 lg:sticky lg:top-8 lg:self-start">
           <section className="panel grain relative overflow-hidden p-5">
             <div className="relative z-10">
               <h2 className="font-display text-base text-haze-100">Scene brief</h2>
@@ -270,7 +278,7 @@ export default function StudioPage() {
                 call the Qloo Insights API, rank artists by measured affinity, check them
                 against the target audience, and show you every call it made.
               </p>
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {[
                   ["Cross-domain ranking", "Film taste predicts music taste. Qloo traverses it; an LLM cannot."],
                   ["Explainable picks", "Every cue names the signal that caused it."],
@@ -301,6 +309,27 @@ export default function StudioPage() {
                 </div>
               ) : null}
 
+              {sheet.sceneParse?.source === "deterministic" &&
+              sheet.sceneParse.failureMessage ? (
+                <div
+                  role="status"
+                  className="panel border-ember-500/40 bg-ember-500/[0.07] p-4"
+                >
+                  <p className="text-xs font-medium uppercase tracking-wider text-ember-400">
+                    Model configured, but the scene reader did not run
+                  </p>
+                  <p className="mt-1.5 text-xs leading-relaxed text-haze-300">
+                    The brief below was produced by the deterministic parser because{" "}
+                    {sheet.sceneParse.failureMessage}
+                    {sheet.sceneParse.failureStatus
+                      ? ` (HTTP ${sheet.sceneParse.failureStatus})`
+                      : ""}
+                    . Rankings, market fit and pricing are unaffected: those come from Qloo,
+                    not the model.
+                  </p>
+                </div>
+              ) : null}
+
               {sheet.warnings.length > 0 ? (
                 <ul className="panel space-y-2 p-4">
                   {sheet.warnings.map((warning, index) => (
@@ -313,14 +342,14 @@ export default function StudioPage() {
               ) : null}
 
               <section aria-label="Cue sheet">
-                <div className="mb-4 flex items-baseline justify-between gap-4">
+                <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
                   <h2 className="font-display text-xl text-haze-100">
                     Cue sheet
                     <span className="ml-2 font-mono text-sm text-haze-500">
                       {sheet.cues.length} options
                     </span>
                   </h2>
-                  <p className="text-xs text-haze-500">
+                  <p className="text-xs text-haze-500 sm:max-w-md sm:text-right">
                     {(() => {
                       const primaries = sheet.cues.filter((cue) => !cue.discovery);
                       const uniform =
@@ -338,13 +367,14 @@ export default function StudioPage() {
                     })()}
                   </p>
                 </div>
-                <div className="grid gap-4 xl:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
                   {sheet.cues.map((cue, index) => (
                     <CueCard
                       key={cue.id}
                       cue={cue}
                       rank={index}
                       maxAffinity={maxAffinity}
+                      trackPendingHint={trackPendingHint}
                     />
                   ))}
                 </div>
@@ -353,7 +383,7 @@ export default function StudioPage() {
               <CompareStrip sheet={sheet} />
               <MarketplacePanel sheet={sheet} />
               <CrossDomainPanel key={sheet.brief.raw} sheet={sheet} />
-              <div className="grid gap-4 xl:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
                 <DirectionPanel sheet={sheet} />
                 <RegionPanel sheet={sheet} />
               </div>
