@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CueCard } from "@/components/CueCard";
+import { AudienceBriefPanel } from "@/components/AudienceBriefPanel";
 import { BriefPanel } from "@/components/BriefPanel";
 import { CompareStrip } from "@/components/CompareStrip";
 import { ReceiptsPanel } from "@/components/ReceiptsPanel";
@@ -383,6 +384,10 @@ export default function StudioPage() {
                   ))}
                 </ul>
               ) : null}
+
+              {/* Evidence before recommendation. The audience measurement is the
+                  reason to trust everything below it, so it reads first. */}
+              <AudienceBriefPanel sheet={sheet} />
 
               <section aria-label="Cue sheet">
                 <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">

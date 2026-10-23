@@ -17,9 +17,15 @@ const QLOO_SEARCH = {
     {
       entity_id: "11111111-1111-1111-1111-111111111111",
       name: "Drive",
-      // Real /search returns a `types` array and no `subtype`.
-      types: ["urn:entity:movie"],
-      properties: { description: "A stunt driver moonlights as a getaway driver." },
+      // Real /v2/search returns `subtype` and no `types` array.
+      subtype: "urn:entity:movie",
+      // `audience_identity` is present on the versioned endpoint and absent on
+      // legacy `/search`, which is why the client targets /v2/search.
+      properties: {
+        description: "A stunt driver moonlights as a getaway driver.",
+        audience_identity:
+          "People drawn to moody, stylistic thrillers and minimalist character studies.",
+      },
     },
   ],
 };
@@ -166,7 +172,7 @@ globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
     ),
   });
 
-  if (parsed.pathname === "/search") return jsonResponse(QLOO_SEARCH);
+  if (parsed.pathname === "/v2/search") return jsonResponse(QLOO_SEARCH);
   if (parsed.pathname === "/v2/tags") return jsonResponse(QLOO_TAGS);
   if (parsed.pathname === "/v2/insights") return jsonResponse(QLOO_INSIGHTS);
   if (parsed.pathname === "/v2/trending") {
@@ -244,6 +250,18 @@ await check("search resolves an entity and sends X-Api-Key", async () => {
   assert.equal(result.ok, true);
   assert.equal(result.data[0].name, "Drive");
   assert.equal(calls[0].headers["X-Api-Key"], "test-key");
+
+  // The versioned path is load-bearing, not cosmetic. `/search` is the legacy
+  // endpoint and returns a reduced entity: measured on the same query it drops
+  // `properties.audience_identity` and eleven other fields. The Audience Identity
+  // Brief reads that field, so regressing to the legacy path would empty the
+  // panel silently — a 200 with no evidence rather than an error.
+  const path = new URL(calls[0].url).pathname;
+  assert.equal(path, "/v2/search", "entity search must use the versioned endpoint");
+  assert.ok(
+    result.data[0].properties && "audience_identity" in (result.data[0].properties as object),
+    "the resolved anchor must carry audience_identity for the audience brief",
+  );
 });
 
 await check("affinity is read from query.affinity", async () => {
@@ -1065,6 +1083,70 @@ await check("a provider key outranks the generic OpenAI key", async () => {
   }
 });
 
+await check("a bare OpenAI key is not a provider endpoint", async () => {
+  // Production ran for a whole session with an unfunded OPENAI_API_KEY and no
+  // other provider: every cue sheet silently fell back to the deterministic
+  // reader while the app reported a configured model. A paid endpoint with no
+  // free tier must not be reachable just because a key happens to be present.
+  const { resolveLlmConfig, llmDiagnostics, probeLlm } = await import("../src/lib/llm.ts");
+  const saved = { ...process.env };
+  try {
+    delete process.env.LLM_API_KEY;
+    delete process.env.LLM_BASE_URL;
+    delete process.env.LLM_MODEL;
+    delete process.env.OPENROUTER_API_KEY;
+    delete process.env.GEMINI_API_KEY;
+    delete process.env.GOOGLE_API_KEY;
+    delete process.env.GROQ_API_KEY;
+    delete process.env.OH_LLM_PROXY_KEY;
+    delete process.env.OH_LLM_API_KEY_REFRESH_BASE_URLS;
+    process.env.OPENAI_API_KEY = "sk-unfunded";
+
+    assert.equal(resolveLlmConfig(), null, "an OpenAI key alone must resolve to no endpoint");
+    const diagnostics = llmDiagnostics();
+    assert.equal(diagnostics.configured, false);
+    assert.equal(diagnostics.source, "none");
+    assert.deepEqual(diagnostics.providerChain, [], "no endpoint may be offered");
+    // The variable is still reported as present, so an operator can see the key
+    // exists and is being ignored rather than wondering where it went.
+    assert.ok(
+      diagnostics.presentKeyVars.includes("OPENAI_API_KEY"),
+      "a present-but-unused key must still be visible in the report",
+    );
+    assert.ok(
+      !JSON.stringify(diagnostics).includes("sk-unfunded"),
+      "no key material may be serialised",
+    );
+
+    // And the probe must agree rather than inventing an attempt.
+    const probe = await probeLlm();
+    assert.equal(probe.ok, false);
+    assert.equal(probe.provider, null);
+    assert.deepEqual(probe.attempts, [], "no provider may be attempted");
+
+    // The Agent Canvas proxy still works through OPENAI_API_KEY when its refresh
+    // URL identifies it, so this is not a blanket ban on the variable.
+    process.env.OH_LLM_API_KEY_REFRESH_BASE_URLS = "https://proxy.test/v1";
+    const proxied = llmDiagnostics();
+    assert.equal(proxied.configured, true, "the managed proxy must still resolve");
+    assert.equal(proxied.source, "proxy");
+    assert.equal(resolveLlmConfig()?.baseUrl, "https://proxy.test/v1");
+
+    // An operator who explicitly wants OpenAI can still name it via LLM_*.
+    delete process.env.OH_LLM_API_KEY_REFRESH_BASE_URLS;
+    process.env.LLM_API_KEY = "sk-explicit";
+    process.env.LLM_BASE_URL = "https://api.openai.com/v1";
+    process.env.LLM_MODEL = "gpt-4o-mini";
+    assert.equal(
+      resolveLlmConfig()?.baseUrl,
+      "https://api.openai.com/v1",
+      "the explicit LLM_* triple is still honoured",
+    );
+  } finally {
+    process.env = saved;
+  }
+});
+
 await check("a stray space in a provider key is reported", async () => {
   const { llmDiagnostics } = await import("../src/lib/llm.ts");
   const saved = { ...process.env };
@@ -1557,7 +1639,7 @@ function restorePools() {
   globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = typeof input === "string" ? input : input.toString();
     const parsed = new URL(url);
-    if (parsed.pathname === "/search") return jsonResponse(QLOO_SEARCH);
+    if (parsed.pathname === "/v2/search") return jsonResponse(QLOO_SEARCH);
     if (parsed.pathname === "/v2/tags") return jsonResponse(QLOO_TAGS);
     if (parsed.pathname === "/v2/insights") return jsonResponse(QLOO_INSIGHTS);
     if (parsed.pathname === "/v2/analysis/compare") return jsonResponse(QLOO_COMPARE);
@@ -2054,6 +2136,101 @@ await check("the provider chain is reported without leaking keys", async () => {
     assert.ok(!serialised.includes("gsk-secret"), "no fallback key may be serialised");
   } finally {
     process.env = saved;
+  }
+});
+
+await check("the audience brief quotes Qloo and never invents a profile", async () => {
+  const { buildAudienceBrief } = await import("../src/lib/audience.ts");
+
+  const entity = (name: string, id: string, identity?: string) => ({
+    entity_id: id,
+    name,
+    type: "urn:entity:movie",
+    properties: identity ? { audience_identity: identity } : { description: "no identity" },
+  });
+
+  // The happy path: Qloo's prose is carried through verbatim, so the UI cannot
+  // paraphrase a measurement into something the data does not say.
+  const quoted = "People drawn to moody, stylistic thrillers and minimalist character studies.";
+  const brief = buildAudienceBrief(
+    ["Drive", "Portishead"],
+    [entity("Drive (2011)", "id-drive", quoted), entity("Portishead", "id-portishead", quoted)],
+  );
+  assert.equal(brief.available, true);
+  assert.equal(brief.evidence.length, 2);
+  assert.equal(brief.evidence[0].audienceIdentity, quoted, "Qloo's text must be verbatim");
+  // The brief's own spelling is kept as the label, not Qloo's qualified name.
+  assert.equal(brief.evidence[0].anchor, "Drive");
+  assert.equal(brief.evidence[0].entityName, "Drive (2011)");
+  assert.ok(brief.interpretation && brief.interpretation.length > 0);
+
+  // A resolved entity with no audience_identity is a data gap, not a profile.
+  const gap = buildAudienceBrief(["Drive"], [entity("Drive", "id-drive")]);
+  assert.equal(gap.available, false, "no identity means no evidence");
+  assert.equal(gap.evidence.length, 0);
+  assert.equal(gap.interpretation, null, "Cue must not write a profile Qloo did not supply");
+  assert.deepEqual(gap.anchorsWithoutEvidence, ["Drive"]);
+  assert.equal(gap.noAnchors, false, "a present anchor is not the same as an empty brief");
+
+  // A blank string is treated as absent rather than rendered as an empty quote.
+  const blank = buildAudienceBrief(["Drive"], [entity("Drive", "id-drive", "   ")]);
+  assert.equal(blank.available, false);
+  assert.deepEqual(blank.anchorsWithoutEvidence, ["Drive"]);
+
+  // An anchor that never resolved is reported separately from one that resolved
+  // without evidence, because the two mean different things to a supervisor.
+  const unresolved = buildAudienceBrief(
+    ["Drive", "Nonexistent Film"],
+    [entity("Drive (2011)", "id-drive", quoted)],
+  );
+  assert.deepEqual(unresolved.anchorsUnresolved, ["Nonexistent Film"]);
+  assert.deepEqual(unresolved.anchorsWithoutEvidence, []);
+
+  // A brief with no anchors is its own state, not a failure.
+  const empty = buildAudienceBrief([], []);
+  assert.equal(empty.noAnchors, true);
+  assert.equal(empty.available, false);
+  assert.equal(empty.interpretation, null);
+
+  // One anchor is not enough to claim the anchors agree, and the reading must not
+  // pretend otherwise.
+  const single = buildAudienceBrief(["Drive"], [entity("Drive", "id-drive", quoted)]);
+  assert.ok(
+    /one anchor/i.test(single.interpretation ?? ""),
+    "a single anchor must not be described as a shared audience",
+  );
+
+  // Matching is by name, not position: an anchor that failed to resolve must not
+  // shift every later anchor onto the wrong entity's audience.
+  const shifted = buildAudienceBrief(
+    ["Gone", "Drive"],
+    [entity("Drive (2011)", "id-drive", quoted)],
+  );
+  assert.equal(shifted.evidence.length, 1);
+  assert.equal(shifted.evidence[0].anchor, "Drive", "the audience must not be relabelled");
+  assert.deepEqual(shifted.anchorsUnresolved, ["Gone"]);
+});
+
+await check("the audience brief costs no extra Qloo calls", async () => {
+  // The whole point of reading `audience_identity` off the anchor search is that
+  // it is already in hand. If this ever starts fetching, a rate-limited key pays
+  // for a field it was given for free.
+  const { buildAudienceBrief } = await import("../src/lib/audience.ts");
+  const original = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = (async () => {
+    calls += 1;
+    throw new Error("the audience brief must not perform network calls");
+  }) as never;
+  try {
+    const brief = buildAudienceBrief(
+      ["Drive"],
+      [{ entity_id: "id", name: "Drive", type: "urn:entity:movie", properties: { audience_identity: "People who like cars." } }],
+    );
+    assert.equal(brief.available, true);
+    assert.equal(calls, 0, "building the brief must not call the network");
+  } finally {
+    globalThis.fetch = original;
   }
 });
 

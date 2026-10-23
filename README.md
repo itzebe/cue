@@ -55,7 +55,7 @@ The hackathon's test is whether a project would work the same without Qloo. Here
 
 | Question the cue sheet answers | Qloo endpoint | Could an LLM answer it? |
 |---|---|---|
-| Who are the entities in this brief? | `GET /search` | No — needs resolved entity IDs |
+| Who are the entities in this brief? | `GET /v2/search` | No — needs resolved entity IDs |
 | Which artists share this scene's taste profile? | `GET /v2/insights` | No — requires measured affinity |
 | Why was this artist chosen? | `feature.explainability=true` | No — requires the signal graph |
 | Does it land with this audience? | `signal.demographics.*` | No — requires demographic data |
@@ -74,7 +74,7 @@ scene brief
    │
    ├─ 1. read the scene            LLM (or deterministic parser as fallback)
    │
-   ├─ 2. resolve references        GET /search        → Qloo entity IDs
+   ├─ 2. resolve references        GET /v2/search     → Qloo entity IDs
    │      resolve mood/genre       GET /v2/tags       → valid tag IDs
    │
    ├─ 3. rank artists              GET /v2/insights   → affinity + explainability
@@ -123,9 +123,10 @@ npm run verify
 | `QLOO_API_BASE_URL` | no | Defaults to `https://hackathon.api.qloo.com` |
 | `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL` | no | Any OpenAI-compatible endpoint (all three, to override everything else) |
 | `OPENROUTER_API_KEY` / `GEMINI_API_KEY` / `GROQ_API_KEY` | no | Set one and Cue infers the base URL and model |
-| `OPENAI_API_KEY` / `OPENAI_BASE_URL` | no | Alternative to the above |
 
-Resolution order, highest first: the `LLM_*` triple, then `OPENROUTER_API_KEY`, `GEMINI_API_KEY` (or `GOOGLE_API_KEY`), `GROQ_API_KEY`, then `OPENAI_*`. A provider-specific key deliberately outranks `OPENAI_API_KEY`: an OpenAI key with an exhausted balance would otherwise shadow a working key set under the provider's own name.
+Resolution order, highest first: the `LLM_*` triple, then `OPENROUTER_API_KEY`, `GEMINI_API_KEY` (or `GOOGLE_API_KEY`), then `GROQ_API_KEY`.
+
+There is no implicit OpenAI endpoint, and that is a deliberate choice. A paid key with no balance is worse than no key at all: every cue sheet becomes a paid call that fails, and the app silently drops to the deterministic reader while reporting a configured model — which is exactly what happened in production before this was changed. A bare `OPENAI_API_KEY` therefore resolves to nothing. To use OpenAI, name it with the `LLM_*` triple. `OPENAI_API_KEY` is still read as the credential for the Agent Canvas managed proxy, which is identified by its own refresh URL rather than by the variable name.
 
 **Every configured provider is a fallback for the one above it.** Cue builds the ordered chain above and tries each provider once, in order, until one answers. A rate-limited or unfunded primary hands the same request to the next provider instead of giving up while a working key sits unused. Providers are never retried within one request: a rejected key or an exhausted balance is permanent for that provider, so repeating it only adds latency. The chain shares a single time budget rather than one per provider, so a fallback cannot silently double the wall-clock cost of a cue sheet. When a later provider answers after an earlier one failed, the sheet says so and names the provider that succeeded.
 
@@ -133,7 +134,7 @@ The `LLM_*` triple is terminal: setting all three names an endpoint deliberately
 
 Qloo is the required half; the LLM is optional and only names the specific track. Without it, Cue still ranks artists from the taste graph and leaves the cut as "Track TBD" rather than inventing a title. With it, each ranked artist gets a real track, album and year plus a rationale for the placement.
 
-Set `LLM_MODEL` explicitly when your endpoint does not serve the default (`gpt-4o-mini` for OpenAI, `claude-sonnet-4-5-20250929` for the Agent Canvas proxy). A model your key cannot access returns `403`, and Cue degrades to "Track TBD" cues; the server log names the rejected model so the cause is visible instead of silent.
+Set `LLM_MODEL` explicitly when your endpoint does not serve the preset default (each provider's own default is listed in the table below; the Agent Canvas proxy defaults to `claude-sonnet-4-5-20250929`). A model your key cannot access returns `403`, and Cue degrades to "Track TBD" cues; the server log names the rejected model so the cause is visible instead of silent.
 
 **A configured key is not assumed to work.** Cue spends one call and, if the provider refuses it, classifies the refusal — exhausted balance, rejected key, unavailable model, rate limit, timeout — and says which one in the cue sheet, in the cue cards, and in `GET /api/cue?probe=1`. Rankings, market fit and pricing are unaffected, because those come from Qloo and not the model. The deterministic parser runs instead of the LLM, and the sheet labels it as such. `GET /api/cue` reports the resolved provider, base URL and model without spending a call.
 

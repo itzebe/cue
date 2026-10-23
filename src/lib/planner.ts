@@ -22,6 +22,7 @@ import {
   type GroundingContext,
 } from "./cues";
 import { hasQlooKey } from "./qloo";
+import { buildAudienceBrief } from "./audience";
 import { castForBrief, type CastingResult } from "./casting";
 import { localiseBrief, type LocalisationResult } from "./localise";
 import { FIXTURE_SHEET } from "@/data/fixtures";
@@ -631,6 +632,11 @@ export async function buildCueSheet(
       )
     : Promise.resolve(undefined);
 
+  // The audience brief is pure computation over the anchor entities the pipeline
+  // already fetched: `audience_identity` arrives on the same /v2/search response
+  // that resolved them, so this costs no API calls and needs no promise.
+  const audienceBrief = buildAudienceBrief(brief.anchors, context.anchorEntities);
+
   const [trackMap, momentum, directionCompare, baseline, casting] = await Promise.all([
     proposeTracks(
       selected.map((entity) => entity.name),
@@ -695,6 +701,7 @@ export async function buildCueSheet(
     warnings: [...warnings, ...casting.warnings],
     mode: "live",
     casting: casting.candidates.length > 0 ? casting : undefined,
+    audienceBrief,
   };
 }
 

@@ -416,14 +416,22 @@ function normaliseEntities(json: unknown): QlooEntity[] {
 /* Endpoints                                                           */
 /* ------------------------------------------------------------------ */
 
-/** GET /search — resolve a human name to a Qloo entity ID. */
+/**
+ * GET /v2/search — resolve a human name to a Qloo entity ID.
+ *
+ * The versioned path matters: `/search` is the legacy endpoint and returns a
+ * reduced entity, dropping `properties.audience_identity` along with eleven other
+ * fields. Measured on the same query, `/search` returns 13 property keys and
+ * `/v2/search` returns 24. The Audience Identity Brief reads that field, so the
+ * legacy path would silently produce an empty brief rather than an error.
+ */
 export function searchEntities(
   query: string,
   types: string[] = [],
   take = 5,
 ): Promise<QlooCallResult<SearchResult[]>> {
   return qlooGet(
-    "/search",
+    "/v2/search",
     { query, types, take },
     (json) => {
       const root = asRecord(json);
@@ -436,8 +444,9 @@ export function searchEntities(
           const id = str(record.entity_id ?? record.id);
           const name = str(record.name);
           if (!id || !name) return null;
-          // /search returns a `types` array and no `subtype`; other endpoints
-          // return `subtype`. Normalise both onto the same fields.
+          // /v2/search returns `subtype` (and no `types` array); other endpoints
+          // are read the same way. Normalise both onto the same fields so a
+          // caller never has to know which endpoint answered.
           const types = asArray(record.types).map((type) => String(type));
           const subtype = str(record.subtype) || types[0] || "";
           return {
