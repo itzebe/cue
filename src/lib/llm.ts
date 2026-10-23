@@ -49,29 +49,97 @@ function envValue(name: string): string | undefined {
   return trimmed.length > 0 ? trimmed : undefined;
 }
 
-export type LlmSource = "llm" | "openai" | "proxy";
+export type LlmSource = "llm" | "openai" | "proxy" | "openrouter" | "gemini" | "groq";
+
+/**
+ * A provider named directly by its own environment variable.
+ *
+ * These exist because `OPENAI_API_KEY` is the generic fallback, and a key sitting
+ * there with an exhausted balance otherwise shadows a perfectly good key the
+ * operator set under the provider's own name. A provider-specific variable is a
+ * deliberate choice, so it outranks the generic one.
+ */
+interface ProviderPreset {
+  source: LlmSource;
+  baseUrl: string;
+  model: string;
+  keyVars: string[];
+}
+
+const PROVIDER_PRESETS: ProviderPreset[] = [
+  {
+    source: "openrouter",
+    baseUrl: "https://openrouter.ai/api/v1",
+    model: "openai/gpt-oss-120b:free",
+    keyVars: ["OPENROUTER_API_KEY"],
+  },
+  {
+    source: "gemini",
+    baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai/",
+    model: "gemini-3.5-flash",
+    keyVars: ["GEMINI_API_KEY", "GOOGLE_API_KEY"],
+  },
+  {
+    source: "groq",
+    baseUrl: "https://api.groq.com/openai/v1",
+    model: "openai/gpt-oss-120b",
+    keyVars: ["GROQ_API_KEY"],
+  },
+];
+
+/** Every variable this module will read, for the config report. */
+const KNOWN_KEY_VARS = [
+  "LLM_API_KEY",
+  ...PROVIDER_PRESETS.flatMap((preset) => preset.keyVars),
+  "OPENAI_API_KEY",
+  "OH_LLM_PROXY_KEY",
+];
 
 /**
  * Resolve LLM credentials from the environment.
  *
  * Preference order:
  *  1. Explicit LLM_* variables (any OpenAI-compatible provider).
- *  2. OpenAI variables.
- *  3. The Agent Canvas managed proxy, which is OpenAI-compatible and lets the
+ *  2. A provider-specific key: OpenRouter, Gemini, then Groq.
+ *  3. OpenAI variables.
+ *  4. The Agent Canvas managed proxy, which is OpenAI-compatible and lets the
  *     app run with zero user-supplied keys during development.
+ *
+ * The source is returned alongside the config so the report cannot drift from
+ * what the pipeline actually uses.
  */
-export function resolveLlmConfig(): LlmConfig | null {
+function detectLlm(): { config: LlmConfig; source: LlmSource; keyVar: string } | null {
   const explicitKey = envValue("LLM_API_KEY");
   const explicitBase = envValue("LLM_BASE_URL");
   const explicitModel = envValue("LLM_MODEL");
 
   if (explicitKey && explicitBase && explicitModel) {
     return {
-      baseUrl: explicitBase.replace(/\/$/, ""),
-      apiKey: explicitKey,
-      model: explicitModel,
-      temperature: 0.4,
+      config: {
+        baseUrl: explicitBase.replace(/\/$/, ""),
+        apiKey: explicitKey,
+        model: explicitModel,
+        temperature: 0.4,
+      },
+      source: "llm",
+      keyVar: "LLM_API_KEY",
     };
+  }
+
+  for (const preset of PROVIDER_PRESETS) {
+    const keyVar = preset.keyVars.find((name) => envValue(name) !== undefined);
+    if (keyVar) {
+      return {
+        config: {
+          baseUrl: preset.baseUrl.replace(/\/$/, ""),
+          apiKey: envValue(keyVar)!,
+          model: explicitModel || preset.model,
+          temperature: 0.4,
+        },
+        source: preset.source,
+        keyVar,
+      };
+    }
   }
 
   const openaiKey = envValue("OPENAI_API_KEY");
@@ -79,39 +147,47 @@ export function resolveLlmConfig(): LlmConfig | null {
   // The managed proxy is identified by its refresh URL, not by the key: the same
   // OPENAI_API_KEY name is used for both, so the base URL is what disambiguates.
   const proxyBase = envValue("OH_LLM_API_KEY_REFRESH_BASE_URLS")?.split(",")[0]?.trim();
+  const proxyModel = explicitModel || "claude-sonnet-4-5-20250929";
+
   if (proxyBase && openaiKey && !openaiBase) {
     return {
-      baseUrl: proxyBase.replace(/\/$/, ""),
-      apiKey: openaiKey,
-      model: explicitModel || "claude-sonnet-4-5-20250929",
-      temperature: 0.4,
+      config: { baseUrl: proxyBase.replace(/\/$/, ""), apiKey: openaiKey, model: proxyModel, temperature: 0.4 },
+      source: "proxy",
+      keyVar: "OPENAI_API_KEY",
     };
   }
 
   if (openaiKey) {
     return {
-      baseUrl: (openaiBase || "https://api.openai.com/v1").replace(/\/$/, ""),
-      apiKey: openaiKey,
-      model: explicitModel || "gpt-4o-mini",
-      temperature: 0.4,
+      config: {
+        baseUrl: (openaiBase || "https://api.openai.com/v1").replace(/\/$/, ""),
+        apiKey: openaiKey,
+        model: explicitModel || "gpt-4o-mini",
+        temperature: 0.4,
+      },
+      source: "openai",
+      keyVar: "OPENAI_API_KEY",
     };
   }
 
   const proxyOnlyKey = envValue("OH_LLM_PROXY_KEY");
   if (proxyBase && proxyOnlyKey) {
     return {
-      baseUrl: proxyBase.replace(/\/$/, ""),
-      apiKey: proxyOnlyKey,
-      model: explicitModel || "claude-sonnet-4-5-20250929",
-      temperature: 0.4,
+      config: { baseUrl: proxyBase.replace(/\/$/, ""), apiKey: proxyOnlyKey, model: proxyModel, temperature: 0.4 },
+      source: "proxy",
+      keyVar: "OH_LLM_PROXY_KEY",
     };
   }
 
   return null;
 }
 
+export function resolveLlmConfig(): LlmConfig | null {
+  return detectLlm()?.config ?? null;
+}
+
 export function hasLlm(): boolean {
-  return resolveLlmConfig() !== null;
+  return detectLlm() !== null;
 }
 
 /**
@@ -123,34 +199,26 @@ export function hasLlm(): boolean {
  * log access. Only lengths and booleans are exposed, never key material.
  */
 export function llmDiagnostics() {
-  const config = resolveLlmConfig();
-  const rawKey =
-    process.env.LLM_API_KEY ?? process.env.OPENAI_API_KEY ?? process.env.OH_LLM_PROXY_KEY;
-  const key = config?.apiKey;
-
-  let source: LlmSource | "none" = "none";
-  if (config) {
-    if (envValue("LLM_API_KEY") && envValue("LLM_BASE_URL") && envValue("LLM_MODEL")) {
-      source = "llm";
-    } else if (envValue("OPENAI_BASE_URL")) {
-      source = "openai";
-    } else if (envValue("OH_LLM_API_KEY_REFRESH_BASE_URLS")) {
-      source = "proxy";
-    } else {
-      source = "openai";
-    }
-  }
+  const detected = detectLlm();
+  // Check the variable that actually supplied the key, so a stray space in a
+  // provider-specific var is reported rather than masked by a clean generic one.
+  const rawKey = detected ? process.env[detected.keyVar] : undefined;
+  const key = detected?.config.apiKey;
 
   return {
-    configured: config !== null,
-    source,
-    baseUrl: config?.baseUrl ?? null,
-    model: config?.model ?? null,
+    configured: detected !== null,
+    source: detected?.source ?? "none",
+    keyVar: detected?.keyVar ?? null,
+    baseUrl: detected?.config.baseUrl ?? null,
+    model: detected?.config.model ?? null,
     keyLength: key?.length ?? 0,
     // A paste that picked up surrounding whitespace is the classic silent 401.
     keyHadWhitespace:
       typeof rawKey === "string" && rawKey.length > 0 && rawKey !== rawKey.trim(),
     keyStartsWithSk: key ? key.startsWith("sk-") : false,
+    // Which variables exist, so a key set under an unexpected name is visible
+    // rather than silently ignored. Presence only, never values.
+    presentKeyVars: KNOWN_KEY_VARS.filter((name) => envValue(name) !== undefined),
   };
 }
 

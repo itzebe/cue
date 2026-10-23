@@ -929,6 +929,124 @@ await check("a malformed cue cannot produce a NaN price", async () => {
   assert.equal(quote.placement, "score_bed", "an unknown placement falls back rather than NaN");
 });
 
+await check("every grant lever actually moves the price", async () => {
+  const { quoteLicense, DEFAULT_TERMS } = await import("../src/lib/rights.ts");
+  // The drivers have to compound. When they were summed, one large driver
+  // (popularity, ~14.6) swamped the media weight (0.35-1.5), so four of the five
+  // media options rounded to the same number and the dropdown looked broken.
+  const major = {
+    id: "cue-1",
+    artist: "Björk",
+    track: "Unravel",
+    affinity: 0.8,
+    popularity: 0.99,
+    momentum: 0,
+    placement: "needle_drop",
+  } as never;
+
+  const mediaPrices = (["all_media", "broadcast", "streaming", "social", "festival"] as const).map(
+    (media) => quoteLicense(major, { ...DEFAULT_TERMS, media }).fee.recommended,
+  );
+  assert.equal(
+    new Set(mediaPrices).size,
+    mediaPrices.length,
+    `every media option must price differently, got ${mediaPrices.join(", ")}`,
+  );
+  assert.ok(
+    mediaPrices[0] > mediaPrices[mediaPrices.length - 1],
+    "all media must cost more than a festival-only grant",
+  );
+
+  const territories = (["worldwide", "north_america", "europe", "single_market"] as const).map(
+    (territory) => quoteLicense(major, { ...DEFAULT_TERMS, territory }).fee.recommended,
+  );
+  assert.equal(new Set(territories).size, territories.length, "each territory must price differently");
+
+  const terms = ([1, 3, 10] as const).map(
+    (termYears) => quoteLicense(major, { ...DEFAULT_TERMS, termYears }).fee.recommended,
+  );
+  assert.equal(new Set(terms).size, terms.length, "each term must price differently");
+
+  // Exclusivity and discovery are the other two levers; both must be felt.
+  const base = quoteLicense(major, DEFAULT_TERMS).fee.recommended;
+  const exclusive = quoteLicense(major, { ...DEFAULT_TERMS, exclusive: true }).fee.recommended;
+  assert.ok(exclusive > base, "exclusivity must raise the fee");
+  const discovery = quoteLicense({ ...major, discovery: true } as never, DEFAULT_TERMS).fee.recommended;
+  assert.ok(discovery < base, "a discovery pick must be discounted");
+
+  // Leverage has to separate an unknown artist from a major, or popularity is
+  // decoration rather than a pricing input.
+  const indie = quoteLicense({ ...major, popularity: 0.2 } as never, DEFAULT_TERMS).fee.recommended;
+  assert.ok(indie < base, "a low-popularity artist must be cheaper than a major");
+});
+
+await check("a provider key outranks the generic OpenAI key", async () => {
+  const { resolveLlmConfig, llmDiagnostics } = await import("../src/lib/llm.ts");
+  const saved = { ...process.env };
+  try {
+    // The reported failure: a dead OpenAI key with no balance shadowed a good
+    // OpenRouter key, because OPENAI_API_KEY was the only variable consulted.
+    delete process.env.LLM_API_KEY;
+    delete process.env.LLM_BASE_URL;
+    delete process.env.LLM_MODEL;
+    delete process.env.OH_LLM_API_KEY_REFRESH_BASE_URLS;
+    delete process.env.OH_LLM_PROXY_KEY;
+    process.env.OPENAI_API_KEY = "sk-openai-exhausted";
+    process.env.OPENROUTER_API_KEY = "sk-or-good";
+
+    const config = resolveLlmConfig();
+    assert.equal(config?.apiKey, "sk-or-good", "the provider key must win");
+    assert.equal(config?.baseUrl, "https://openrouter.ai/api/v1");
+    assert.ok(config?.model, "a provider preset must supply a model");
+
+    const diagnostics = llmDiagnostics();
+    assert.equal(diagnostics.source, "openrouter");
+    assert.equal(diagnostics.keyVar, "OPENROUTER_API_KEY");
+    // The report is public; it must name variables without leaking either value.
+    const serialised = JSON.stringify(diagnostics);
+    assert.ok(!serialised.includes("sk-or-good"), "no key may be serialised");
+    assert.ok(!serialised.includes("sk-openai-exhausted"), "no shadowed key may be serialised");
+
+    // Gemini is the next provider in the preset order.
+    delete process.env.OPENROUTER_API_KEY;
+    process.env.GEMINI_API_KEY = "AIza-test";
+    const gemini = llmDiagnostics();
+    assert.equal(gemini.source, "gemini");
+    assert.ok(
+      resolveLlmConfig()?.baseUrl.includes("generativelanguage.googleapis.com"),
+      "the Gemini OpenAI-compatible endpoint must be used",
+    );
+
+    // An explicit LLM_* triple still outranks every provider preset.
+    process.env.LLM_API_KEY = "sk-explicit";
+    process.env.LLM_BASE_URL = "https://custom.test/v1";
+    process.env.LLM_MODEL = "custom-model";
+    const explicit = llmDiagnostics();
+    assert.equal(explicit.source, "llm");
+    assert.equal(resolveLlmConfig()?.apiKey, "sk-explicit");
+  } finally {
+    process.env = saved;
+  }
+});
+
+await check("a stray space in a provider key is reported", async () => {
+  const { llmDiagnostics } = await import("../src/lib/llm.ts");
+  const saved = { ...process.env };
+  try {
+    delete process.env.LLM_API_KEY;
+    delete process.env.LLM_BASE_URL;
+    delete process.env.LLM_MODEL;
+    delete process.env.OPENAI_API_KEY;
+    process.env.OPENROUTER_API_KEY = "sk-or-good \n";
+    const diagnostics = llmDiagnostics();
+    assert.equal(diagnostics.keyHadWhitespace, true, "the untrimmed paste must be flagged");
+    assert.equal(diagnostics.source, "openrouter");
+    assert.equal(diagnostics.keyVar, "OPENROUTER_API_KEY");
+  } finally {
+    process.env = saved;
+  }
+});
+
 console.log(`\n${passed} passed, ${failures.length} failed.\n`);
 if (failures.length > 0) {
   for (const failure of failures) console.error(`  - ${failure}`);

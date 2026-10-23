@@ -118,8 +118,14 @@ const TERM_WEIGHT: Record<LicenseTerms["termYears"], number> = {
   10: 1.45,
 };
 
-/** Base fee for a low-profile independent artist on a minimal, non-exclusive deal. */
-const BASE_FEE = 900;
+/** Base fee before any weighting, for a minimal independent sync use. */
+const BASE_FEE = 200;
+
+/**
+ * No clearance is free. Even an unknown artist in one market at a festival still
+ * carries paperwork, an invoice and Cue's handling, so the model floors there.
+ */
+const MINIMUM_FEE = 250;
 
 /**
  * Popularity is the only label-leverage proxy Qloo exposes, so it drives the
@@ -225,8 +231,12 @@ export function quoteLicense(cue: Cue, terms: LicenseTerms): LicenseQuote {
     });
   }
 
-  const raw = BASE_FEE * drivers.reduce((total, driver) => total + driver.multiplier, 0) * 0.35;
-  const recommended = roundFee(raw);
+  // The drivers compound. A grant covering all media worldwide for ten years is
+  // not "all media plus worldwide plus ten years" — each lever multiplies the
+  // exposure, so summing them would let one large driver (popularity) swamp the
+  // rest and make four of the five media options round to the same price.
+  const product = drivers.reduce((total, driver) => total * driver.multiplier, 1);
+  const recommended = Math.max(MINIMUM_FEE, roundFee(BASE_FEE * product));
 
   return {
     cueId: cue.id,

@@ -119,8 +119,11 @@ npm run verify
 |---|---|---|
 | `QLOO_API_KEY` | for live mode | Your Qloo hackathon key |
 | `QLOO_API_BASE_URL` | no | Defaults to `https://hackathon.api.qloo.com` |
-| `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL` | no | Any OpenAI-compatible endpoint |
-| `OPENAI_API_KEY` / `OPENAI_BASE_URL` / `LLM_MODEL` | no | Alternative to the above |
+| `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL` | no | Any OpenAI-compatible endpoint (all three, to override everything else) |
+| `OPENROUTER_API_KEY` / `GEMINI_API_KEY` / `GROQ_API_KEY` | no | Set one and Cue infers the base URL and model |
+| `OPENAI_API_KEY` / `OPENAI_BASE_URL` | no | Alternative to the above |
+
+Resolution order, highest first: the `LLM_*` triple, then `OPENROUTER_API_KEY`, `GEMINI_API_KEY` (or `GOOGLE_API_KEY`), `GROQ_API_KEY`, then `OPENAI_*`. A provider-specific key deliberately outranks `OPENAI_API_KEY`: an OpenAI key with an exhausted balance would otherwise shadow a working key set under the provider's own name.
 
 Qloo is the required half; the LLM is optional and only names the specific track. Without it, Cue still ranks artists from the taste graph and leaves the cut as "Track TBD" rather than inventing a title. With it, each ranked artist gets a real track, album and year plus a rationale for the placement.
 
@@ -128,15 +131,17 @@ Set `LLM_MODEL` explicitly when your endpoint does not serve the default (`gpt-4
 
 #### Free OpenAI-compatible providers
 
-Track naming is optional, and a paid OpenAI key is not required to turn it on. Any OpenAI-compatible endpoint works, with no code change. Set all three of `LLM_API_KEY`, `LLM_BASE_URL` and `LLM_MODEL`:
+Track naming is optional, and a paid OpenAI key is not required to turn it on. Set the provider's own key and Cue infers the rest:
 
-| Provider | `LLM_BASE_URL` | Example `LLM_MODEL` | Key |
+| Provider | Key variable | Default model | Where to get a key |
 |---|---|---|---|
-| Groq | `https://api.groq.com/openai/v1` | `openai/gpt-oss-120b` | [console.groq.com](https://console.groq.com/keys) |
-| Google Gemini | `https://generativelanguage.googleapis.com/v1beta/openai/` | `gemini-3.5-flash` | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) |
-| OpenRouter | `https://openrouter.ai/api/v1` | `openai/gpt-oss-120b:free` | [openrouter.ai/keys](https://openrouter.ai/keys) |
+| Groq | `GROQ_API_KEY` | `openai/gpt-oss-120b` | [console.groq.com](https://console.groq.com/keys) |
+| Google Gemini | `GEMINI_API_KEY` | `gemini-3.5-flash` | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) |
+| OpenRouter | `OPENROUTER_API_KEY` | `openai/gpt-oss-120b:free` | [openrouter.ai/keys](https://openrouter.ai/keys) |
 
-Groq and Gemini need no credit card. Free model lineups rotate and models do get retired, so check the provider's deprecation list before pinning an ID — `llama-3.3-70b-versatile`, for example, was shut down for free-tier use on 2026-08-16.
+Any other OpenAI-compatible endpoint also works with no code change: set all three of `LLM_API_KEY`, `LLM_BASE_URL` and `LLM_MODEL` to override every preset.
+
+Groq, Gemini and OpenRouter's free tier need no credit card. Free model lineups rotate and models do get retired, so check the provider's deprecation list before pinning an ID — `llama-3.3-70b-versatile`, for example, was shut down for free-tier use on 2026-08-16.
 
 To confirm what the deployed app resolved, and to see the upstream status if a call fails:
 
