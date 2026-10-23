@@ -8,6 +8,7 @@ import { CompareStrip } from "@/components/CompareStrip";
 import { ReceiptsPanel } from "@/components/ReceiptsPanel";
 import { DirectionPanel, RegionPanel } from "@/components/SignalPanels";
 import { MarketplacePanel } from "@/components/MarketplacePanel";
+import { ComparablesPanel } from "@/components/ComparablesPanel";
 import { CrossDomainPanel } from "@/components/CrossDomainPanel";
 import { SubstitutePanel } from "@/components/SubstitutePanel";
 import { SAMPLE_SCENES } from "@/data/fixtures";
@@ -443,6 +444,8 @@ export default function StudioPage() {
                 />
               </div>
               <MarketplacePanel sheet={sheet} />
+              <ComparablesPanel sheet={sheet} />
+
               <CrossDomainPanel key={sheet.brief.raw} sheet={sheet} />
               <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
                 <DirectionPanel sheet={sheet} />

@@ -193,17 +193,27 @@ async function qlooGet<T>(
       // A fresh controller per attempt. Reusing one across attempts means the
       // first attempt's budget silently covers the retries, so a slow-but-
       // recoverable endpoint aborts before it is ever retried.
+      //
+      // The timer starts *inside* the slot, not before it. Starting it outside
+      // means the time spent queued behind the concurrency limit is charged to
+      // the request's network budget, so a request that waits 11s for a slot and
+      // then takes 2s to answer is reported as a 12s timeout — the deadline fires
+      // while the queue is still waiting, before a socket is ever opened. That
+      // was a real failure: with the comparables pass adding three concurrent
+      // calls, the television query was starved of a slot and aborted as a
+      // "timeout" while Qloo was never asked.
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      let timer: ReturnType<typeof setTimeout> | undefined;
       try {
-        res = await withSlot(() =>
-          fetch(url, {
+        res = await withSlot(() => {
+          timer = setTimeout(() => controller.abort(), timeoutMs);
+          return fetch(url, {
             method: "GET",
             headers: { "X-Api-Key": key, accept: "application/json" },
             signal: controller.signal,
             cache: "no-store",
-          }),
-        );
+          });
+        });
       } catch (error) {
         res = undefined;
         lastError =
@@ -213,7 +223,7 @@ async function qlooGet<T>(
               ? error.message
               : "network error";
       } finally {
-        clearTimeout(timer);
+        if (timer) clearTimeout(timer);
       }
 
       if (!res || !RETRYABLE_STATUS.has(res.status) || attempt === MAX_ATTEMPTS) break;

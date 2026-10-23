@@ -7,6 +7,7 @@
  */
 
 import type { AudienceBrief } from "./audience";
+import type { ComparablesResult } from "./comparables";
 import type { CastingResult } from "./casting";
 import type { LocalisationResult } from "./localise";
 import type { LicenseQuote } from "./rights";
@@ -196,6 +197,12 @@ export interface CueSheet {
    * it costs no extra API calls — it arrives on the anchor search.
    */
   audienceBrief?: AudienceBrief;
+  /**
+   * Film, TV and book references whose measured audience overlaps the brief's.
+   * The same question the cue sheet asks about artists, pointed at the three
+   * domains a director actually names when describing a reference.
+   */
+  comparables?: ComparablesResult;
   /** Marketplace quotes, keyed by cue id, generated on demand from the sheet. */
   quotes?: LicenseQuote[];
 }

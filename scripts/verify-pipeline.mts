@@ -2234,6 +2234,161 @@ await check("the audience brief costs no extra Qloo calls", async () => {
   }
 });
 
+await check("comparables exclude the brief's own anchors", async () => {
+  const { comparablesForBrief } = await import("../src/lib/comparables.ts");
+
+  // A film named as the reference must not come back as its own comparable. This
+  // is the invariant that keeps "more like Drive" from returning Drive, and it
+  // depends on the anchor IDs reaching filter.exclude.entities.
+  const seen: string[] = [];
+  const original = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = new URL(typeof input === "string" ? input : input.toString());
+    seen.push(url.searchParams.get("filter.exclude.entities") ?? "");
+    return jsonResponse({
+      results: {
+        entities: [
+          { entity_id: "cmp-1", name: "The Town", type: "urn:entity:movie", popularity: 0.98, properties: { release_year: 2010 } },
+        ],
+      },
+    });
+  }) as typeof fetch;
+
+  try {
+    const receipts: any[] = [];
+    const anchors = [
+      { entity_id: "anchor-drive", name: "Drive", type: "urn:entity:movie" },
+      { entity_id: "anchor-portishead", name: "Portishead", type: "urn:entity:artist" },
+    ] as never;
+    const result = await comparablesForBrief(anchors, [], receipts);
+
+    assert.equal(result.groups.length, 3, "film, television and books should each be queried");
+    assert.deepEqual(
+      result.groups.map((g) => g.domain),
+      ["movie", "tv_show", "book"],
+      "domains should be reported in a stable order",
+    );
+    assert.ok(
+      seen.every((excluded) => excluded.includes("anchor-drive") && excluded.includes("anchor-portishead")),
+      "every domain query must exclude the brief's anchors",
+    );
+    assert.equal(receipts.length, 3, "each domain call should leave a receipt");
+
+    // release_year is carried through so the panel can date a comparable.
+    assert.equal(result.groups[0].items[0].releaseYear, 2010);
+    assert.equal(result.groups[0].items[0].name, "The Town");
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("comparables report an empty domain differently from a failed one", async () => {
+  const { comparablesForBrief } = await import("../src/lib/comparables.ts");
+  const original = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = new URL(typeof input === "string" ? input : input.toString());
+    const type = url.searchParams.get("filter.type") ?? "";
+    // Books genuinely match nothing; television fails outright. These are
+    // different facts and must not be collapsed into one empty state.
+    if (type === "urn:entity:book") return jsonResponse({ results: { entities: [] } });
+    if (type === "urn:entity:tv_show") return jsonResponse({ error: "upstream" }, 500);
+    return jsonResponse({
+      results: { entities: [{ entity_id: "m1", name: "The Town", type: "urn:entity:movie" }] },
+    });
+  }) as typeof fetch;
+
+  try {
+    const result = await comparablesForBrief(
+      [{ entity_id: "anchor", name: "Drive", type: "urn:entity:movie" }] as never,
+      [],
+      [],
+    );
+    assert.deepEqual(result.emptyDomains, ["book"], "an empty result set is an empty domain");
+    assert.ok(
+      !result.emptyDomains.includes("tv_show"),
+      "a failed call is not an empty domain",
+    );
+    assert.ok(
+      result.warnings.some((w) => /television/i.test(w)),
+      "a failed domain should warn, naming the domain",
+    );
+    assert.equal(result.groups.length, 1);
+    assert.equal(result.groups[0].domain, "movie");
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("comparables skip the query when the brief gives no signal", async () => {
+  const { comparablesForBrief } = await import("../src/lib/comparables.ts");
+  const original = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = (async () => {
+    calls += 1;
+    return jsonResponse({ results: { entities: [] } });
+  }) as typeof fetch;
+
+  try {
+    // No anchors and no tags means there is no audience to rank against. Calling
+    // Qloo anyway would burn three requests to return noise.
+    const result = await comparablesForBrief([], [], []);
+    assert.equal(calls, 0, "no signal means no calls");
+    assert.deepEqual(result.skippedDomains, ["movie", "tv_show", "book"]);
+    assert.equal(result.groups.length, 0);
+    assert.ok(result.warnings.length > 0, "the skip should be explained, not silent");
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("queue wait is not charged to the request timeout budget", async () => {
+  const { insights } = await import("../src/lib/qloo.ts");
+  const original = globalThis.fetch;
+
+  // The concurrency limiter allows 4 in flight. Saturate it with slow calls, then
+  // send a fifth whose timeout is shorter than one call's latency: if the timer
+  // starts before the slot is granted, the fifth aborts while still queued and is
+  // reported as a network timeout even though Qloo was never asked. That was a
+  // real failure — the comparables pass starved the television query into a
+  // phantom 12s timeout.
+  const LATENCY = 400;
+  const BUDGET = 600;
+
+  globalThis.fetch = ((_input: RequestInfo | URL, init?: RequestInit) => {
+    return new Promise<Response>((resolve, reject) => {
+      const timer = setTimeout(
+        () => resolve(new Response(JSON.stringify({ results: { entities: [] } }), { status: 200 })),
+        LATENCY,
+      );
+      // Respect the abort signal the way a real socket would, so a timeout is
+      // observable rather than silently ignored.
+      init?.signal?.addEventListener("abort", () => {
+        clearTimeout(timer);
+        const error = new Error("aborted");
+        error.name = "AbortError";
+        reject(error);
+      });
+    });
+  }) as typeof fetch;
+
+  try {
+    const requests = Array.from({ length: 5 }, () =>
+      insights({ filterType: "urn:entity:artist", take: 1, timeoutMs: BUDGET }),
+    );
+    const results = await Promise.all(requests);
+    const failed = results.filter((r) => !r.ok);
+    assert.equal(
+      failed.length,
+      0,
+      `every request should succeed once queue wait is excluded from the budget; failures: ${failed
+        .map((r) => r.error)
+        .join("; ")}`,
+    );
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
 console.log(`\n${passed} passed, ${failures.length} failed.\n`);
 if (failures.length > 0) {
   for (const failure of failures) console.error(`  - ${failure}`);
