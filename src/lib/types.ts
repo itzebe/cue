@@ -133,6 +133,17 @@ export interface Cue {
    * exactly the failure Cue exists to avoid.
    */
   trackUnverified?: boolean;
+  /**
+   * The scene reader's one-line reason for proposing this specific cut.
+   *
+   * Kept apart from `why` on purpose. `why` is the evidence trail and every entry
+   * in it is traceable to a Qloo signal; this string is model-written prose. It
+   * used to be prepended to `why`, which put an LLM sentence underneath a heading
+   * that said "Why Qloo ranked this" and inside a panel badged "taste graph
+   * grounded" — the model's words attributed to the taste graph. Two different
+   * sources have to stay two different fields, or the attribution is a lie.
+   */
+  proposalRationale?: string;
 }
 
 export interface CueSheet {

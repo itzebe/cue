@@ -16,7 +16,7 @@ export function ReceiptsPanel({ sheet }: { sheet: CueSheet }) {
   const failures = sheet.receipts.filter((receipt) => receipt.status !== 200).length;
 
   return (
-    <section className="panel grain relative overflow-hidden p-5" aria-label="Qloo call receipts">
+    <section id="receipts" className="panel grain relative scroll-mt-20 overflow-hidden p-5" aria-label="Qloo call receipts">
       <div className="relative z-10">
         <header className="flex flex-wrap items-center justify-between gap-3">
           <div>

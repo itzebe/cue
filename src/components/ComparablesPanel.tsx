@@ -19,7 +19,7 @@ export function ComparablesPanel({ sheet }: { sheet: CueSheet }) {
   const domains = comparables.groups.map((group) => group.label.toLowerCase());
 
   return (
-    <section className="panel grain relative overflow-hidden p-5" aria-label="Comparables">
+    <section id="comparables" className="panel grain relative scroll-mt-20 overflow-hidden p-5" aria-label="Comparables">
       <header>
         <h2 className="font-display text-xl text-haze-100">What this is like</h2>
         <p className="mt-1 max-w-2xl text-xs leading-relaxed text-haze-500">

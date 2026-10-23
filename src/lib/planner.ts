@@ -680,7 +680,9 @@ export async function buildCueSheet(
     if (!proposed) cue.trackUnverified = true;
     if (proposed?.album) cue.album = proposed.album;
     if (proposed?.year) cue.year = proposed.year;
-    if (proposed?.rationale) cue.why = [proposed.rationale, ...cue.why];
+    // Not pushed into `why`: that array is Qloo evidence, and this sentence is
+    // written by the model. Mixing them mislabels the source (see Cue.proposalRationale).
+    if (proposed?.rationale) cue.proposalRationale = proposed.rationale;
     return cue;
   });
 

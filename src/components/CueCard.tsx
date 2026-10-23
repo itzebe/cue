@@ -160,6 +160,21 @@ export function CueCard({
           </div>
         ) : null}
 
+        {cue.proposalRationale ? (
+          /* Attributed to the model that wrote it, and kept visually apart from the
+             Qloo evidence below. This sentence previously sat under the "Why Qloo
+             ranked this" heading, which credited the taste graph with the scene
+             reader's words. */
+          <section className="mt-4 rounded-lg border border-white/5 bg-black/20 p-3">
+            <h4 className="text-[10px] font-medium uppercase tracking-wider text-haze-500">
+              Why this cut — written by the scene reader
+            </h4>
+            <p className="mt-1.5 text-sm leading-relaxed text-haze-300">
+              {cue.proposalRationale}
+            </p>
+          </section>
+        ) : null}
+
         <section className="mt-4">
           <h4 className="text-[10px] font-medium uppercase tracking-wider text-haze-500">
             Why Qloo ranked this
