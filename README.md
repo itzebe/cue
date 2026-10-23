@@ -1,8 +1,10 @@
 # Cue
 
-**An agentic music supervisor that scores film, TV and advertising scenes with music that is culturally right — not just plausible.**
+**The cultural layer for creative decisions.** Cue measures what actually resonates — and then sells the placement.
 
-Built for the [Qloo Agentic Hackathon](https://qloo.devpost.com/). Every recommendation is ranked by the [Qloo Taste Graph](https://docs.qloo.com/), because an LLM cannot know what people actually like.
+Built for the [Qloo Agentic Hackathon](https://qloo.devpost.com/). Every ranking, market read, casting match and price traces back to measured audience affinity in the [Qloo Taste Graph](https://docs.qloo.com/), because an LLM cannot know what people actually like.
+
+The first use case is music supervision for film, TV and advertising: a scene brief in, a grounded cue sheet out. The same engine then answers the neighbouring questions — who to cast, which brands fit, what changes by market, and what the placement costs to clear.
 
 ---
 
@@ -24,7 +26,26 @@ Paste a scene brief — a script page, a treatment, or two sentences — and Cue
 - **Momentum.** Qloo's own trend series, so a supervisor knows whether a cue reads current or nostalgic.
 - **Placement and clearance notes.** Which cue is the needle drop, which is the score bed, and what each will cost to clear.
 - **A creative A/B.** Two competing directions run through `/v2/analysis/compare` to see whether they split the audience or share it.
+- **A clearance desk.** Select the cues you want and Cue prices the grant: fee band, rights holders, one-stop or two negotiations, the path to signature, and the day the campaign is gated.
+- **Cross-domain answers.** The same audience measurement ranks people and brands for casting, and returns the cultural touchpoints each market would reference.
 - **Full receipts.** Every Qloo endpoint called, with parameters, status, latency and row count.
+
+## What is honest and what is not
+
+Cue is built for a hackathon with a live API, so the boundary between measured and modelled is stated in the product rather than blurred.
+
+| Output | Source | Status |
+|---|---|---|
+| Affinity, popularity, momentum, audience fit | Qloo | Measured |
+| Market touchpoints | Qloo (`urn:entity:place` + location) | Measured |
+| Casting and brand candidates | Qloo (`urn:entity:person`, `urn:entity:brand`) | Measured |
+| Track titles | Optional LLM, else left for the supervisor | Never invented |
+| Fees, splits, clearance timelines | Cue's own model | Estimated, labelled as such |
+
+Two findings shaped the design and are worth stating plainly:
+
+1. **Qloo's location filter does not move artist affinity.** Measured against the hackathon API, `filter.type=urn:entity:artist` returns byte-identical entities *and* affinity scores for Los Angeles, Sao Paulo, Seoul, Lagos and London. A feature claiming to "localise the soundtrack" would be fabricating its result, so Cue localises what the data actually supports — `urn:entity:place`, where markets diverge completely (Big Ben for London, the Ghibli Museum for Tokyo, zero overlap between markets). The music stays global because the data says it is global.
+2. **Clearance data is not available through Qloo.** Fees and splits are therefore produced by a transparent model with every input and multiplier shown in the UI, not presented as quotes. Inventing a real number would be the same failure as inventing a track title.
 
 ## Why this needs Qloo
 
@@ -38,7 +59,9 @@ The hackathon's test is whether a project would work the same without Qloo. Here
 | Does it land with this audience? | `signal.demographics.*` | No — requires demographic data |
 | Is this artist rising or cooling? | `GET /v2/trending` | No — requires a time series |
 | Do these two directions share an audience? | `GET /v2/analysis/compare` | No — requires cross-group analysis |
-| Does it land in this market? | `location-aware insights` | No — requires regional signals |
+| Which people and brands fit this audience? | `urn:entity:person`, `urn:entity:brand` insights | No — requires cross-domain affinity |
+| What cultural touchpoints define this market? | `urn:entity:place` + `filter.location.query` | No — requires regional signals |
+| What will this cost to clear? | Qloo popularity + momentum, then Cue's model | No — needs measured leverage |
 
 Cue makes this explicit in the product itself. The **"The difference is the whole point"** panel puts the ungrounded LLM answer next to the Qloo-grounded one, on the same scene, in the same view.
 
@@ -61,8 +84,12 @@ scene brief
    │
    ├─ 5. name tracks               LLM → one real track per Qloo-ranked artist
    │
-   └─ 6. assemble                  placement, clearance, confidence, receipts
+   ├─ 6. cross-domain              people + brands → casting and partner fit
+   │
+   └─ 7. assemble                  placement, clearance, confidence, receipts
 ```
+
+Localisation is deliberately **not** a stage of the cue sheet. Each market is a location-filtered place query that measured 3.6s–19.2s on the hackathon sandbox — a cost every sheet would pay for a feature most sheets do not use. It lives behind its own endpoint, `POST /api/localise`, that the user triggers when they want it. The cue sheet itself stays around 20s.
 
 **The division of labour is deliberate.** The LLM proposes creative scaffolding — track titles, tone language, the reading of the scene. **Qloo decides what actually ranks.** Cue never invents an affinity number, and never asks a model to guess one.
 
@@ -84,7 +111,7 @@ npm run dev                  # http://localhost:12000
 npm run verify
 ```
 
-24 checks covering normalisation, affinity extraction, explainability parsing, momentum derivation, failure degradation and cue assembly. Only `fetch` is stubbed — everything under test is the production code path.
+36 checks covering normalisation, affinity extraction, explainability parsing, momentum derivation, failure degradation, cue assembly, concurrency limits, place-based localisation, casting and licence pricing. Only `fetch` is stubbed — everything under test is the production code path.
 
 ### Environment
 
@@ -93,9 +120,12 @@ npm run verify
 | `QLOO_API_KEY` | for live mode | Your Qloo hackathon key |
 | `QLOO_API_BASE_URL` | no | Defaults to `https://hackathon.api.qloo.com` |
 | `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL` | no | Any OpenAI-compatible endpoint |
-| `OPENAI_API_KEY` | no | Alternative to the above |
+| `OPENAI_API_KEY` / `OPENAI_BASE_URL` / `LLM_MODEL` | no | Alternative to the above |
 
-Without an LLM configured, Cue uses its deterministic scene reader and skips track naming. The Qloo grounding is unaffected.
+Qloo is the required half; the LLM is optional and only names the specific track. Without it, Cue still ranks artists from the taste graph and leaves the cut as "Track TBD" rather than inventing a title. With it, each ranked artist gets a real track, album and year plus a rationale for the placement.
+
+Set `LLM_MODEL` explicitly when your endpoint does not serve the default (`gpt-4o-mini` for OpenAI, `claude-sonnet-4-5-20250929` for the Agent Canvas proxy). A model your key cannot access returns `403`, and Cue degrades to "Track TBD" cues; the server log now names the rejected model so the cause is visible instead of silent.
+
 
 ## Deployment
 
@@ -104,6 +134,15 @@ Deploy to Vercel and set `QLOO_API_KEY` (plus your LLM variables) as environment
 ```bash
 vercel --prod
 ```
+
+## Endpoints
+
+| Route | Purpose |
+|---|---|
+| `POST /api/cue` | Scene brief in, grounded cue sheet out. The core call. |
+| `POST /api/localise` | Compare the brief's cultural touchpoints across markets. Slow by nature, so it is opt-in. |
+| `POST /api/quote` | Price a selected basket: fee bands, rights holders, clearance path, gating day. |
+| `GET /api/cue` | Health check: whether Qloo and an LLM are configured, and against which base URL. |
 
 ## Notes for reviewers
 
@@ -115,7 +154,10 @@ vercel --prod
 - **No "song" entity type exists in Qloo.** Cue grounds the *artist* and *vibe* with Qloo, then proposes specific tracks from those artists. This is stated openly rather than papered over.
 - **Momentum is measured, never invented.** The trend series exposed by the hackathon sandbox is a frozen snapshot: `population_rank_velocity`, `population_percent_delta` and `population_percentile` are constant across every artist tested, so the derivation legitimately returns `0` (steady) on live data. The field is parsed, ranked and rendered; it simply reports "steady" rather than fabricating a trend. The unit tests cover the rising and cooling branches with a varying series.
 - **Tag-only briefs return a uniform affinity.** When a brief names no film, director or artist, `/v2/insights` matches on tags alone and returns the same affinity score for every entity. Cue detects this (zero spread with no signal entities), orders by popularity as a deterministic tiebreak, and says so in the warnings instead of presenting an arbitrary order as a ranking. Naming an anchor restores true affinity ranking.
+- **Anchor extraction is load-bearing, so it is tested.** Whether a brief gets true affinity ranking or the flat tag-only fallback is decided entirely by whether Cue can find a named reference in the text. The reader handles the shapes supervisors actually write — single-word titles (`Drive`, `Sicario`), titles with lowercase connectors (`Under the Skin`), quoted phrases, and `and`-separated lists, which split into separate entities rather than merging. It excludes sentence-initial words capitalised by grammar, regions and US states (those are routed to `region`, since a place is not a taste entity), and phrases that begin with a stopword (`Set in New York`, `US and UK`). The four bundled sample scenes are part of the test suite for this reason: a sample that silently degrades to a flat ranking is a bad first impression.
 - **The key rate-limits in bursts, and the client absorbs it.** A cue sheet issues 20+ calls, and the hackathon key returns `429` under that load. Requests are capped at four in flight and retried up to three times with exponential backoff, honouring `Retry-After` when present. A rate-limited run comes back complete instead of half-empty.
+- **Location does not move artist affinity.** See "What is honest and what is not" above. This was measured, not assumed, and it is the reason localisation targets places.
+- **Market calls are slow and are budgeted for.** A location-filtered `urn:entity:place` query ran between 3.6s and 19.2s against the sandbox, well past the 12s default, so `/api/localise` runs its markets in parallel with a 25s per-call budget rather than serialising them inside the cue sheet.
 - **Typo tolerance is off on purpose.** With `feature.typo_tolerance=true`, Qloo fuzzy-matches unrelated tags — `tension` → *Venison*, `dark` → *Park*, `open` → *Oven* — which silently corrupts the grounding. Tag resolution pins `feature.typo_tolerance=false` so a tag means what it says.
 
 ## License

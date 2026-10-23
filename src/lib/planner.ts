@@ -13,6 +13,8 @@ import {
   type GroundingContext,
 } from "./cues";
 import { hasQlooKey } from "./qloo";
+import { castForBrief, type CastingResult } from "./casting";
+import { localiseBrief, type LocalisationResult } from "./localise";
 import { FIXTURE_SHEET } from "@/data/fixtures";
 
 /**
@@ -184,12 +186,82 @@ export function parseSceneBrief(raw: string): SceneBrief {
   );
   const era = eraMatch ? eraMatch[0].trim() : "contemporary";
 
-  // Quoted phrases and capitalised proper nouns are treated as anchors.
+  // Named references become Qloo signal entities, so this extraction decides
+  // whether the sheet gets true affinity ranking or a flat tag-only fallback.
+  //
+  // Two shapes matter and the previous pattern caught neither: single-word
+  // titles ("Drive", "Sicario", "Outkast") and multi-word titles containing a
+  // lowercase connector ("Under the Skin", "The Temptations"). Requiring two
+  // capitalised words silently dropped every single-word reference, which is
+  // most of them.
   const quoted = Array.from(text.matchAll(/"([^"]{2,40})"/g)).map((match) => match[1]);
-  const proper = Array.from(text.matchAll(/\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,2})\b/g))
-    .map((match) => match[1])
-    .filter((value) => !/^(The Scene|A Man|A Woman|New York|Los Angeles)$/.test(value));
-  const anchors = Array.from(new Set([...quoted, ...proper])).slice(0, 5);
+
+  // Sentence-initial words are capitalised by grammar rather than by being a
+  // name, so they are excluded by position. This is the only reliable signal
+  // available without a model.
+  // Connectors that appear *inside* titles ("Under the Skin", "The Temptations").
+  // "and" is deliberately excluded: it joins a list of names rather than being
+  // part of one, so treating it as a connector merges "Bill Withers and Aretha
+  // Franklin" into a single bogus entity and orphans "Franklin".
+  const CONNECTOR = "(?:the|of|a|an|in|on|to|for|de|la|el|le|du|van|von|al)";
+  const WORD = "[A-Z\\u00C0-\\u024F][\\w'\\u00C0-\\u024F\\u2019.-]*";
+  const NAME = new RegExp(
+    `\\b(${WORD}(?:\\s+(?:${CONNECTOR}\\s+)?${WORD}){1,2})\\b|\\b(${WORD})\\b`,
+    "g",
+  );
+
+  const regionWords = new Set([
+    "new york", "los angeles", "london", "chicago", "atlanta", "miami", "paris",
+    "berlin", "tokyo", "seoul", "lagos", "austin", "nashville", "detroit", "toronto",
+    // US states and common region suffixes. These are places, so they belong in
+    // `region`; as signal entities they return nothing a supervisor can use.
+    "michigan", "california", "texas", "georgia", "illinois", "ohio", "oregon",
+    "washington", "florida", "louisiana", "tennessee", "massachusetts", "virginia",
+    "united states", "united kingdom", "great britain", "america", "england",
+  ]);
+
+  // Grammar words that are capitalised for reasons other than naming something.
+  const NOT_A_NAME = new Set([
+    "a", "an", "the", "and", "but", "or", "so", "then", "we", "i", "she", "he",
+    "they", "it", "this", "that", "there", "here", "no", "not", "just", "era",
+    "set", "reference", "references", "target", "audience", "brand", "cue", "us",
+    "uk", "tv", "am", "pm", "shot", "film", "films", "spot", "series", "open",
+    "audience", "score", "scene", "note", "points", "mother", "father",
+  ]);
+
+  // A phrase is only a name if it starts with a name-like word. "Set in New
+  // York" and "US and UK" are grammatical phrases that happen to be
+  // capitalised, and sending them to /search returns nothing useful.
+  function looksLikeName(value: string): boolean {
+    const tokens = value.split(/\s+/).map((token) => token.toLowerCase().replace(/[^\p{L}\p{N}']/gu, ""));
+    if (tokens.length === 0) return false;
+    if (NOT_A_NAME.has(tokens[0])) return false;
+    // Reject phrases built entirely from grammar words and connectors.
+    return tokens.some((token) => token.length > 1 && !NOT_A_NAME.has(token));
+  }
+
+  const proper: string[] = [];
+  for (const sentence of text.split(/(?<=[.!?])\s+|\n+/)) {
+    const trimmed = sentence.trimStart();
+    for (const match of trimmed.matchAll(NAME)) {
+      // A single word at the very start of a sentence is capitalised by position
+      // rather than by being a proper noun.
+      const isSentenceInitial = (match.index ?? 0) === 0 && trimmed === sentence;
+      const value = (match[1] ?? match[2] ?? "").trim();
+      if (!value) continue;
+      if (isSentenceInitial && !match[1]) continue;
+      if (!looksLikeName(value)) continue;
+      const normalised = value.toLowerCase().replace(/\s+/g, " ");
+      if (regionWords.has(normalised)) continue;
+      proper.push(value);
+    }
+  }
+
+  const anchors = Array.from(new Set([...quoted, ...proper]))
+    // Prefer multi-word names: "Under the Skin" is a stronger signal than the
+    // bare "Skin" that a single-word pass would also find.
+    .sort((a, b) => b.split(/\s+/).length - a.split(/\s+/).length)
+    .slice(0, 5);
 
   const regionMatch = text.match(
     /\b(New York|Los Angeles|London|Chicago|Atlanta|Miami|Paris|Berlin|Tokyo|Seoul|Lagos|Austin|Nashville|Detroit|Toronto)\b/i,
@@ -428,13 +500,16 @@ export async function buildCueSheet(
 
   // Stage 1: resolve the brief into valid Qloo IDs. Invalid inputs are dropped
   // silently by Qloo, so resolution first is what keeps later calls meaningful.
-  context.anchorEntities = await resolveAnchors(brief.anchors, receipts);
+  // Anchors and tags are independent searches, so they resolve concurrently.
+  [context.anchorEntities, context.tags] = await Promise.all([
+    resolveAnchors(brief.anchors, receipts),
+    resolveTags([...brief.genre, ...brief.mood], receipts),
+  ]);
   if (context.anchorEntities.length === 0) {
     warnings.push(
       "None of the scene's named references resolved to Qloo entities. Falling back to mood and genre tags.",
     );
   }
-  context.tags = await resolveTags([...brief.genre, ...brief.mood], receipts);
 
   // Stage 2: Qloo ranks the artists. This is the load-bearing call.
   const rankedArtists = await groundArtistCues(context);
@@ -470,16 +545,34 @@ export async function buildCueSheet(
     ...discovery.slice(0, DISCOVERY_SLOTS),
   ].slice(0, SHEET_SIZE);
 
-  // Stage 4: one specific track per Qloo-ranked artist, from the LLM.
-  const trackMap = await proposeTracks(
-    selected.map((entity) => entity.name),
-    brief,
-  );
+  // Stages 4 and 5 are independent of each other and of the cross-domain work
+  // below, and the LLM track call is the slowest step in the pipeline. Running
+  // them concurrently is what keeps a sheet inside the route's time budget.
+  const directionPromise = options.alternativeAnchors?.length
+    ? resolveAnchors(options.alternativeAnchors, receipts).then((altEntities) =>
+        compareDirections(context.anchorEntities, altEntities, receipts),
+      )
+    : Promise.resolve(undefined);
 
-  // Stage 5: momentum per artist, computed from Qloo's own trend series.
-  const momentum = await Promise.all(
-    selected.map((entity) => artistMomentumSafe(entity.entity_id, receipts)),
-  );
+  const [trackMap, momentum, directionCompare, baseline, casting] = await Promise.all([
+    proposeTracks(
+      selected.map((entity) => entity.name),
+      brief,
+    ),
+    Promise.all(selected.map((entity) => artistMomentumSafe(entity.entity_id, receipts))),
+    directionPromise,
+    buildBaseline(brief),
+    // Stage 6: cross-domain. The same audience measurement pointed at people and
+    // brands. This is the argument that Cue is a cultural layer rather than a
+    // music tool, and it is cheap enough to run on every sheet.
+    //
+    // Localisation is NOT run here. It costs one slow location-filtered query per
+    // market, so it lives behind its own endpoint that the user triggers
+    // explicitly — see /api/localise.
+    castForBrief(brief, context.anchorEntities, context.tags, receipts).catch(
+      (): CastingResult => ({ audience: "", candidates: [], receipts: [], warnings: [] }),
+    ),
+  ]);
 
   const cues: Cue[] = selected.map((entity, index) => {
     const proposed = trackMap.get(entity.name.toLowerCase());
@@ -500,18 +593,11 @@ export async function buildCueSheet(
     );
   }
 
-  // Optional A/B: a second creative direction the supervisor is weighing.
-  let directionCompare: CueSheet["directionCompare"];
-  if (options.alternativeAnchors?.length) {
-    const altEntities = await resolveAnchors(options.alternativeAnchors, receipts);
-    directionCompare = await compareDirections(
-      context.anchorEntities,
-      altEntities,
-      receipts,
+  if (casting.candidates.length === 0) {
+    casting.warnings.push(
+      "No casting candidates returned. This is expected when the brief names only music, since Qloo needs a shared audience cluster to connect people.",
     );
   }
-
-  const baseline = await buildBaseline(brief);
 
   return {
     brief,
@@ -520,9 +606,38 @@ export async function buildCueSheet(
     baseline,
     regionAffinity: regional.length > 0 ? regional : undefined,
     receipts,
-    warnings,
+    warnings: [...warnings, ...casting.warnings],
     mode: "live",
+    casting: casting.candidates.length > 0 ? casting : undefined,
   };
+}
+
+export interface LocaliseOptions {
+  scene: string;
+  /** The reference market, compared against `markets`. */
+  referenceMarket: string;
+  markets: string[];
+  forceFixture?: boolean;
+}
+
+/**
+ * Standalone localisation entry point, served by /api/localise.
+ *
+ * This deliberately re-resolves the anchors and tags from the scene text rather
+ * than accepting them from the client. The client could send them, but that
+ * would let a caller pair one brief's anchors with another's market and produce
+ * a result no part of the pipeline can vouch for. Re-resolving costs two cheap
+ * calls and keeps the output attributable to a single brief.
+ */
+export async function localiseForScene(
+  options: LocaliseOptions,
+): Promise<LocalisationResult> {
+  const receipts: Receipt[] = [];
+  const { brief } = await readScene(options.scene);
+  const anchors = await resolveAnchors(brief.anchors, receipts);
+  const tags = await resolveTags([...brief.genre, ...brief.mood], receipts);
+
+  return localiseBrief(anchors, tags, options.referenceMarket, options.markets, receipts);
 }
 
 /** Trending failures should never surface as user-facing errors. */

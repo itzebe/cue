@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { buildCueSheet } from "@/lib/planner";
-import { hasLlm } from "@/lib/llm";
+import { hasLlm, llmDiagnostics, probeLlm } from "@/lib/llm";
 import { hasQlooKey } from "@/lib/qloo";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 interface CueRequest {
   scene?: unknown;
@@ -56,11 +56,17 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const wantProbe = url.searchParams.get("probe") === "1";
+
   return NextResponse.json({
     service: "cue",
     qlooConfigured: hasQlooKey(),
     llmConfigured: hasLlm(),
     baseUrl: process.env.QLOO_API_BASE_URL || "https://hackathon.api.qloo.com",
+    llm: llmDiagnostics(),
+    // Opt-in so the health check stays free; the probe spends one upstream call.
+    llmProbe: wantProbe ? await probeLlm() : undefined,
   });
 }

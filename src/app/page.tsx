@@ -6,6 +6,8 @@ import { BriefPanel } from "@/components/BriefPanel";
 import { CompareStrip } from "@/components/CompareStrip";
 import { ReceiptsPanel } from "@/components/ReceiptsPanel";
 import { DirectionPanel, RegionPanel } from "@/components/SignalPanels";
+import { MarketplacePanel } from "@/components/MarketplacePanel";
+import { CrossDomainPanel } from "@/components/CrossDomainPanel";
 import { SAMPLE_SCENES } from "@/data/fixtures";
 import type { CueSheet } from "@/lib/types";
 
@@ -104,18 +106,18 @@ export default function StudioPage() {
             </span>
             <span className="font-display text-2xl tracking-tight text-haze-100">Cue</span>
             <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] uppercase tracking-wider text-haze-500">
-              agentic music supervisor
+              cultural layer for creative decisions
             </span>
           </div>
           <p className="mt-4 max-w-2xl text-balance font-display text-3xl leading-tight text-haze-100 sm:text-4xl">
-            A scene brief goes in. A cue sheet that&rsquo;s{" "}
-            <span className="text-ember-400">actually right</span> comes out.
+            Agencies and studios can&rsquo;t afford to{" "}
+            <span className="text-ember-400">guess what resonates</span>. Cue measures it.
           </p>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-haze-300">
-            Generic models name the same obvious songs for every scene, because they
-            have no idea what anyone actually likes. Cue ranks every pick against the
-            Qloo Taste Graph — measured affinity across music, film and audience — so a
-            supervisor gets culturally grounded options, each with the reason attached.
+            A creative brief goes in. A grounded answer comes out — the cue, the cast, the
+            market fit, the price and the path to signature — every ranking traced to measured
+            audience affinity in the Qloo Taste Graph. A language model cannot produce any of
+            it, because it has no idea what anyone actually likes.
           </p>
         </div>
         <dl className="grid shrink-0 grid-cols-3 gap-4 lg:grid-cols-1 lg:text-right">
@@ -326,9 +328,13 @@ export default function StudioPage() {
                         primaries.every(
                           (cue) => Math.abs(cue.affinity - primaries[0].affinity) < 0.001,
                         );
-                      return uniform
+                      const base = uniform
                         ? "Qloo affinity is uniform for this brief; ordered by popularity."
                         : "Ranked by Qloo affinity, highest first.";
+                      const hasDiscovery = sheet.cues.some((cue) => cue.discovery);
+                      return hasDiscovery
+                        ? `${base} Discovery picks close the sheet — a separate Qloo call, so their scores are not comparable to the ranking above.`
+                        : base;
                     })()}
                   </p>
                 </div>
@@ -345,6 +351,8 @@ export default function StudioPage() {
               </section>
 
               <CompareStrip sheet={sheet} />
+              <MarketplacePanel sheet={sheet} />
+              <CrossDomainPanel key={sheet.brief.raw} sheet={sheet} />
               <div className="grid gap-4 xl:grid-cols-2">
                 <DirectionPanel sheet={sheet} />
                 <RegionPanel sheet={sheet} />
@@ -357,9 +365,10 @@ export default function StudioPage() {
 
       <footer className="mt-12 border-t border-white/5 pt-6 text-xs text-haze-500">
         <p>
-          Cue is an agentic music supervisor built for the Qloo Agentic Hackathon. Music
-          and film affinity, audience fit and momentum all come from the Qloo Taste Graph
-          — an LLM alone cannot produce any of them. Cue never invents affinity numbers.
+          Cue is the cultural layer for creative decisions, built for the Qloo Agentic
+          Hackathon. Every ranking, market read, casting match and price is derived from
+          measured audience affinity in the Qloo Taste Graph — an LLM alone cannot produce
+          any of them. Cue never invents affinity numbers, track titles or rights data.
         </p>
       </footer>
     </main>
