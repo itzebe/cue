@@ -208,7 +208,10 @@ export const SAMPLE_SCENES: Array<{
     id: "funeral-drive",
     label: "The Long Drive Home",
     blurb: "Late-90s drama · grief without wallowing",
-    scene: FIXTURE_SHEET.brief.raw,
+    // Named references are what switch the sheet from tag-only matching to true
+    // affinity ranking, so the default sample names real, resolvable entities.
+    scene:
+      "A late-90s character drama. She drives home after the funeral. Rain on the windshield, no dialogue for ninety seconds. We need something that holds grief without wallowing — it should feel like the city forgiving her. Set in New York, aimed at a 35-44 audience. The director's reference points: Massive Attack's Mezzanine, Portishead, and the restraint of Lost in Translation.",
     alternativeAnchors: ["Sault", "Nils Frahm", "Floating Points"],
   },
   {
@@ -216,7 +219,7 @@ export const SAMPLE_SCENES: Array<{
     label: "Sneaker Launch Spot",
     blurb: "30s brand film · young, kinetic, global",
     scene:
-      "A 30-second spot for a limited-run sneaker drop. Street court in Atlanta at golden hour, quick cuts of footwork, then a slow push-in on the shoe. Contemporary, confident, a little dangerous. Target audience is 18-24, heavily mobile, US and UK. The brand wants it to feel like it was made by someone who actually plays, not a marketing department.",
+      "A 30-second spot for a limited-run sneaker drop. Street court in Atlanta at golden hour, quick cuts of footwork, then a slow push-in on the shoe. Contemporary, confident, a little dangerous. Target audience is 18-24, heavily mobile, US and UK. The brand wants it to feel like it was made by someone who actually plays, not a marketing department. References the creative team gave: Outkast, J Dilla, and the energy of a Virgil Abloh campaign.",
     alternativeAnchors: ["Outkast", "J Dilla", "Flying Lotus"],
   },
   {
@@ -232,7 +235,7 @@ export const SAMPLE_SCENES: Array<{
     label: "Retirement Brand Film",
     blurb: "60s spot · dignity, not treacle",
     scene:
-      "Sixty-second brand film for a retirement community. A 72-year-old man in Detroit tends a rooftop garden, then dances alone in his kitchen to a record. Warm, dignified, never saccharine. The brand explicitly said no ukulele covers. Audience is 55+ and their adult children. Detroit, Michigan. Reference: the tone of the Apple 'Shot on iPhone' films, but for people who grew up on Motown.",
+      "Sixty-second brand film for a retirement community. A 72-year-old man in Detroit tends a rooftop garden, then dances alone in his kitchen to a record. Warm, dignified, never saccharine. The brand explicitly said no ukulele covers. Audience is 55+ and their adult children. Detroit, Michigan. Reference: the tone of the Apple 'Shot on iPhone' films, but for people who grew up on Motown, Bill Withers and Aretha Franklin.",
     alternativeAnchors: ["Aretha Franklin", "The Temptations", "Bill Withers"],
   },
 ];

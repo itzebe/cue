@@ -116,11 +116,13 @@ async function qlooGet<T>(
   params: Record<string, ParamValue>,
   normalise: (json: unknown) => T,
   emptyValue: T,
+  options: { timeoutMs?: number } = {},
 ): Promise<QlooCallResult<T>> {
   const flat = flattenParams(params);
   const query = new URLSearchParams(flat).toString();
   const url = `${QLOO_BASE_URL}${endpoint}${query ? `?${query}` : ""}`;
   const started = Date.now();
+  const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
 
   const key = apiKey();
   if (!key) {
@@ -135,23 +137,38 @@ async function qlooGet<T>(
     };
   }
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
-
   try {
     let res: Response | undefined;
     let lastError = "";
 
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
-      res = await withSlot(() =>
-        fetch(url, {
-          method: "GET",
-          headers: { "X-Api-Key": key, accept: "application/json" },
-          signal: controller.signal,
-          cache: "no-store",
-        }),
-      );
-      if (!RETRYABLE_STATUS.has(res.status) || attempt === MAX_ATTEMPTS) break;
+      // A fresh controller per attempt. Reusing one across attempts means the
+      // first attempt's budget silently covers the retries, so a slow-but-
+      // recoverable endpoint aborts before it is ever retried.
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        res = await withSlot(() =>
+          fetch(url, {
+            method: "GET",
+            headers: { "X-Api-Key": key, accept: "application/json" },
+            signal: controller.signal,
+            cache: "no-store",
+          }),
+        );
+      } catch (error) {
+        res = undefined;
+        lastError =
+          error instanceof Error && error.name === "AbortError"
+            ? `request timed out after ${timeoutMs}ms`
+            : error instanceof Error
+              ? error.message
+              : "network error";
+      } finally {
+        clearTimeout(timer);
+      }
+
+      if (!res || !RETRYABLE_STATUS.has(res.status) || attempt === MAX_ATTEMPTS) break;
 
       // Honour Retry-After when the gateway supplies it, else back off 300/900ms.
       const header = Number(res.headers.get("retry-after"));
@@ -210,8 +227,6 @@ async function qlooGet<T>(
       endpoint,
       error: message,
     };
-  } finally {
-    clearTimeout(timer);
   }
 }
 
@@ -412,6 +427,8 @@ export interface InsightsParams {
   explainability?: boolean;
   take?: number;
   extra?: Record<string, ParamValue>;
+  /** Override the default 12s budget. Location-filtered place queries are slow. */
+  timeoutMs?: number;
 }
 
 /** GET /v2/insights — the primary recommendation + explainability endpoint. */
@@ -439,7 +456,9 @@ export function insights(
     ...params.extra,
   };
 
-  return qlooGet("/v2/insights", query, normaliseEntities, []);
+  return qlooGet("/v2/insights", query, normaliseEntities, [], {
+    timeoutMs: params.timeoutMs,
+  });
 }
 
 /** GET /v2/tags — resolve free-text interests into valid Qloo tag IDs. */

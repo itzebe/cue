@@ -10,6 +10,7 @@
  */
 
 import assert from "node:assert/strict";
+import type { Receipt } from "../src/lib/types.ts";
 
 const QLOO_SEARCH = {
   results: [
@@ -328,6 +329,82 @@ await check("deterministic parser extracts mood, era, anchors and diegesis", () 
   assert.equal(brief.audience.age, "25_to_29");
 });
 
+await check("single-word and lowercase-connector references become anchors", () => {
+  // These are the shapes a supervisor actually writes. Requiring two
+  // capitalised words dropped every single-word reference, which silently
+  // degraded the whole sheet to flat tag-only ranking.
+  const brief = parseSceneBrief(
+    "Cold open for a prestige thriller. Reference points the director mentioned: Drive, Sicario, Under the Skin. Set in Berlin, audience 25-34.",
+  );
+  assert.ok(brief.anchors.includes("Drive"), "a single-word title must be an anchor");
+  assert.ok(brief.anchors.includes("Sicario"), "a bare proper noun must be an anchor");
+  assert.ok(
+    brief.anchors.includes("Under the Skin"),
+    "a title containing a lowercase connector must survive intact",
+  );
+});
+
+await check("grammar phrases and regions are never sent as signal entities", () => {
+  const brief = parseSceneBrief(
+    "A 30-second spot. Street court in Atlanta at golden hour. Target audience is 18-24, heavily mobile, US and UK. Set in New York.",
+  );
+  // "Set in New York" and "US and UK" are capitalised but name nothing, and
+  // /search returns nothing useful for them.
+  for (const junk of ["Set in New York", "US and UK", "New York", "Atlanta"]) {
+    assert.equal(
+      brief.anchors.includes(junk),
+      false,
+      `"${junk}" must not become a signal entity`,
+    );
+  }
+  assert.equal(brief.region, "Atlanta");
+});
+
+await check("every bundled sample scene yields usable anchors or none", () => {
+  // A judge's first click is a sample, so a sample that silently degrades to a
+  // flat ranking is a bad first impression.
+  const samples = [
+    "A late-90s character drama. Rain on the windshield. Set in New York, aimed at a 35-44 audience. The director's reference points: Massive Attack's Mezzanine, Portishead, and the restraint of Lost in Translation.",
+    "Cold open for a prestige thriller series. Reference points the director mentioned: Drive, Sicario, Under the Skin.",
+    "Sixty-second brand film for a retirement community. Detroit, Michigan. Reference: the tone of the Apple 'Shot on iPhone' films, but for people who grew up on Motown.",
+  ];
+  for (const scene of samples) {
+    const brief = parseSceneBrief(scene);
+    assert.ok(brief.anchors.length > 0, `expected anchors from: ${scene.slice(0, 40)}`);
+    for (const anchor of brief.anchors) {
+      assert.ok(anchor.length >= 2, `anchor too short: "${anchor}"`);
+      assert.equal(anchor, anchor.trim(), "anchors must be trimmed");
+    }
+  }
+});
+
+await check("an 'and' list splits into separate entities, not one merged name", () => {
+  // "Bill Withers and Aretha Franklin" is two artists. Treating "and" as a
+  // title connector produced one bogus entity and orphaned "Franklin".
+  const brief = parseSceneBrief(
+    "Warm, dignified. For people who grew up on Motown, Bill Withers and Aretha Franklin.",
+  );
+  assert.ok(brief.anchors.includes("Bill Withers"));
+  assert.ok(brief.anchors.includes("Aretha Franklin"));
+  assert.equal(
+    brief.anchors.some((anchor) => /and/i.test(anchor)),
+    false,
+    "no anchor should contain a list conjunction",
+  );
+});
+
+await check("place names are routed to region, never used as signal entities", () => {
+  // A state is a place, not a taste entity. Sending "Michigan" to /search
+  // returns nothing a supervisor can act on.
+  const brief = parseSceneBrief(
+    "A brand film. Detroit, Michigan. Audience is 55+. Reference: Motown and Bill Withers.",
+  );
+  assert.equal(brief.region, "Detroit");
+  assert.equal(brief.anchors.includes("Michigan"), false);
+  assert.equal(brief.anchors.includes("Detroit"), false);
+  assert.ok(brief.anchors.includes("Motown"));
+});
+
 await check("fixture mode is explicit and never masquerades as live", async () => {
   // The deployed demo runs without a key, so it must say so loudly rather than
   // presenting pre-computed samples as Qloo output.
@@ -517,6 +594,241 @@ await check("tag search disables typo tolerance", async () => {
     tagCall.url.includes("feature.typo_tolerance=false"),
     "typo tolerance must be disabled for tag resolution",
   );
+});
+
+await check("localisation queries places, not artists, and varies by market", async () => {
+  const original = globalThis.fetch;
+  calls.length = 0;
+  // Return market-specific places so overlap is genuinely computed rather than
+  // trivially zero.
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = typeof input === "string" ? input : input.toString();
+    const parsed = new URL(url);
+    calls.push({ url, headers: {} });
+    const market = parsed.searchParams.get("filter.location.query");
+    const type = parsed.searchParams.get("filter.type");
+    const perMarket: Record<string, string[]> = {
+      "Los Angeles": ["Hollywood Sign", "Warner Bros. Studio Tour"],
+      Seoul: ["Drip Factory", "Starfield Library"],
+      Tokyo: ["Samurai Museum", "Ghibli Museum"],
+    };
+    const names = perMarket[market ?? ""] ?? [];
+    return jsonResponse({
+      results: {
+        entities: names.map((name, index) => ({
+          entity_id: `place-${market}-${index}`,
+          name,
+          types: [type],
+          query: { affinity: 0.9 - index * 0.1 },
+        })),
+      },
+    });
+  }) as typeof fetch;
+
+  try {
+    const { localiseBrief } = await import("../src/lib/localise.ts");
+    const receipts: Receipt[] = [];
+    const result = await localiseBrief(
+      [{ entity_id: "anchor-1", name: "Drive", types: ["urn:entity:movie"] } as never],
+      [],
+      "Los Angeles",
+      ["Seoul", "Tokyo"],
+      receipts,
+    );
+
+    assert.equal(result.markets.length, 3, "reference plus two markets");
+    assert.equal(result.markets[0].overlapWithReference, 1, "reference overlaps itself");
+    assert.equal(
+      result.markets[1].overlapWithReference,
+      0,
+      "disjoint markets must report zero overlap",
+    );
+    assert.ok(
+      result.markets[1].uniqueToMarket.includes("Drip Factory"),
+      "market-unique touchpoints must be surfaced",
+    );
+    assert.equal(result.uniform, false, "disjoint markets are not uniform");
+    assert.equal(receipts.length, 3, "one receipt per market");
+
+    // The honest contract: location is queried against places. Artist affinity
+    // is location-invariant on this API, so querying artists here would produce
+    // a fake localisation.
+    for (const call of calls) {
+      assert.equal(
+        new URL(call.url).searchParams.get("filter.type"),
+        "urn:entity:place",
+        "localisation must query urn:entity:place",
+      );
+    }
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("localisation flags a uniform result instead of claiming divergence", async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = typeof input === "string" ? input : input.toString();
+    calls.push({ url, headers: {} });
+    return jsonResponse({
+      results: {
+        entities: [
+          { entity_id: "p1", name: "Same Place", types: [], query: { affinity: 0.8 } },
+        ],
+      },
+    });
+  }) as typeof fetch;
+
+  try {
+    const { localiseBrief } = await import("../src/lib/localise.ts");
+    const result = await localiseBrief(
+      [],
+      [],
+      "Los Angeles",
+      ["Seoul"],
+      [],
+    );
+    assert.equal(result.uniform, true, "identical markets must be flagged uniform");
+    assert.ok(
+      result.warnings.some((warning) => warning.includes("same touchpoints")),
+      "uniform results must warn rather than pass silently",
+    );
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("casting queries people and brands without a music-era filter", async () => {
+  const original = globalThis.fetch;
+  calls.length = 0;
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = typeof input === "string" ? input : input.toString();
+    calls.push({ url, headers: {} });
+    const type = new URL(url).searchParams.get("filter.type");
+    return jsonResponse({
+      results: {
+        entities: [
+          { entity_id: `${type}-1`, name: "Candidate", types: [type], query: { affinity: 0.7 } },
+        ],
+      },
+    });
+  }) as typeof fetch;
+
+  try {
+    const { castForBrief } = await import("../src/lib/casting.ts");
+    const receipts: Receipt[] = [];
+    const result = await castForBrief(
+      { audience: { age: "25_34" } } as never,
+      [{ entity_id: "anchor-1", name: "Drive", types: ["urn:entity:movie"] } as never],
+      [],
+      receipts,
+    );
+
+    const types = calls.map((call) => new URL(call.url).searchParams.get("filter.type"));
+    assert.ok(types.includes("urn:entity:person"), "casting must query people");
+    assert.ok(types.includes("urn:entity:brand"), "casting must query brands cross-domain");
+    assert.equal(result.candidates.length, 2, "one person and one brand");
+    assert.equal(result.audience, "25 34", "audience is made human-readable");
+
+    // A release-year floor is a music-catalogue concept. Applying it to people
+    // would drop every living performer and leave a casting list of dead ones.
+    for (const call of calls) {
+      assert.equal(
+        new URL(call.url).searchParams.get("filter.release_year.min"),
+        null,
+        "casting must not filter people by music release year",
+      );
+    }
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("a market timeout is reported, not silently treated as uncovered", async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = typeof input === "string" ? input : input.toString();
+    calls.push({ url, headers: {} });
+    if (new URL(url).searchParams.get("filter.location.query") === "Seoul") {
+      // Emulate an abort the way fetch does, so the error path is exercised.
+      return new Promise<Response>((_resolve, reject) => {
+        const signal = init?.signal;
+        const abort = () => {
+          const error = new Error("aborted");
+          error.name = "AbortError";
+          reject(error);
+        };
+        if (signal?.aborted) abort();
+        else signal?.addEventListener("abort", abort);
+      });
+    }
+    return jsonResponse({
+      results: {
+        entities: [{ entity_id: "p1", name: "A Place", types: [], query: { affinity: 0.8 } }],
+      },
+    });
+  }) as typeof fetch;
+
+  try {
+    const { localiseBrief } = await import("../src/lib/localise.ts");
+    const receipts: Receipt[] = [];
+    const result = await localiseBrief([], [], "Los Angeles", ["Seoul"], receipts);
+
+    const seoul = result.markets.find((market) => market.market === "Seoul");
+    assert.ok(seoul, "the timed-out market must still appear in the result");
+    assert.equal(seoul.failed, true, "a timed-out market is marked failed");
+    assert.equal(seoul.touchpoints.length, 0, "no touchpoints are invented");
+    assert.ok(
+      receipts.some((receipt) => receipt.status !== 200),
+      "the failure must be visible in the receipts",
+    );
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("a basket quote prices from Qloo signals and reports the take", async () => {
+  const { quoteLicense, summariseQuotes, DEFAULT_TERMS } = await import("../src/lib/rights.ts");
+  const cue = {
+    id: "cue-1",
+    artist: "Jonny Greenwood",
+    track: "Tree Synthesisers",
+    affinity: 0.93,
+    popularity: 0.8,
+    momentum: 0.4,
+    clearance: "major_label",
+    placement: "needle_drop",
+  } as never;
+
+  const quote = quoteLicense(cue, DEFAULT_TERMS);
+  assert.ok(quote.fee.low < quote.fee.recommended, "recommended sits inside the range");
+  assert.ok(quote.fee.recommended < quote.fee.high, "recommended sits inside the range");
+  assert.ok(quote.takeAmount > 0, "the marketplace must charge a take");
+  assert.ok(quote.holders.length > 0, "rights holders must be identified");
+  assert.ok(quote.clearance.steps.length > 0, "a clearance path must be laid out");
+  assert.ok(quote.drivers.length > 0, "the price must be explainable");
+  assert.ok(quote.disclaimer.length > 0, "an estimate must be labelled as an estimate");
+
+  const summary = summariseQuotes([quote, quoteLicense(cue, { ...DEFAULT_TERMS, exclusive: true })]);
+  assert.equal(summary.quotes.length, 2);
+  assert.ok(summary.totalRecommended > quote.fee.recommended, "totals sum the basket");
+  assert.ok(summary.gatingDays > 0, "a gating clearance window must be reported");
+});
+
+await check("a malformed cue cannot produce a NaN price", async () => {
+  const { quoteLicense, DEFAULT_TERMS } = await import("../src/lib/rights.ts");
+  // /api/quote prices cues supplied by the client, so every field the model
+  // multiplies by has to survive being absent.
+  const malformed = { id: "cue-x", artist: "Unknown Artist", track: "Track TBD" } as never;
+
+  const quote = quoteLicense(malformed, DEFAULT_TERMS);
+  for (const value of [quote.fee.low, quote.fee.high, quote.fee.recommended, quote.takeAmount]) {
+    assert.ok(Number.isFinite(value), "every priced value must be a finite number");
+    assert.ok(value > 0, "a price must be positive");
+  }
+  assert.ok(quote.fee.low < quote.fee.recommended, "the band must stay ordered");
+  assert.ok(quote.fee.recommended < quote.fee.high, "the band must stay ordered");
+  assert.equal(quote.placement, "score_bed", "an unknown placement falls back rather than NaN");
 });
 
 console.log(`\n${passed} passed, ${failures.length} failed.\n`);

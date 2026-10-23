@@ -91,7 +91,7 @@ export function CueCard({
           </div>
           <div className="shrink-0 text-right">
             <div className="font-mono text-xl leading-none text-haze-100">
-              {cue.affinity.toFixed(2)}
+              {cue.affinity.toFixed(3)}
             </div>
             <div className="mt-1 text-[10px] uppercase tracking-wider text-haze-500">
               affinity

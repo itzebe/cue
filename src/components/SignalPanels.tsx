@@ -112,11 +112,15 @@ export function RegionPanel({ sheet }: { sheet: CueSheet }) {
       <div className="relative z-10">
         <header>
           <h3 className="font-display text-base text-haze-100">
-            Where it lands ·{" "}
+            Market check ·{" "}
             <code className="font-mono text-xs text-signal-300">location-aware insights</code>
           </h3>
-          <p className="mt-0.5 text-xs text-haze-500">
-            Affinity inside {sheet.brief.region ?? "the target market"}.
+          <p className="mt-0.5 text-xs leading-relaxed text-haze-500">
+            Artists measured with the location filter set to{" "}
+            {sheet.brief.region ?? "the target market"}. Qloo returns the same ranking and the
+            same scores as the unfiltered call — artist affinity is location-invariant on this
+            API. The market genuinely changes what a campaign references, which is why Cue
+            localises touchpoints rather than the soundtrack.
           </p>
         </header>
         <ul className="mt-4 space-y-2.5">
@@ -130,7 +134,7 @@ export function RegionPanel({ sheet }: { sheet: CueSheet }) {
                 />
               </span>
               <span className="w-10 shrink-0 text-right font-mono text-xs text-haze-500">
-                {row.affinity.toFixed(2)}
+                {row.affinity.toFixed(3)}
               </span>
             </li>
           ))}

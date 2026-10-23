@@ -67,7 +67,7 @@ export function CompareStrip({ sheet }: { sheet: CueSheet }) {
                     )}
                   </p>
                   <span className="shrink-0 font-mono text-xs text-ember-400">
-                    {cue.affinity.toFixed(2)}
+                    {cue.affinity.toFixed(3)}
                   </span>
                 </div>
                 <p className="mt-0.5 text-xs leading-relaxed text-haze-300">

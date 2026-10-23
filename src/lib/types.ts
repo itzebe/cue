@@ -6,6 +6,10 @@
  * mapping between our UI and the API stays obvious.
  */
 
+import type { CastingResult } from "./casting";
+import type { LocalisationResult } from "./localise";
+import type { LicenseQuote } from "./rights";
+
 export type EntityType =
   | "urn:entity:artist"
   | "urn:entity:movie"
@@ -156,6 +160,15 @@ export interface CueSheet {
   receipts: Receipt[];
   warnings: string[];
   mode: "live" | "fixture";
+  /**
+   * Cross-domain extensions. These exist to demonstrate that the same audience
+   * measurement answers questions beyond music — casting and market fit are the
+   * same call against a different entity type or location.
+   */
+  casting?: CastingResult;
+  localisation?: LocalisationResult;
+  /** Marketplace quotes, keyed by cue id, generated on demand from the sheet. */
+  quotes?: LicenseQuote[];
 }
 
 export interface Receipt {
