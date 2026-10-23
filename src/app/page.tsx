@@ -9,6 +9,7 @@ import { ReceiptsPanel } from "@/components/ReceiptsPanel";
 import { DirectionPanel, RegionPanel } from "@/components/SignalPanels";
 import { MarketplacePanel } from "@/components/MarketplacePanel";
 import { ComparablesPanel } from "@/components/ComparablesPanel";
+import { TasteMapPanel } from "@/components/TasteMapPanel";
 import { WorkflowBand } from "@/components/WorkflowBand";
 import { SectionNav } from "@/components/SectionNav";
 import { CrossDomainPanel } from "@/components/CrossDomainPanel";
@@ -460,6 +461,10 @@ export default function StudioPage() {
               </div>
               <MarketplacePanel sheet={sheet} />
               <ComparablesPanel sheet={sheet} />
+              {/* The taste map sits directly after comparables: both answer
+                  "what else is this like", and together they read as one
+                  widening of the same audience measurement. */}
+              <TasteMapPanel sheet={sheet} />
 
               <CrossDomainPanel key={sheet.brief.raw} sheet={sheet} />
               <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">

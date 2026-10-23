@@ -25,7 +25,9 @@ import { hasQlooKey } from "./qloo";
 import { buildAudienceBrief } from "./audience";
 import { comparablesForBrief } from "./comparables";
 import { castForBrief, type CastingResult } from "./casting";
+import { crossDomainForAudience } from "./crossdomain";
 import type { ComparablesResult } from "./comparables";
+import type { CrossDomainResult } from "./crossdomain";
 import { localiseBrief, type LocalisationResult } from "./localise";
 import { FIXTURE_SHEET } from "@/data/fixtures";
 
@@ -639,7 +641,8 @@ export async function buildCueSheet(
   // that resolved them, so this costs no API calls and needs no promise.
   const audienceBrief = buildAudienceBrief(brief.anchors, context.anchorEntities);
 
-  const [trackMap, momentum, directionCompare, baseline, casting, comparables] = await Promise.all([
+  const [trackMap, momentum, directionCompare, baseline, casting, comparables, tasteMap] =
+    await Promise.all([
     proposeTracks(
       selected.map((entity) => entity.name),
       brief,
@@ -667,6 +670,22 @@ export async function buildCueSheet(
         skippedDomains: [],
         receipts: [],
         warnings: ["Comparables could not be retrieved for this brief."],
+      }),
+    ),
+    // Stage 8: the cross-domain taste map. Brands, destinations, podcasts and
+    // places, measured on the same anchors as the cue sheet. Four calls, run
+    // alongside the rest so they cost latency only. The domains are the ones the
+    // cue sheet and comparables pass do not already cover, so this adds breadth
+    // rather than a second copy of a list the reader has already seen.
+    crossDomainForAudience(context.anchorEntities, receipts).catch(
+      (): CrossDomainResult => ({
+        groups: [],
+        emptyDomains: [],
+        failedDomains: [],
+        skippedDomains: [],
+        anchors: [],
+        receipts: [],
+        warnings: ["Cross-domain discoveries could not be retrieved for this brief."],
       }),
     ),
   ]);
@@ -715,11 +734,18 @@ export async function buildCueSheet(
     baseline,
     regionAffinity: regional.length > 0 ? regional : undefined,
     receipts,
-    warnings: [...warnings, ...casting.warnings, ...comparables.warnings],
+    warnings: [...warnings, ...casting.warnings, ...comparables.warnings, ...tasteMap.warnings],
     mode: "live",
     casting: casting.candidates.length > 0 ? casting : undefined,
     audienceBrief,
     comparables: comparables.groups.length > 0 ? comparables : undefined,
+    // Kept whenever the query actually ran, even if every domain came back empty
+    // or failed. The panel renders an honest empty state from that; dropping it
+    // here would make "Qloo returned nothing" indistinguishable from "this
+    // feature does not exist", which is the confusion the empty state exists to
+    // prevent. A brief with no anchors is still dropped — there the panel has
+    // nothing truthful to say.
+    tasteMap: tasteMap.anchors.length > 0 ? tasteMap : undefined,
   };
 }
 

@@ -21,6 +21,7 @@ const SECTIONS = [
   { id: "budget", label: "Budget" },
   { id: "marketplace", label: "Marketplace" },
   { id: "comparables", label: "Comparables" },
+  { id: "taste-map", label: "Taste map" },
   { id: "cross-domain", label: "Cross-domain" },
   { id: "market-check", label: "Market check" },
   { id: "receipts", label: "Receipts" },
