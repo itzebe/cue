@@ -59,6 +59,36 @@ body {
   }
 }
 
+/* On a short phone viewport (e.g. 375x667) the composer's primary action still
+   landed just below the first screen after the mobile spacing pass in page.tsx,
+   because the header is the only block above it and vertical room is genuinely
+   scarce. Reclaim the last few pixels from the scene textarea and the hero
+   rather than hiding anything: every element stays present and readable, the
+   copy is unchanged, and desktop is untouched (both conditions must hold). */
+@media (max-width: 1023px) and (max-height: 700px) {
+  /* Tailwind's `.text-2xl` utility sets font-size and line-height on the h1, and
+     a class selector outranks the element selectors below, so these need
+     `!important` to win. The scope is a narrow media query, matching the
+     `!important` already used for reduced motion above. */
+  #scene {
+    max-height: 56px;
+  }
+  main {
+    padding-top: 8px;
+  }
+  main > div.grid {
+    margin-top: 10px;
+  }
+  h1 {
+    font-size: 21px !important;
+    line-height: 1.2 !important;
+  }
+  h1 + p {
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+  }
+}
+
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;

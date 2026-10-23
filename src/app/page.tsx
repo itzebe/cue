@@ -129,9 +129,9 @@ export default function StudioPage() {
     : null;
 
   return (
-    <main className="mx-auto max-w-[1400px] px-5 py-8 lg:px-10 lg:py-12">
+    <main className="mx-auto max-w-[1400px] px-5 py-5 lg:px-10 lg:py-12">
       {/* Masthead */}
-      <header className="flex flex-col gap-6 border-b border-white/5 pb-6 lg:flex-row lg:items-end lg:justify-between">
+      <header className="flex flex-col gap-3.5 border-b border-white/5 pb-3.5 sm:gap-6 sm:pb-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <div className="flex items-center gap-3">
             <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-ember-500/30 bg-ember-500/10 font-display text-lg text-ember-400">
@@ -144,19 +144,24 @@ export default function StudioPage() {
           </div>
           {/* The page had no h1: its headline was a paragraph, so the document
               exposed no top-level heading to assistive tech or search. Promoting
-              the same element keeps the visual design identical. */}
-          <h1 className="mt-4 max-w-2xl text-balance font-display text-3xl leading-tight text-haze-100 sm:text-4xl">
+              the same element keeps the visual design identical.
+              The opening block is the only thing above the composer, so its
+              height decides whether the primary action clears the first mobile
+              screen. Only the mobile font-size is stepped down; no `leading-*`
+              utility is set, so the desktop h1 keeps `text-4xl`'s own 36/40
+              line box exactly as before. */}
+          <h1 className="mt-2 max-w-2xl text-balance font-display text-2xl text-haze-100 sm:mt-4 sm:text-4xl">
             Agencies and studios can&rsquo;t afford to{" "}
             <span className="text-ember-400">guess what resonates</span>. Cue measures it.
           </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-haze-300">
+          <p className="mt-1.5 max-w-2xl text-[12.5px] leading-[1.45] text-haze-300 sm:mt-3 sm:text-sm sm:leading-relaxed">
             A creative brief goes in. A grounded answer comes out — the cue, the cast, the
             market fit, the price and the path to signature — every ranking traced to measured
             audience affinity in the Qloo Taste Graph. A language model cannot produce any of
             it, because it has no idea what anyone actually likes.
           </p>
         </div>
-        <dl className="grid shrink-0 grid-cols-3 gap-4 lg:grid-cols-1 lg:text-right">
+        <dl className="grid shrink-0 grid-cols-3 gap-1.5 sm:gap-4 lg:grid-cols-1 lg:text-right">
           <div>
             <dt className="text-[10px] uppercase tracking-wider text-haze-500">Engine</dt>
             <dd className="font-mono text-sm text-signal-400">Qloo Taste Graph</dd>
@@ -176,10 +181,10 @@ export default function StudioPage() {
         </dl>
       </header>
 
-      <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
+      <div className="mt-3.5 grid grid-cols-1 gap-5 sm:mt-8 sm:gap-8 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
         {/* Composer */}
         <div className="min-w-0 space-y-4 lg:sticky lg:top-8 lg:self-start">
-          <section className="panel grain relative overflow-hidden p-5">
+          <section className="panel grain relative overflow-hidden p-3.5 sm:p-5">
             <div className="relative z-10">
               <h2 className="font-display text-base text-haze-100">Scene brief</h2>
               <p className="mt-0.5 text-xs text-haze-500">
@@ -187,14 +192,14 @@ export default function StudioPage() {
                 Qloo signal entities.
               </p>
 
-              <div className="mt-3 flex flex-wrap gap-2">
+              <div className="mt-3 flex flex-wrap gap-1.5 sm:gap-2">
                 {SAMPLE_SCENES.map((sample) => (
                   <button
                     key={sample.id}
                     type="button"
                     onClick={() => applySample(sample.id)}
                     aria-pressed={activeSample === sample.id}
-                    className={`rounded-full border px-3 py-1.5 text-left text-[11px] transition ${
+                    className={`rounded-full border px-2.5 py-1 text-left text-[11px] transition sm:px-3 sm:py-1.5 ${
                       activeSample === sample.id
                         ? "border-ember-500/40 bg-ember-500/10 text-ember-400"
                         : "border-white/10 bg-white/5 text-haze-300 hover:border-white/20 hover:text-haze-100"
@@ -205,7 +210,7 @@ export default function StudioPage() {
                 ))}
               </div>
 
-              <label htmlFor="scene" className="mt-3 block text-[10px] uppercase tracking-wider text-haze-500">
+              <label htmlFor="scene" className="mt-2.5 block text-[10px] uppercase tracking-wider text-haze-500 sm:mt-3">
                 The scene
               </label>
               <textarea
@@ -217,7 +222,7 @@ export default function StudioPage() {
                 }}
                 rows={5}
                 spellCheck={false}
-                className="mt-1.5 w-full resize-y rounded-lg border border-white/10 bg-black/30 p-3 font-sans text-sm leading-relaxed text-haze-100 placeholder:text-haze-700 focus:border-ember-500/40"
+                className="mt-1.5 max-h-[84px] w-full resize-y rounded-lg border border-white/10 bg-black/30 p-2.5 font-sans text-sm leading-relaxed text-haze-100 placeholder:text-haze-700 focus:border-ember-500/40 sm:max-h-none sm:p-3"
                 placeholder="Describe the scene, the emotion, the era, the audience…"
               />
 

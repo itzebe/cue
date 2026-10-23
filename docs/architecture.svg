@@ -1,0 +1,163 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 900" width="1180" height="900" role="img" aria-labelledby="archTitle archDesc" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <title id="archTitle">Cue architecture: the LLM reads the scene, Qloo decides the ranking</title>
+  <desc id="archDesc">A creative brief is parsed by an LLM into a structured scene brief with anchors. Anchors and tags are resolved to Qloo entity and tag IDs. Qloo's Insights API then ranks candidate artists by measured affinity, with explainability. Parallel stages enrich the sheet with momentum, cross-domain people and brands, comparables, and a cross-domain taste map. The LLM separately proposes track titles, and a control baseline is produced by the LLM alone with no Qloo data. Everything is assembled into a cue sheet with a full receipt ledger.</desc>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#87859d"/>
+    </marker>
+    <marker id="arrowQ" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#3ddc97"/>
+    </marker>
+    <marker id="arrowL" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#ff7a1a"/>
+    </marker>
+    <style>
+      .bg { fill: #0b0b12; }
+      .panel { fill: #15151f; stroke: rgba(255,255,255,0.10); stroke-width: 1; }
+      .panelQ { fill: #10241c; stroke: rgba(61,220,151,0.45); stroke-width: 1.4; }
+      .panelL { fill: #241708; stroke: rgba(255,122,26,0.45); stroke-width: 1.4; }
+      .panelOut { fill: #1a1a28; stroke: rgba(255,255,255,0.18); stroke-width: 1.4; }
+      .t { fill: #f5f4f8; font-size: 15px; font-weight: 600; }
+      .s { fill: #b9b7c9; font-size: 12px; }
+      .m { fill: #87859d; font-size: 11.5px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+      .lbl { fill: #87859d; font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; font-weight: 600; }
+      .q { fill: #3ddc97; }
+      .l { fill: #ff9f5a; }
+      .edge { stroke: #87859d; stroke-width: 1.4; fill: none; marker-end: url(#arrow); }
+      .edgeQ { stroke: #3ddc97; stroke-width: 1.6; fill: none; marker-end: url(#arrowQ); }
+      .edgeL { stroke: #ff7a1a; stroke-width: 1.6; fill: none; marker-end: url(#arrowL); }
+      .dash { stroke-dasharray: 5 4; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1180" height="900"/>
+
+  <!-- ============ LEGEND ============ -->
+  <rect class="panel" x="820" y="22" width="336" height="76" rx="10"/>
+  <text class="lbl" x="840" y="44">Legend</text>
+  <rect class="panelQ" x="840" y="54" width="14" height="14" rx="3"/>
+  <text class="s" x="862" y="66">Qloo — measured evidence</text>
+  <rect class="panelL" x="840" y="76" width="14" height="14" rx="3"/>
+  <text class="s" x="862" y="88">LLM — proposes, never measures</text>
+
+  <!-- ============ INPUT ============ -->
+  <rect class="panel" x="40" y="22" width="330" height="76" rx="10"/>
+  <text class="lbl" x="60" y="44">Input</text>
+  <text class="t" x="60" y="66">Creative brief</text>
+  <text class="s" x="60" y="86">script page · treatment · two sentences</text>
+
+  <!-- ============ STAGE 1: SCENE READER (LLM) ============ -->
+  <rect class="panelL" x="40" y="140" width="330" height="104" rx="10"/>
+  <text class="lbl" x="60" y="162">Stage 1 · LLM</text>
+  <text class="t" x="60" y="184">Scene reader</text>
+  <text class="s" x="60" y="204">Reads tone, era, instrumentation into a</text>
+  <text class="s" x="60" y="220">structured brief. Deterministic parser if</text>
+  <text class="s" x="60" y="236">no model is configured.</text>
+
+  <!-- ============ STAGE 2: RESOLVE ============ -->
+  <rect class="panelQ" x="40" y="288" width="330" height="96" rx="10"/>
+  <text class="lbl" x="60" y="310">Stage 2 · Qloo</text>
+  <text class="t" x="60" y="332">Resolve anchors &amp; tags</text>
+  <text class="s" x="60" y="352">Names become real entity IDs before</text>
+  <text class="s" x="60" y="368">ranking, so an invalid parameter cannot</text>
+  <text class="s" x="60" y="384">silently return nothing.</text>
+
+  <!-- ============ STAGE 3: THE RANKING CALL ============ -->
+  <rect class="panelQ" x="40" y="428" width="330" height="120" rx="10"/>
+  <text class="lbl" x="60" y="450">Stage 3 · Qloo — load-bearing</text>
+  <text class="t" x="60" y="472">Rank candidates by affinity</text>
+  <text class="s" x="60" y="492">Every cue's order and every number in it</text>
+  <text class="s" x="60" y="508">comes from here. Nothing on this path is</text>
+  <text class="s" x="60" y="524">scored or guessed by a language model.</text>
+  <text class="m q" x="60" y="540">GET /v2/insights</text>
+
+  <!-- ============ STAGE 4: PARALLEL ENRICHMENT ============ -->
+  <rect class="panelQ" x="40" y="592" width="330" height="180" rx="10"/>
+  <text class="lbl" x="60" y="614">Stage 4 · Qloo, in parallel</text>
+  <text class="t" x="60" y="636">Enrich the sheet</text>
+  <text class="s" x="60" y="656">Each stage degrades independently — a</text>
+  <text class="s" x="60" y="672">failed call costs one badge, not the sheet.</text>
+  <text class="m q" x="60" y="694">GET /v2/trending · momentum</text>
+  <text class="m q" x="60" y="712">GET /v2/analysis/compare · A/B split</text>
+  <text class="m q" x="60" y="730">urn:entity:person, urn:entity:brand</text>
+  <text class="m q" x="60" y="748">urn:entity:destination/podcast/place</text>
+  <text class="m q" x="60" y="766">urn:entity:movie/tv_show/book</text>
+
+  <!-- ============ LLM BRANCH: TRACK NAMING ============ -->
+  <rect class="panelL" x="440" y="592" width="300" height="86" rx="10"/>
+  <text class="lbl" x="460" y="614">Stage 5 · LLM</text>
+  <text class="t" x="460" y="636">Propose track titles</text>
+  <text class="s" x="460" y="656">One real cut per already-ranked artist.</text>
+  <text class="s" x="460" y="672">Absent a model, the cut stays "Track TBD".</text>
+
+  <!-- ============ CONTROL BRANCH ============ -->
+  <rect class="panelL" x="440" y="140" width="300" height="104" rx="10"/>
+  <text class="lbl" x="460" y="162">Control group · LLM alone</text>
+  <text class="t" x="460" y="184">The ungrounded answer</text>
+  <text class="s" x="460" y="204">The same scene, answered with no cultural</text>
+  <text class="s" x="460" y="220">data. Plausible, and unverifiable — no</text>
+  <text class="s" x="460" y="236">affinity, no provenance, no momentum.</text>
+
+  <!-- ============ ASSEMBLE ============ -->
+  <rect class="panelOut" x="440" y="288" width="300" height="120" rx="10"/>
+  <text class="lbl" x="460" y="310">Assembly</text>
+  <text class="t" x="460" y="332">Cue sheet + receipts</text>
+  <text class="s" x="460" y="352">Ranked cues, audience fit, placement and</text>
+  <text class="s" x="460" y="368">clearance estimates, and a receipt for</text>
+  <text class="s" x="460" y="384">every Qloo endpoint called.</text>
+
+  <!-- ============ OUTPUT ============ -->
+  <rect class="panelOut" x="820" y="288" width="336" height="120" rx="10"/>
+  <text class="lbl" x="840" y="310">Output · the product</text>
+  <text class="t" x="840" y="332">Grounded cue sheet</text>
+  <text class="s" x="840" y="352">Ranked cues with a named signal behind</text>
+  <text class="s" x="840" y="368">each pick, the Qloo-vs-LLM comparison,</text>
+  <text class="s" x="840" y="384">and cross-domain results.</text>
+
+  <!-- ============ QLOO API BOUNDARY ============ -->
+  <rect class="panelQ" x="820" y="428" width="336" height="96" rx="10"/>
+  <text class="lbl" x="840" y="450">External · Qloo</text>
+  <text class="t" x="840" y="472">hackathon.api.qloo.com</text>
+  <text class="s" x="840" y="492">All affinity, popularity, momentum, audience</text>
+  <text class="s" x="840" y="508">and provenance originate here.</text>
+
+  <!-- ============ OPTIONAL ENDPOINTS ============ -->
+  <rect class="panel" x="820" y="592" width="336" height="110" rx="10"/>
+  <text class="lbl" x="840" y="614">Opt-in endpoints</text>
+  <text class="s" x="840" y="636">Slow or multi-call work the user triggers,</text>
+  <text class="s" x="840" y="652">kept off the cue-sheet path.</text>
+  <text class="m" x="840" y="674">POST /api/localise · market touchpoints</text>
+  <text class="m" x="840" y="692">POST /api/quote · licence pricing model</text>
+
+  <!-- ============ EDGES ============ -->
+  <!-- brief -> scene reader -->
+  <path class="edgeL" d="M 205 98 L 205 136"/>
+  <!-- scene reader -> resolve -->
+  <path class="edgeQ" d="M 205 244 L 205 284"/>
+  <!-- resolve -> rank -->
+  <path class="edgeQ" d="M 205 384 L 205 424"/>
+  <!-- rank -> enrich -->
+  <path class="edgeQ" d="M 205 548 L 205 588"/>
+  <!-- brief -> control -->
+  <path class="edgeL dash" d="M 370 60 L 590 60 L 590 136"/>
+  <!-- rank -> assembly (down then right) -->
+  <path class="edgeQ" d="M 370 470 L 410 470 L 410 340 L 436 340"/>
+  <!-- enrich -> assembly -->
+  <path class="edgeQ" d="M 370 660 L 410 660 L 410 380 L 436 380"/>
+  <!-- control -> assembly -->
+  <path class="edgeL" d="M 590 244 L 590 284"/>
+  <!-- track naming -> assembly -->
+  <path class="edgeL" d="M 590 592 L 590 412"/>
+  <!-- assembly -> output -->
+  <path class="edge" d="M 740 340 L 816 340"/>
+  <!-- qloo boundary -> rank -->
+  <path class="edgeQ" d="M 820 470 L 374 470"/>
+  <!-- optional -> qloo boundary -->
+  <path class="edge" d="M 988 592 L 988 528"/>
+
+  <!-- ============ FOOTER NOTE ============ -->
+  <text class="m" x="40" y="826">Division of labour: the LLM reads the scene and names the cut. Qloo decides what ranks.</text>
+  <text class="m" x="40" y="846">No affinity, popularity, momentum or audience figure is ever produced by a language model.</text>
+  <text class="m" x="40" y="866">Module map: src/lib/planner.ts orchestrates · qloo.ts · cues.ts · crossdomain.ts · llm.ts · rights.ts</text>
+</svg>
