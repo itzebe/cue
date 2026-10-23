@@ -73,13 +73,19 @@ export async function resolveAnchors(
     "urn:entity:person",
   ];
 
-  for (const anchor of anchors.slice(0, 6)) {
-    const call = await searchEntities(anchor, types, 3);
+  // Resolve concurrently: each anchor is an independent search, and a brief can
+  // name up to six. Receipts are written by index so the log keeps the order of
+  // the brief rather than the order the network happened to return.
+  const calls = await Promise.all(
+    anchors.slice(0, 6).map((anchor) => searchEntities(anchor, types, 3)),
+  );
+  anchors.slice(0, 6).forEach((anchor, i) => {
+    const call = calls[i];
     receipts.push(receiptFrom(call, "GET /search", `Resolve "${anchor}"`));
     if (call.ok && call.data.length > 0) {
       resolved.push(call.data[0]);
     }
-  }
+  });
   return resolved;
 }
 
@@ -90,16 +96,18 @@ export async function resolveTags(
 ): Promise<TagResult[]> {
   const resolved: TagResult[] = [];
   const seen = new Set<string>();
-  for (const term of terms.slice(0, 6)) {
-    const call = await searchTags(term, [], 3);
+  const scoped = terms.slice(0, 6);
+  const calls = await Promise.all(scoped.map((term) => searchTags(term, [], 3)));
+  scoped.forEach((term, i) => {
+    const call = calls[i];
     receipts.push(receiptFrom(call, "GET /v2/tags", `Tag "${term}"`));
     if (call.ok && call.data.length > 0) {
       const tag = call.data[0];
-      if (seen.has(tag.tag_id)) continue;
+      if (seen.has(tag.tag_id)) return;
       seen.add(tag.tag_id);
       resolved.push(tag);
     }
-  }
+  });
   return resolved;
 }
 

@@ -815,6 +815,49 @@ await check("a basket quote prices from Qloo signals and reports the take", asyn
   assert.ok(summary.gatingDays > 0, "a gating clearance window must be reported");
 });
 
+await check("concurrent Qloo calls never exceed the in-flight cap", async () => {
+  const { insights } = await import("../src/lib/qloo.ts");
+  // Guards the MAX_CONCURRENCY invariant now that the pipeline resolves anchors
+  // and tags concurrently and can issue a dozen calls at once. The cap is what
+  // keeps a burst from earning 429s, so it should stay pinned by a test even
+  // though the current limiter is correct.
+  let peak = 0;
+  let inFlight = 0;
+  const original = globalThis.fetch;
+  globalThis.fetch = (async (...args: Parameters<typeof fetch>) => {
+    inFlight += 1;
+    peak = Math.max(peak, inFlight);
+    await new Promise((resolve) => setTimeout(resolve, 15));
+    try {
+      return await original(...args);
+    } finally {
+      inFlight -= 1;
+    }
+  }) as typeof fetch;
+
+  try {
+    // Arrivals are staggered rather than launched as one burst, so callers keep
+    // hitting the limiter while slots are being released.
+    const tasks: Array<Promise<unknown>> = [];
+    for (let i = 0; i < 40; i += 1) {
+      tasks.push(
+        insights({
+          filterType: "urn:entity:artist",
+          signalEntities: ["11111111-1111-1111-1111-111111111111"],
+          take: 3,
+        }),
+      );
+      await new Promise((resolve) => setTimeout(resolve, 3));
+    }
+    await Promise.all(tasks);
+  } finally {
+    globalThis.fetch = original;
+  }
+
+  assert.ok(peak > 1, "the limiter must still allow real concurrency");
+  assert.ok(peak <= 4, `no more than 4 calls may be in flight, saw ${peak}`);
+});
+
 await check("a malformed cue cannot produce a NaN price", async () => {
   const { quoteLicense, DEFAULT_TERMS } = await import("../src/lib/rights.ts");
   // /api/quote prices cues supplied by the client, so every field the model

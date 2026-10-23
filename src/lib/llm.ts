@@ -143,7 +143,16 @@ export async function chat(
       signal: controller.signal,
     });
 
-    if (!res.ok) return null;
+    if (!res.ok) {
+      // A misconfigured model or revoked key must be visible in the server log.
+      // Without this the pipeline silently degrades to "no LLM" and the operator
+      // sees unexplained "Track TBD" cues with no hint as to why.
+      const detail = await res.text().catch(() => "");
+      console.warn(
+        `[cue] LLM call failed: ${res.status} model=${config.model} ${detail.slice(0, 300)}`,
+      );
+      return null;
+    }
 
     const json = (await res.json()) as { choices?: ChatCompletionChoice[] };
     const choice = json.choices?.[0];

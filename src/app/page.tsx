@@ -328,9 +328,13 @@ export default function StudioPage() {
                         primaries.every(
                           (cue) => Math.abs(cue.affinity - primaries[0].affinity) < 0.001,
                         );
-                      return uniform
+                      const base = uniform
                         ? "Qloo affinity is uniform for this brief; ordered by popularity."
                         : "Ranked by Qloo affinity, highest first.";
+                      const hasDiscovery = sheet.cues.some((cue) => cue.discovery);
+                      return hasDiscovery
+                        ? `${base} Discovery picks close the sheet — a separate Qloo call, so their scores are not comparable to the ranking above.`
+                        : base;
                     })()}
                   </p>
                 </div>

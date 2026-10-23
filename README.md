@@ -111,7 +111,7 @@ npm run dev                  # http://localhost:12000
 npm run verify
 ```
 
-30 checks covering normalisation, affinity extraction, explainability parsing, momentum derivation, failure degradation, cue assembly, place-based localisation, casting and licence pricing. Only `fetch` is stubbed — everything under test is the production code path.
+36 checks covering normalisation, affinity extraction, explainability parsing, momentum derivation, failure degradation, cue assembly, concurrency limits, place-based localisation, casting and licence pricing. Only `fetch` is stubbed — everything under test is the production code path.
 
 ### Environment
 
@@ -120,9 +120,12 @@ npm run verify
 | `QLOO_API_KEY` | for live mode | Your Qloo hackathon key |
 | `QLOO_API_BASE_URL` | no | Defaults to `https://hackathon.api.qloo.com` |
 | `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL` | no | Any OpenAI-compatible endpoint |
-| `OPENAI_API_KEY` | no | Alternative to the above |
+| `OPENAI_API_KEY` / `OPENAI_BASE_URL` / `LLM_MODEL` | no | Alternative to the above |
 
-Without an LLM configured, Cue uses its deterministic scene reader and skips track naming. The Qloo grounding is unaffected.
+Qloo is the required half; the LLM is optional and only names the specific track. Without it, Cue still ranks artists from the taste graph and leaves the cut as "Track TBD" rather than inventing a title. With it, each ranked artist gets a real track, album and year plus a rationale for the placement.
+
+Set `LLM_MODEL` explicitly when your endpoint does not serve the default (`gpt-4o-mini` for OpenAI, `claude-sonnet-4-5-20250929` for the Agent Canvas proxy). A model your key cannot access returns `403`, and Cue degrades to "Track TBD" cues; the server log now names the rejected model so the cause is visible instead of silent.
+
 
 ## Deployment
 

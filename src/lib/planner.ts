@@ -500,13 +500,16 @@ export async function buildCueSheet(
 
   // Stage 1: resolve the brief into valid Qloo IDs. Invalid inputs are dropped
   // silently by Qloo, so resolution first is what keeps later calls meaningful.
-  context.anchorEntities = await resolveAnchors(brief.anchors, receipts);
+  // Anchors and tags are independent searches, so they resolve concurrently.
+  [context.anchorEntities, context.tags] = await Promise.all([
+    resolveAnchors(brief.anchors, receipts),
+    resolveTags([...brief.genre, ...brief.mood], receipts),
+  ]);
   if (context.anchorEntities.length === 0) {
     warnings.push(
       "None of the scene's named references resolved to Qloo entities. Falling back to mood and genre tags.",
     );
   }
-  context.tags = await resolveTags([...brief.genre, ...brief.mood], receipts);
 
   // Stage 2: Qloo ranks the artists. This is the load-bearing call.
   const rankedArtists = await groundArtistCues(context);
@@ -542,16 +545,34 @@ export async function buildCueSheet(
     ...discovery.slice(0, DISCOVERY_SLOTS),
   ].slice(0, SHEET_SIZE);
 
-  // Stage 4: one specific track per Qloo-ranked artist, from the LLM.
-  const trackMap = await proposeTracks(
-    selected.map((entity) => entity.name),
-    brief,
-  );
+  // Stages 4 and 5 are independent of each other and of the cross-domain work
+  // below, and the LLM track call is the slowest step in the pipeline. Running
+  // them concurrently is what keeps a sheet inside the route's time budget.
+  const directionPromise = options.alternativeAnchors?.length
+    ? resolveAnchors(options.alternativeAnchors, receipts).then((altEntities) =>
+        compareDirections(context.anchorEntities, altEntities, receipts),
+      )
+    : Promise.resolve(undefined);
 
-  // Stage 5: momentum per artist, computed from Qloo's own trend series.
-  const momentum = await Promise.all(
-    selected.map((entity) => artistMomentumSafe(entity.entity_id, receipts)),
-  );
+  const [trackMap, momentum, directionCompare, baseline, casting] = await Promise.all([
+    proposeTracks(
+      selected.map((entity) => entity.name),
+      brief,
+    ),
+    Promise.all(selected.map((entity) => artistMomentumSafe(entity.entity_id, receipts))),
+    directionPromise,
+    buildBaseline(brief),
+    // Stage 6: cross-domain. The same audience measurement pointed at people and
+    // brands. This is the argument that Cue is a cultural layer rather than a
+    // music tool, and it is cheap enough to run on every sheet.
+    //
+    // Localisation is NOT run here. It costs one slow location-filtered query per
+    // market, so it lives behind its own endpoint that the user triggers
+    // explicitly — see /api/localise.
+    castForBrief(brief, context.anchorEntities, context.tags, receipts).catch(
+      (): CastingResult => ({ audience: "", candidates: [], receipts: [], warnings: [] }),
+    ),
+  ]);
 
   const cues: Cue[] = selected.map((entity, index) => {
     const proposed = trackMap.get(entity.name.toLowerCase());
@@ -571,33 +592,6 @@ export async function buildCueSheet(
       "Qloo returned no artists for this brief. Try adding a named film, show or artist as an anchor.",
     );
   }
-
-  // Optional A/B: a second creative direction the supervisor is weighing.
-  let directionCompare: CueSheet["directionCompare"];
-  if (options.alternativeAnchors?.length) {
-    const altEntities = await resolveAnchors(options.alternativeAnchors, receipts);
-    directionCompare = await compareDirections(
-      context.anchorEntities,
-      altEntities,
-      receipts,
-    );
-  }
-
-  const baseline = await buildBaseline(brief);
-
-  // Stage 4: cross-domain. The same audience measurement pointed at people and
-  // brands. This is the argument that Cue is a cultural layer rather than a
-  // music tool, and it is cheap enough to run on every sheet.
-  //
-  // Localisation is NOT run here. It costs one slow location-filtered query per
-  // market, so it lives behind its own endpoint that the user triggers
-  // explicitly — see /api/localise.
-  const casting = await castForBrief(
-    brief,
-    context.anchorEntities,
-    context.tags,
-    receipts,
-  ).catch((): CastingResult => ({ audience: "", candidates: [], receipts: [], warnings: [] }));
 
   if (casting.candidates.length === 0) {
     casting.warnings.push(
