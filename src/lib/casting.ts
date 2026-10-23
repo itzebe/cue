@@ -24,7 +24,12 @@ export interface CastCandidate {
 }
 
 export interface CastingResult {
-  /** The audience the brief is speaking to. */
+  /**
+   * Human-readable description of the signal the candidates were ranked on.
+   * This is NOT the brief's demographic audience: the people query is ranked on
+   * anchor entities and taste tags (see `castForBrief`), so labelling it as the
+   * target demographic would claim a filter that was never applied.
+   */
   audience: string;
   candidates: CastCandidate[];
   receipts: Receipt[];
@@ -63,28 +68,42 @@ export async function castForBrief(
   const warnings: string[] = [];
   const signalEntities = anchors.map((anchor) => anchor.entity_id);
   const signalTags = toTagSignals(tags);
+  const demographics = {
+    age: brief.audience.age,
+    gender: brief.audience.gender,
+    audiences: brief.audience.audiences,
+  };
 
+  // Demographics are deliberately NOT sent on the PEOPLE call, and that is a
+  // correctness decision rather than an oversight.
+  //
+  // Measured against the hackathon sandbox, adding `signal.demographics.age` to
+  // a `urn:entity:person` query does not narrow the brief's audience — it
+  // replaces it. Anchored on Drive (2011), the undemographic call returns action
+  // leads (Stallone, Statham, Bruce Lee); the same call with `age=25_to_29`
+  // returns an unrelated cluster (Shruti Haasan, MS Dhoni), and only 2 of 15
+  // entities survive across the two. The effect repeats across anchors and every
+  // age bucket, and `gender` alone poisons it the same way. Because a polluted
+  // result set is *plausible-looking*, it cannot be detected downstream — it
+  // silently presents a different audience's people as this brief's.
+  //
+  // Brands are the opposite: the same comparison keeps 4-8 of 10 entities and
+  // stays on-theme (Drive yields Aston Martin, Audi, Maserati and Lamborghini
+  // either way), so demographics there behave as a genuine refinement and are
+  // kept. The difference is not documented by Qloo; it was measured, and the
+  // asymmetry is why this is scoped to one call rather than removed wholesale.
   const [people, brands] = await Promise.all([
     insights({
       filterType: "urn:entity:person",
       signalEntities,
       signalTags,
-      demographics: {
-        age: brief.audience.age,
-        gender: brief.audience.gender,
-        audiences: brief.audience.audiences,
-      },
       take: 10,
     }),
     insights({
       filterType: "urn:entity:brand",
       signalEntities,
       signalTags,
-      demographics: {
-        age: brief.audience.age,
-        gender: brief.audience.gender,
-        audiences: brief.audience.audiences,
-      },
+      demographics,
       take: 6,
     }),
   ]);
@@ -130,7 +149,10 @@ export async function castForBrief(
   }
 
   return {
-    audience: brief.audience.age?.replace(/_/g, " ") ?? "unspecified audience",
+    // Named for the signal actually used, not the brief's demographic.
+    audience: anchors.length > 0
+      ? `taste profile of ${anchors.map((anchor) => anchor.name).join(", ")}`
+      : "the brief's taste tags",
     candidates: [...peopleCandidates, ...brandCandidates],
     receipts,
     warnings,

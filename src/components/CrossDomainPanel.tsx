@@ -2,9 +2,27 @@
 
 import { useCallback, useState } from "react";
 import type { CueSheet } from "@/lib/types";
+import type { CastCandidate } from "@/lib/casting";
 import type { LocalisationResult } from "@/lib/localise";
 
 const DEFAULT_MARKETS = "Sao Paulo, Seoul, Tokyo";
+
+function CandidateCard({ candidate }: { candidate: CastCandidate }) {
+  return (
+    <div className="rounded-lg border border-white/5 bg-black/20 p-3">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
+        <p className="truncate text-sm text-haze-100">{candidate.name}</p>
+        <span className="shrink-0 font-mono text-xs text-signal-400">
+          {candidate.affinity.toFixed(3)}
+        </span>
+      </div>
+      <p className="mt-1 text-[10px] text-haze-500">
+        {candidate.crossDomain ? "brand" : "person"}
+        {candidate.popularity ? ` · pop ${candidate.popularity.toFixed(2)}` : ""}
+      </p>
+    </div>
+  );
+}
 
 /**
  * The cross-domain proof.
@@ -27,6 +45,15 @@ export function CrossDomainPanel({ sheet }: { sheet: CueSheet }) {
   const [error, setError] = useState<string | null>(null);
 
   const reference = referenceMarket.trim() || sheet.brief.region || "";
+
+  // Grouped, not sliced off a single ranked list. Candidates arrive as people
+  // first, then brands, so a single `slice(0, 9)` showed nine people and zero
+  // brands — the cross-domain half of the claim never reached the screen. Each
+  // domain gets its own budget here, which is also the honest presentation:
+  // these are two separate queries and their affinity numbers are not
+  // comparable to each other.
+  const peopleCandidates = casting?.candidates.filter((c) => !c.crossDomain).slice(0, 6) ?? [];
+  const brandCandidates = casting?.candidates.filter((c) => c.crossDomain).slice(0, 6) ?? [];
 
   const localise = useCallback(async () => {
     const list = markets
@@ -74,29 +101,32 @@ export function CrossDomainPanel({ sheet }: { sheet: CueSheet }) {
         </header>
 
         {casting ? (
-          <div className="mt-5">
-            <h3 className="text-[10px] uppercase tracking-wider text-haze-500">
-              Casting and partner fit · audience {casting.audience}
-            </h3>
-            <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {casting.candidates.slice(0, 9).map((candidate) => (
-                <div
-                  key={candidate.entityId}
-                  className="rounded-lg border border-white/5 bg-black/20 p-3"
-                >
-                  <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
-                    <p className="truncate text-sm text-haze-100">{candidate.name}</p>
-                    <span className="shrink-0 font-mono text-xs text-signal-400">
-                      {candidate.affinity.toFixed(3)}
-                    </span>
-                  </div>
-                  <p className="mt-1 text-[10px] text-haze-500">
-                    {candidate.crossDomain ? "brand · cross-domain" : "person"}
-                    {candidate.popularity ? ` · pop ${candidate.popularity.toFixed(2)}` : ""}
-                  </p>
+          <div className="mt-5 space-y-5">
+            {peopleCandidates.length > 0 ? (
+              <div>
+                <h3 className="text-[10px] uppercase tracking-wider text-haze-500">
+                  Casting fit · people · ranked on {casting.audience}
+                </h3>
+                <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  {peopleCandidates.map((candidate) => (
+                    <CandidateCard key={candidate.entityId} candidate={candidate} />
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
+            ) : null}
+
+            {brandCandidates.length > 0 ? (
+              <div>
+                <h3 className="text-[10px] uppercase tracking-wider text-haze-500">
+                  Partner fit · brands · same brief, different entity type
+                </h3>
+                <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  {brandCandidates.map((candidate) => (
+                    <CandidateCard key={candidate.entityId} candidate={candidate} />
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </div>
         ) : null}
 

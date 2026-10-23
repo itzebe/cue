@@ -728,7 +728,11 @@ await check("casting queries people and brands without a music-era filter", asyn
     assert.ok(types.includes("urn:entity:person"), "casting must query people");
     assert.ok(types.includes("urn:entity:brand"), "casting must query brands cross-domain");
     assert.equal(result.candidates.length, 2, "one person and one brand");
-    assert.equal(result.audience, "25 34", "audience is made human-readable");
+    assert.equal(
+      result.audience,
+      "taste profile of Drive",
+      "the label must name the signal actually used, not the brief's demographic",
+    );
 
     // A release-year floor is a music-catalogue concept. Applying it to people
     // would drop every living performer and leave a casting list of dead ones.
@@ -739,6 +743,38 @@ await check("casting queries people and brands without a music-era filter", asyn
         "casting must not filter people by music release year",
       );
     }
+
+    // The person query must not carry demographics. Measured against the live
+    // sandbox, `signal.demographics.age` on `urn:entity:person` replaces the
+    // brief's audience rather than narrowing it — Drive's action leads become an
+    // unrelated cluster with only 2 of 15 entities in common. A polluted result
+    // set still looks plausible, so nothing downstream can catch it.
+    const personCall = calls.find(
+      (call) => new URL(call.url).searchParams.get("filter.type") === "urn:entity:person",
+    );
+    const personParams = new URL(personCall!.url).searchParams;
+    for (const param of [
+      "signal.demographics.age",
+      "signal.demographics.gender",
+      "signal.demographics.audiences",
+    ]) {
+      assert.equal(
+        personParams.get(param),
+        null,
+        `the person query must not send ${param}`,
+      );
+    }
+
+    // Brands keep demographics: the same comparison preserves 4-8 of 10 entities
+    // and stays on-theme, so there it is a genuine refinement.
+    const brandCall = calls.find(
+      (call) => new URL(call.url).searchParams.get("filter.type") === "urn:entity:brand",
+    );
+    assert.equal(
+      new URL(brandCall!.url).searchParams.get("signal.demographics.age"),
+      "25_to_29",
+      "the brand query keeps demographics as a refinement",
+    );
   } finally {
     globalThis.fetch = original;
   }
