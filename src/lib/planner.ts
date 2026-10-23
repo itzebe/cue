@@ -704,6 +704,7 @@ export async function buildCueSheet(
       provider: sceneProvider,
       failureReason: sceneFailure?.reason,
       failureStatus: sceneFailure?.status ?? null,
+      failureProviderCode: sceneFailure?.providerCode ?? null,
       failureMessage: sceneFailure?.message,
       /** Providers tried, in order. Only set when more than one was available. */
       triedProviders: sceneAttempts.length > 1 ? sceneAttempts.map((a) => a.source) : undefined,

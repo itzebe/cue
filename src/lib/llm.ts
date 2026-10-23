@@ -277,6 +277,14 @@ export type LlmFailureReason =
   | "timeout"
   | "empty_response"
   | "transport"
+  /**
+   * The provider rejected the request because the model failed to produce a
+   * well-formed tool call. Groq raises this as an HTTP 400 (`tool_use_failed` /
+   * `json_validate_failed`) for reasoning models that do not reliably follow a
+   * tool schema. It is a *request-shape* fault, not an auth, quota or outage
+   * fault, and it is recoverable by asking differently rather than by giving up.
+   */
+  | "tool_format"
   | "http_error";
 
 export interface LlmFailure {
@@ -286,6 +294,16 @@ export interface LlmFailure {
   message: string;
   /** Upstream text, truncated. For the server log, not the public response. */
   detail: string;
+  /**
+   * The provider's own machine-readable error code, e.g. Groq's
+   * `tool_use_failed` or `json_validate_failed`.
+   *
+   * Without this an unrecognised 400 collapses into "the provider returned 400",
+   * which names the status and nothing else — the operator cannot tell a malformed
+   * tool call from a bad parameter from an unavailable model, and the one piece of
+   * information that identifies the fault is the piece that was being dropped.
+   */
+  providerCode?: string | null;
 }
 
 /**
@@ -299,15 +317,137 @@ export interface ChatResult {
   failure: LlmFailure | null;
 }
 
-function classifyFailure(status: number, detail: string): LlmFailure {
-  const body = detail.toLowerCase();
+/**
+ * Pull the provider's error code out of a response body, without ever carrying
+ * key material or request echoes into a diagnostic string.
+ *
+ * OpenAI-compatible providers nest the useful part under `error`, but the shape
+ * varies: Groq sets `code` and `type`, OpenAI sets `code` and `type`, and some
+ * gateways return a bare string. All of these are read defensively, and the
+ * result is length-capped and scrubbed so a body that happens to echo an
+ * `Authorization` header cannot leak it into a log or a public response.
+ */
+export function extractProviderError(detail: string): {
+  code: string | null;
+  type: string | null;
+  message: string;
+} {
+  let code: string | null = null;
+  let type: string | null = null;
+  let message = "";
 
-  if (status === 401 || status === 403) {
+  try {
+    const parsed = JSON.parse(detail) as unknown;
+    const error = (parsed as { error?: unknown })?.error ?? parsed;
+    if (typeof error === "string") {
+      message = error;
+    } else if (error && typeof error === "object") {
+      const record = error as Record<string, unknown>;
+      if (typeof record.code === "string") code = record.code;
+      if (typeof record.type === "string") type = record.type;
+      if (typeof record.message === "string") message = record.message;
+    }
+  } catch {
+    // Not JSON: fall back to the raw text as the message.
+    message = detail;
+  }
+
+  return { code, type, message: sanitiseDiagnostic(message) };
+}
+
+/**
+ * Strip anything that looks like a credential out of text that will be logged or
+ * returned to a browser. Provider errors are normally safe, but they are upstream
+ * data and an echoed header is exactly the kind of thing that ends up in a
+ * screenshot.
+ */
+export function sanitiseDiagnostic(text: string): string {
+  return text
+    .replace(/\b(sk|gsk|ghu|ghp|xai|key)[-_][A-Za-z0-9_-]{8,}/gi, "[redacted]")
+    .replace(/\bBearer\s+[A-Za-z0-9._-]{8,}/gi, "Bearer [redacted]")
+    .replace(/\b[A-Za-z0-9_-]{40,}\b/g, "[redacted]")
+    .slice(0, 300);
+}
+
+/** Provider codes that mean "the model did not emit a usable tool call". */
+const TOOL_FORMAT_CODES = new Set([
+  "tool_use_failed",
+  "tool_call_validation_failed",
+  "json_validate_failed",
+  "invalid_tool_call",
+  "failed_generation",
+]);
+
+/**
+ * True when a failure is the model's tool-call formatting rather than anything
+ * about the account, the network or the request's parameters. Only these are
+ * worth re-asking with a different request shape; everything else is permanent
+ * for this provider and should move straight to the fallback.
+ */
+export function isToolFormatFailure(failure: LlmFailure | null): boolean {
+  if (!failure) return false;
+  if (failure.reason === "tool_format") return true;
+  const code = (failure.providerCode ?? "").toLowerCase();
+  if (TOOL_FORMAT_CODES.has(code)) return true;
+  const body = `${failure.detail} ${failure.message}`.toLowerCase();
+  return (
+    body.includes("tool_use_failed") ||
+    body.includes("tool call") ||
+    body.includes("failed_generation") ||
+    body.includes("failed to validate json") ||
+    body.includes("json_validate_failed")
+  );
+}
+
+function classifyFailure(status: number, detail: string): LlmFailure {
+  const { code, type, message: upstreamMessage } = extractProviderError(detail);
+  const body = detail.toLowerCase();
+  // The provider's own code, e.g. Groq's `tool_use_failed`. Carried on every
+  // failure so the specific cause survives into the log and the sheet.
+  const providerCode = code ?? type ?? null;
+  // Prefer the provider's own sentence when it gave one. "Failed to validate
+  // JSON. Please adjust your prompt." is far more actionable than a status code,
+  // and it is the sentence an operator needs in order to recognise the fault.
+  const detailText = upstreamMessage || sanitiseDiagnostic(detail);
+
+  // A 403 is ambiguous: it covers both a rejected key and a key that is valid
+  // but not permitted to use the requested model. Reported as "the API key was
+  // rejected" the second case sends the operator to rotate a working credential
+  // while the real fix is a different model or an entitlement change. The body is
+  // the only thing that distinguishes them, so it is read before deciding.
+  if (status === 403) {
+    const modelAccess =
+      body.includes("model") &&
+      (body.includes("not allowed") ||
+        body.includes("no access") ||
+        body.includes("permission") ||
+        body.includes("entitle") ||
+        body.includes("only access models") ||
+        body.includes("does not have access"));
+    if (modelAccess) {
+      return {
+        reason: "model_not_permitted",
+        status,
+        message: "the configured model is not available to this key",
+        detail: detailText,
+        providerCode,
+      };
+    }
     return {
       reason: "invalid_key",
       status,
       message: "the configured API key was rejected",
-      detail,
+      detail: detailText,
+      providerCode,
+    };
+  }
+  if (status === 401) {
+    return {
+      reason: "invalid_key",
+      status,
+      message: "the configured API key was rejected",
+      detail: detailText,
+      providerCode,
     };
   }
   // OpenAI reports an exhausted balance as 429, which is easy to misread as a
@@ -327,7 +467,8 @@ function classifyFailure(status: number, detail: string): LlmFailure {
       reason: "insufficient_quota",
       status,
       message: "the provider reports no remaining credits",
-      detail,
+      detail: detailText,
+      providerCode,
     };
   }
   if (body.includes("rate limit") || body.includes("rate_limit") || status === 429) {
@@ -335,7 +476,33 @@ function classifyFailure(status: number, detail: string): LlmFailure {
       reason: "rate_limited",
       status,
       message: "the provider rate-limited the request",
-      detail,
+      detail: detailText,
+      providerCode,
+    };
+  }
+  // Checked before the model-availability branch: a tool-protocol rejection is a
+  // 400 that mentions neither a model nor a parameter, and misclassifying it as
+  // "model not available" would send the operator to change a model that is fine.
+  if (
+    (providerCode !== null && TOOL_FORMAT_CODES.has(providerCode.toLowerCase())) ||
+    body.includes("tool_use_failed") ||
+    body.includes("failed_generation") ||
+    body.includes("json_validate_failed") ||
+    body.includes("failed to validate json") ||
+    body.includes("tool call validation")
+  ) {
+    return {
+      reason: "tool_format",
+      status,
+      // The cause is named by the provider's own code, not paraphrased into a
+      // status number. The provider's full sentence stays in `detail` for the
+      // server log: it is accurate but it talks about internal fields such as
+      // `failed_generation`, which is noise in a banner a producer reads.
+      message: providerCode
+        ? `the model did not return a valid tool call (${providerCode})`
+        : "the model did not return a valid tool call",
+      detail: detailText,
+      providerCode,
     };
   }
   if (
@@ -351,10 +518,21 @@ function classifyFailure(status: number, detail: string): LlmFailure {
       reason: "model_not_permitted",
       status,
       message: "the configured model is not available to this key",
-      detail,
+      detail: detailText,
+      providerCode,
     };
   }
-  return { reason: "http_error", status, message: `the provider returned ${status}`, detail };
+  // The generic case still names the provider's code, so an unclassified 400 is
+  // diagnosable instead of collapsing to a bare status number.
+  return {
+    reason: "http_error",
+    status,
+    message: providerCode
+      ? `the provider returned ${status} (${providerCode})`
+      : `the provider returned ${status}`,
+    detail: detailText,
+    providerCode,
+  };
 }
 
 /**
@@ -477,11 +655,18 @@ interface ChatCompletionChoice {
  * One turn of chat completion. Returns null instead of throwing so callers can
  * fall back to the deterministic planner.
  */
-export async function chatDetailed(
+/**
+ * A single request/response round trip, with no recovery of its own.
+ *
+ * Split out so `chatDetailed` can re-ask with a different request shape without
+ * duplicating transport, timeout and response-parsing logic three times.
+ */
+async function sendOnce(
   config: LlmConfig,
   messages: ChatMessage[],
-  tools: ToolSpec[] = [],
-  timeoutMs = 45_000,
+  tools: ToolSpec[],
+  temperature: number,
+  timeoutMs: number,
 ): Promise<ChatResult> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -489,7 +674,7 @@ export async function chatDetailed(
   const body: Record<string, unknown> = {
     model: config.model,
     messages,
-    temperature: config.temperature ?? 0.4,
+    temperature,
   };
   if (tools.length > 0) {
     body.tools = tools.map((tool) => ({
@@ -517,11 +702,14 @@ export async function chatDetailed(
     if (!res.ok) {
       // A misconfigured model or revoked key must be visible in the server log.
       // Without this the pipeline silently degrades to "no LLM" and the operator
-      // sees unexplained "Track TBD" cues with no hint as to why.
+      // sees unexplained "Track TBD" cues with no hint as to why. `failure.detail`
+      // is already scrubbed of anything credential-shaped by `classifyFailure`.
       const detail = await res.text().catch(() => "");
       const failure = classifyFailure(res.status, detail);
       console.warn(
-        `[cue] LLM call failed: ${res.status} ${failure.reason} model=${config.model} ${detail.slice(0, 300)}`,
+        `[cue] LLM call failed: ${res.status} ${failure.reason}` +
+          `${failure.providerCode ? ` code=${failure.providerCode}` : ""} ` +
+          `model=${config.model} ${failure.detail.slice(0, 200)}`,
       );
       return { message: null, failure };
     }
@@ -537,7 +725,7 @@ export async function chatDetailed(
           reason: "empty_response",
           status: res.status,
           message: "the provider returned no completion",
-          detail: JSON.stringify(json).slice(0, 300),
+          detail: sanitiseDiagnostic(JSON.stringify(json)),
         },
       };
     }
@@ -573,12 +761,105 @@ export async function chatDetailed(
         message: aborted
           ? `the provider did not answer within ${Math.round(timeoutMs / 1000)}s`
           : "the request to the provider failed",
-        detail: error instanceof Error ? error.message : "Unknown transport error",
+        detail: error instanceof Error ? sanitiseDiagnostic(error.message) : "Unknown transport error",
       },
     };
   } finally {
     clearTimeout(timer);
   }
+}
+
+/**
+ * The JSON instruction used when a provider cannot be trusted with a tool schema.
+ *
+ * Derived from the same schema the tool call would have validated against, so the
+ * two request shapes ask for exactly the same object and the caller's existing
+ * parser can read either one.
+ */
+function jsonInstruction(tool: ToolSpec): string {
+  return (
+    `Respond with ONLY a single JSON object, no prose and no markdown fences.\n` +
+    `It must validate against this JSON schema:\n${JSON.stringify(tool.parameters)}`
+  );
+}
+
+/**
+ * One turn of chat completion, with bounded recovery from a tool-protocol
+ * rejection. Returns null instead of throwing so callers can fall back to the
+ * deterministic planner.
+ *
+ * The recovery exists because a tool schema is not a request the model is
+ * obliged to satisfy, and Groq enforces that at the transport level: when a
+ * reasoning model emits a malformed tool call, the whole request is rejected
+ * with HTTP 400 (`tool_use_failed` / `json_validate_failed`) rather than
+ * returning a message Cue could ignore. Production hit this intermittently —
+ * the identical scene returned a brief, then a 400, then a brief — which is the
+ * signature of model-side nondeterminism rather than a bad key or a bad model.
+ *
+ * Recovery is deliberately narrow and bounded:
+ *  - only a tool-format failure is retried; an auth, quota, rate-limit or
+ *    model-availability error is permanent for this provider and is returned
+ *    immediately so `chatWithFallback` can move to the next one;
+ *  - at most two extra attempts, and all three share the caller's timeout budget
+ *    so a recovery cannot silently double the wall-clock cost of a cue sheet;
+ *  - the final attempt drops the tool schema and asks for the same JSON in
+ *    content, which the existing `extractJson` path already parses.
+ */
+export async function chatDetailed(
+  config: LlmConfig,
+  messages: ChatMessage[],
+  tools: ToolSpec[] = [],
+  timeoutMs = 45_000,
+): Promise<ChatResult> {
+  const deadline = Date.now() + timeoutMs;
+  const baseTemperature = config.temperature ?? 0.4;
+
+  const result = await sendOnce(config, messages, tools, baseTemperature, timeoutMs);
+
+  const firstFailure = result.failure;
+  if (tools.length === 0 || !isToolFormatFailure(firstFailure) || firstFailure === null) {
+    return result;
+  }
+  const remaining = () => deadline - Date.now();
+  if (remaining() <= 1_000) return result;
+
+  // Attempt 2: same request, lower temperature. This is the mitigation Groq's own
+  // tool-use documentation prescribes for exactly this error, and lowering
+  // temperature is the one lever that reliably reduces malformed tool calls.
+  console.warn(
+    `[cue] retrying ${config.model} at lower temperature after a tool-call rejection` +
+      `${firstFailure.providerCode ? ` (${firstFailure.providerCode})` : ""}`,
+  );
+  const second = await sendOnce(
+    config,
+    messages,
+    tools,
+    Math.max(0.1, baseTemperature - 0.3),
+    remaining(),
+  );
+  if (second.message) return second;
+
+  // Attempt 3: drop the tool schema and ask for the same object as plain JSON.
+  // The caller already parses `content` when no tool call is present, so this
+  // recovers the scene read even though the provider refuses tool calling.
+  if (isToolFormatFailure(second.failure) && remaining() > 1_000) {
+    console.warn(
+      `[cue] re-asking ${config.model} without tools after repeated tool-call rejection`,
+    );
+    const plain = await sendOnce(
+      config,
+      [...messages, { role: "user", content: jsonInstruction(tools[0]) }],
+      [],
+      0,
+      remaining(),
+    );
+    if (plain.message) return plain;
+    return { message: null, failure: plain.failure ?? second.failure };
+  }
+
+  // Recovery failed. Report the tool-protocol rejection itself rather than the
+  // last symptom: it is the accurate description of what the provider refused.
+  return { message: null, failure: second.failure ?? firstFailure };
 }
 
 /** The message, or `null`. Use `chatDetailed` when the reason matters. */

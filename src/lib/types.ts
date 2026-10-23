@@ -150,6 +150,12 @@ export interface CueSheet {
     /** Present when a configured provider was tried and failed. */
     failureReason?: string;
     failureStatus?: number | null;
+    /**
+     * The provider's own error code, e.g. Groq's `tool_use_failed`. Names the
+     * cause a bare status cannot: without it an unclassified 400 reads only as
+     * "the provider returned 400".
+     */
+    failureProviderCode?: string | null;
     /** Operator-facing sentence, e.g. "the provider reports no remaining credits". */
     failureMessage?: string;
     /** Providers tried, in order, when more than one was configured. */
