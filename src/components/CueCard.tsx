@@ -27,20 +27,20 @@ const CLEARANCE_LABEL: Record<Cue["clearance"], { text: string; className: strin
 function MomentumGlyph({ momentum }: { momentum: number }) {
   if (momentum > 0) {
     return (
-      <span className="text-signal-400" title="Rising over the last 90 days">
+      <span className="text-signal-400" title="Climbing Qloo population rank">
         ▲ rising
       </span>
     );
   }
   if (momentum < 0) {
     return (
-      <span className="text-haze-500" title="Cooling over the last 90 days">
+      <span className="text-haze-500" title="Falling Qloo population rank">
         ▼ cooling
       </span>
     );
   }
   return (
-    <span className="text-haze-500" title="Flat over the last 90 days">
+    <span className="text-haze-500" title="Steady Qloo population rank">
       ● steady
     </span>
   );
@@ -75,9 +75,17 @@ export function CueCard({
                 {cue.artist}
               </h3>
               <p className="mt-0.5 text-sm text-haze-300">
-                <span className="text-ember-400">“{cue.track}”</span>
-                {cue.album ? <span className="text-haze-500"> · {cue.album}</span> : null}
-                {cue.year ? <span className="text-haze-500"> · {cue.year}</span> : null}
+                {cue.trackUnverified ? (
+                  <span className="text-haze-500 italic">
+                    {cue.track} — set an LLM key to name the exact cut
+                  </span>
+                ) : (
+                  <>
+                    <span className="text-ember-400">“{cue.track}”</span>
+                    {cue.album ? <span className="text-haze-500"> · {cue.album}</span> : null}
+                    {cue.year ? <span className="text-haze-500"> · {cue.year}</span> : null}
+                  </>
+                )}
               </p>
             </div>
           </div>
@@ -105,6 +113,14 @@ export function CueCard({
           <span className={`rounded-full border px-2.5 py-1 ${clearance.className}`}>
             {clearance.text}
           </span>
+          {cue.discovery ? (
+            <span
+              className="rounded-full border border-violet-500/30 bg-violet-500/10 px-2.5 py-1 text-violet-300"
+              title="Surfaced by the cross-domain backfill query. Affinity is measured against a separate Qloo call, so it is not directly comparable to the primary picks above."
+            >
+              ◇ discovery
+            </span>
+          ) : null}
           <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">
             <MomentumGlyph momentum={cue.momentum} />
           </span>

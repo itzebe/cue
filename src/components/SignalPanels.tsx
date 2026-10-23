@@ -9,7 +9,8 @@ import type { CueSheet } from "@/lib/types";
  */
 export function DirectionPanel({ sheet }: { sheet: CueSheet }) {
   if (!sheet.directionCompare) return null;
-  const { aLabel, bLabel, shared, verdict } = sheet.directionCompare;
+  const { aLabel, bLabel, shared, aOnly, bOnly, overlap, verdict } =
+    sheet.directionCompare;
 
   return (
     <section className="panel grain relative overflow-hidden p-5" aria-label="Direction compare">
@@ -34,6 +35,15 @@ export function DirectionPanel({ sheet }: { sheet: CueSheet }) {
           </div>
         </div>
 
+        <div className="mt-4 flex items-baseline gap-3">
+          <span className="font-display text-2xl text-signal-300">
+            {Math.round(overlap * 100)}%
+          </span>
+          <span className="text-xs text-haze-500">
+            shared taste overlap · {shared.length} common tags
+          </span>
+        </div>
+
         <div className="mt-3">
           <h4 className="text-[10px] uppercase tracking-wider text-haze-500">
             Shared audience ({shared.length})
@@ -49,6 +59,41 @@ export function DirectionPanel({ sheet }: { sheet: CueSheet }) {
             ))}
           </div>
         </div>
+
+        {(aOnly.length > 0 || bOnly.length > 0) && (
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <div>
+              <h4 className="text-[10px] uppercase tracking-wider text-haze-500">
+                Only A
+              </h4>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {aOnly.slice(0, 6).map((name) => (
+                  <span
+                    key={name}
+                    className="rounded-full border border-ember-500/20 bg-ember-500/5 px-2 py-0.5 text-[11px] text-ember-400/80"
+                  >
+                    {name}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="text-[10px] uppercase tracking-wider text-haze-500">
+                Only B
+              </h4>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {bOnly.slice(0, 6).map((name) => (
+                  <span
+                    key={name}
+                    className="rounded-full border border-signal-500/20 bg-signal-500/5 px-2 py-0.5 text-[11px] text-signal-300/80"
+                  >
+                    {name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         <p className="mt-3 rounded-lg border border-signal-500/15 bg-signal-500/5 p-3 text-xs leading-relaxed text-haze-300">
           {verdict}

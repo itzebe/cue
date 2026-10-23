@@ -6,6 +6,7 @@ import type {
   RegionAffinity,
   SceneBrief,
   SearchResult,
+  TagResult,
 } from "./types";
 import {
   compareGroups,
@@ -15,6 +16,7 @@ import {
   searchTags,
   trending,
   type QlooCallResult,
+  type TagSignal,
 } from "./qloo";
 
 /**
@@ -25,6 +27,19 @@ import {
  * the scene's anchor entities, audience fit from demographic signals, and
  * momentum from the trending endpoint.
  */
+
+/**
+ * The trending endpoint returns an empty series for short windows (90 days
+ * yields zero points), so momentum is measured over two years to guarantee a
+ * usable series for any artist with coverage.
+ */
+const MOMENTUM_WINDOW_DAYS = 730;
+
+/** Qloo requires `{tag, weight}` objects for tag signals; bare strings return 400. */
+function toTagSignals(tags: TagResult[]): TagSignal[] | undefined {
+  if (tags.length === 0) return undefined;
+  return tags.map((tag) => ({ tag: tag.tag_id, weight: 1 }));
+}
 
 /** Map a free-text era hint onto a release-year floor for signal anchoring. */
 export function eraToYearFloor(era: string): number | undefined {
@@ -68,20 +83,24 @@ export async function resolveAnchors(
   return resolved;
 }
 
-/** Resolve mood/genre words into valid Qloo tag IDs (invalid tags are ignored silently). */
+/** Resolve mood/genre words into valid Qloo tags (invalid tags are ignored silently). */
 export async function resolveTags(
   terms: string[],
   receipts: Receipt[],
-): Promise<string[]> {
-  const tagIds: string[] = [];
+): Promise<TagResult[]> {
+  const resolved: TagResult[] = [];
+  const seen = new Set<string>();
   for (const term of terms.slice(0, 6)) {
     const call = await searchTags(term, [], 3);
     receipts.push(receiptFrom(call, "GET /v2/tags", `Tag "${term}"`));
     if (call.ok && call.data.length > 0) {
-      tagIds.push(call.data[0].tag_id);
+      const tag = call.data[0];
+      if (seen.has(tag.tag_id)) continue;
+      seen.add(tag.tag_id);
+      resolved.push(tag);
     }
   }
-  return Array.from(new Set(tagIds));
+  return resolved;
 }
 
 function receiptFrom<T>(
@@ -104,9 +123,18 @@ function receiptFrom<T>(
 export interface GroundingContext {
   brief: SceneBrief;
   anchorEntities: SearchResult[];
-  tagIds: string[];
+  /** Resolved mood/genre tags, kept with names so explanations read in English. */
+  tags: TagResult[];
   receipts: Receipt[];
   warnings: string[];
+}
+
+/** Names for every entity/tag that can appear in an explainability block. */
+function buildLabelMap(context: GroundingContext): Map<string, string> {
+  const labels = new Map<string, string>();
+  for (const anchor of context.anchorEntities) labels.set(anchor.entity_id, anchor.name);
+  for (const tag of context.tags) labels.set(tag.tag_id, tag.name);
+  return labels;
 }
 
 /**
@@ -116,7 +144,7 @@ export interface GroundingContext {
 export async function groundArtistCues(
   context: GroundingContext,
 ): Promise<QlooEntity[]> {
-  const { brief, anchorEntities, tagIds, receipts, warnings } = context;
+  const { brief, anchorEntities, tags, receipts, warnings } = context;
 
   const signalEntities = anchorEntities.map((entity) => entity.entity_id);
   const eraFloor = eraToYearFloor(brief.era);
@@ -124,7 +152,7 @@ export async function groundArtistCues(
   const call = await insights({
     filterType: "urn:entity:artist",
     signalEntities,
-    signalTags: tagIds,
+    signalTags: toTagSignals(tags),
     demographics: {
       age: brief.audience.age,
       gender: brief.audience.gender,
@@ -147,32 +175,75 @@ export async function groundArtistCues(
     warnings.push(
       "Qloo returned no artists. Parameters may be unsupported for this entity type, or the anchors had no coverage.",
     );
+    return [];
   }
-  return call.data;
+
+  // Rank by affinity, then by popularity. The tiebreak matters: a tag-only
+  // signal (no named references in the brief) comes back with a single uniform
+  // affinity score, so affinity alone leaves the order arbitrary.
+  const ranked = [...call.data].sort(
+    (a, b) => (b.affinity ?? 0) - (a.affinity ?? 0) || (b.popularity ?? 0) - (a.popularity ?? 0),
+  );
+
+  const spread = (ranked[0].affinity ?? 0) - (ranked[ranked.length - 1].affinity ?? 0);
+  if (signalEntities.length === 0 && Math.abs(spread) < 0.001) {
+    warnings.push(
+      "No named references in the brief, so Qloo returned a uniform affinity for tag matches. Cues are ordered by popularity instead of affinity — add a film, director or artist to get true affinity ranking.",
+    );
+  }
+
+  return ranked;
 }
 
 /**
  * Resolve one artist's momentum via the trending endpoint. Kept per-artist so a
  * single failure degrades one cue rather than the whole sheet.
+ *
+ * Qloo exposes momentum through `population_rank_velocity` / `population_percent_delta`
+ * on the first point of the series. The rank and percentile fields are treated
+ * as a fallback because the hackathon sandbox returns a frozen snapshot in which
+ * they are constant, and reporting a fabricated trend would be worse than
+ * reporting none.
  */
 export async function artistMomentum(
   artistId: string,
   receipts: Receipt[],
 ): Promise<number> {
   const end = new Date();
-  const start = new Date(end.getTime() - 1000 * 60 * 60 * 24 * 90);
+  const start = new Date(end.getTime() - 1000 * 60 * 60 * 24 * MOMENTUM_WINDOW_DAYS);
   const iso = (date: Date) => date.toISOString().slice(0, 10);
 
   const call = await trending(artistId, "urn:entity:artist", iso(start), iso(end));
   receipts.push(receiptFrom(call, "GET /v2/trending", "Artist momentum"));
-  if (!call.ok || call.data.length < 2) return 0;
+  if (!call.ok || call.data.length === 0) return 0;
 
-  const sorted = [...call.data].sort((a, b) => a.date.localeCompare(b.date));
-  const first = sorted[0];
-  const last = sorted[sorted.length - 1];
-  const delta = (last.percentile ?? last.rank ?? 0) - (first.percentile ?? first.rank ?? 0);
-  if (delta > 0.02) return 1;
-  if (delta < -0.02) return -1;
+  const scored = [...call.data].sort((a, b) => a.date.localeCompare(b.date));
+  const first = scored[0];
+  const last = scored[scored.length - 1];
+
+  // Rank movement is the most direct momentum signal: a shrinking rank number
+  // means the artist is climbing. A 5% rank move is treated as meaningful.
+  const rankVelocity = last.rankVelocity ?? 0;
+  const percentDelta = last.percentDelta ?? 0;
+  if (Number.isFinite(rankVelocity) && rankVelocity !== 0) {
+    const relative = first.rank ? rankVelocity / Math.max(first.rank, 1) : rankVelocity;
+    if (relative > 0.05) return 1;
+    if (relative < -0.05) return -1;
+  }
+  if (Number.isFinite(percentDelta) && percentDelta !== 0) {
+    if (percentDelta > 0.02) return 1;
+    if (percentDelta < -0.02) return -1;
+  }
+
+  // Fallback for snapshots that omit velocity: compare the series endpoints.
+  const firstPct = first.percentile ?? NaN;
+  const lastPct = last.percentile ?? NaN;
+  if (Number.isFinite(firstPct) && Number.isFinite(lastPct)) {
+    const delta = lastPct - firstPct;
+    if (delta > 0.02) return 1;
+    if (delta < -0.02) return -1;
+  }
+
   return 0;
 }
 
@@ -186,44 +257,27 @@ export async function compareDirections(
   const b = groupB.map((entity) => entity.entity_id);
   if (a.length === 0 || b.length === 0) return undefined;
 
-  const call = await compareGroups(a, b, "urn:entity:artist", 10);
+  const call = await compareGroups(a, b, "urn:entity:artist", {
+    a: groupA.map((entity) => entity.name).join(" + ") || "Direction A",
+    b: groupB.map((entity) => entity.name).join(" + ") || "Direction B",
+  });
   receipts.push(receiptFrom(call, "GET /v2/analysis/compare", "Direction A/B compare"));
   if (!call.ok) return undefined;
 
-  const sharedIds = new Set(
-    call.data
-      .filter((entity) => !entity.backfill)
-      .map((entity) => entity.entity_id),
-  );
-  const aTop = groupA.filter((entity) => sharedIds.has(entity.entity_id));
-  const bTop = groupB.filter((entity) => sharedIds.has(entity.entity_id));
-
-  const verdict =
-    call.data.length === 0
-      ? "Qloo found no shared audience between the two directions, which is itself a signal: they will split the room."
-      : `${call.data.length} artist(s) bridge both directions, so the two readings overlap more than they diverge.`;
-
-  return {
-    aLabel: groupA.map((entity) => entity.name).join(" + ") || "Direction A",
-    bLabel: groupB.map((entity) => entity.name).join(" + ") || "Direction B",
-    aTop,
-    bTop,
-    shared: call.data.map((entity) => entity.name),
-    verdict,
-  };
+  return call.data;
 }
 
 /** Location-aware regional affinity, used for the "where does this land" panel. */
 export async function regionalAffinity(
   context: GroundingContext,
 ): Promise<RegionAffinity[]> {
-  const { brief, anchorEntities, tagIds, receipts } = context;
+  const { brief, anchorEntities, tags, receipts } = context;
   if (!brief.region) return [];
 
   const call = await insights({
     filterType: "urn:entity:artist",
     signalEntities: anchorEntities.map((entity) => entity.entity_id),
-    signalTags: tagIds,
+    signalTags: toTagSignals(tags),
     locationQuery: brief.region,
     take: 6,
   });
@@ -237,20 +291,27 @@ export async function regionalAffinity(
     .map((entity) => ({ name: entity.name, affinity: entity.affinity ?? 0 }));
 }
 
-/** Content-based backfill: adjacent artists Qloo surfaces beyond the direct signal. */
+/** Cross-domain discovery: adjacent artists Qloo surfaces beyond the direct signal. */
 export async function discoveryBackfill(
   context: GroundingContext,
   excludeIds: string[],
 ): Promise<QlooEntity[]> {
-  const { anchorEntities, tagIds, receipts } = context;
+  const { brief, anchorEntities, tags, receipts } = context;
   const call = await insights({
     filterType: "urn:entity:artist",
     signalEntities: anchorEntities.map((entity) => entity.entity_id),
-    signalTags: tagIds,
-    extra: {
-      "filter.exclude.entities": excludeIds.join(","),
-      "backfill.cross_domain.take": 6,
+    signalTags: toTagSignals(tags),
+    excludeEntities: excludeIds,
+    // Hold discovery picks to the same brief constraints as the primary picks,
+    // otherwise a "late-90s" brief can surface contemporary artists in the
+    // discovery slots and the two halves of the sheet stop being comparable.
+    demographics: {
+      age: brief.audience.age,
+      gender: brief.audience.gender,
+      audiences: brief.audience.audiences,
     },
+    releaseYearMin: eraToYearFloor(brief.era),
+    extra: { "backfill.cross_domain.take": 6 },
     take: 6,
   });
   receipts.push(receiptFrom(call, "GET /v2/insights (backfill)", "Cross-domain discovery"));
@@ -268,6 +329,9 @@ export function explainCue(
 ): string[] {
   const reasons: string[] = [];
   const { brief, anchorEntities } = context;
+  const labels = buildLabelMap(context);
+  const label = (entry: { entity_id: string; name?: string }) =>
+    entry.name || labels.get(entry.entity_id) || entry.entity_id;
 
   if (anchorEntities.length > 0) {
     const topAnchor = anchorEntities[0].name;
@@ -276,13 +340,11 @@ export function explainCue(
     );
   }
 
-  const drivers = (entity.explainability ?? [])
-    .filter((entry) => entry.score > 0)
-    .slice(0, 2)
-    .map((entry) => entry.name || entry.entity_id);
-  if (drivers.length > 0) {
+  const contributions = (entity.explainability ?? []).filter((entry) => entry.score > 0);
+  if (contributions.length > 0) {
+    const drivers = contributions.slice(0, 2).map(label);
     reasons.push(
-      `Explainability attributes ${Math.round((entity.explainability?.[0]?.score ?? 0) * 100)}% of the match to ${drivers.join(" and ")}.`,
+      `Qloo attributes the match to ${drivers.join(" and ")} (weight ${contributions[0].score.toFixed(2)}).`,
     );
   }
 
@@ -293,9 +355,9 @@ export function explainCue(
   }
 
   if (momentum > 0) {
-    reasons.push("Rising momentum over the last 90 days, so the cue reads current rather than nostalgic.");
+    reasons.push("Climbing Qloo population rank over the trend window, so the cue reads current rather than nostalgic.");
   } else if (momentum < 0) {
-    reasons.push("Cooling momentum, which suits a scene that needs distance or melancholy.");
+    reasons.push("Falling Qloo population rank over the trend window, which suits a scene that needs distance or melancholy.");
   }
 
   if (entity.backfill) {
@@ -342,6 +404,15 @@ export function toCue(
   const corroboration = Math.min(1, (entity.explainability?.length ?? 0) / 3);
   const confidence = Math.min(0.99, 0.45 + affinity * 0.4 + corroboration * 0.15);
 
+  // Qloo's explainability payload carries entity IDs but no names, so resolve
+  // them against everything the brief already grounded. Without this the UI
+  // renders bare UUIDs.
+  const labels = buildLabelMap(context);
+  const explainability = (entity.explainability ?? []).map((entry) => ({
+    ...entry,
+    name: entry.name ?? labels.get(entry.entity_id),
+  }));
+
   return {
     id: entity.entity_id,
     artist: entity.name,
@@ -352,7 +423,7 @@ export function toCue(
     momentum,
     image: entity.image,
     why: explainCue(entity, context, momentum),
-    explainability: entity.explainability ?? [],
+    explainability,
     audienceFit: context.brief.audience.age
       ? { [context.brief.audience.age]: affinity }
       : undefined,
@@ -365,6 +436,7 @@ export function toCue(
           ? "Backfill pick: verify the master and publishing split before locking."
           : "Standard clearance path for this profile.",
     confidence,
+    discovery: entity.backfill,
   };
 }
 

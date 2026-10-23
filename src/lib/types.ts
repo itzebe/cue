@@ -43,6 +43,8 @@ export interface ExplainabilityEntry {
   name?: string;
   /** Normalised 0..1 contribution. Qloo always includes entries >= 0.1. */
   score: number;
+  /** Which request signal produced this contribution, e.g. `signal.interests.entities`. */
+  signal?: string;
 }
 
 export interface SearchResult {
@@ -50,6 +52,8 @@ export interface SearchResult {
   name: string;
   type: string;
   subtype?: string;
+  /** Qloo returns an array of type URNs from /search. */
+  types?: string[];
   properties?: Record<string, unknown>;
 }
 
@@ -111,6 +115,18 @@ export interface Cue {
   clearance: "indie_friendly" | "major_label" | "unknown";
   risk: string;
   confidence: number;
+  /**
+   * True when this pick came from the cross-domain backfill query rather than
+   * the primary affinity query. The two are separate Qloo calls, so their
+   * affinity numbers are not directly comparable and the UI says so.
+   */
+  discovery?: boolean;
+  /**
+   * True when no track was proposed (no LLM configured). The UI renders this as
+   * a pending selection rather than a song title, because inventing one would be
+   * exactly the failure Cue exists to avoid.
+   */
+  trackUnverified?: boolean;
 }
 
 export interface CueSheet {
@@ -120,9 +136,13 @@ export interface CueSheet {
   directionCompare?: {
     aLabel: string;
     bLabel: string;
-    aTop: SearchResult[];
-    bTop: SearchResult[];
+    /** Taste tags both directions share — the shared-audience read. */
     shared: string[];
+    /** Taste tags unique to each direction. */
+    aOnly: string[];
+    bOnly: string[];
+    /** Overlap ratio 0..1. */
+    overlap: number;
     verdict: string;
   };
   /** The generic, ungrounded answer, shown for the side-by-side. */

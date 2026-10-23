@@ -306,7 +306,17 @@ export default function StudioPage() {
                     </span>
                   </h2>
                   <p className="text-xs text-haze-500">
-                    Ranked by Qloo affinity, highest first.
+                    {(() => {
+                      const primaries = sheet.cues.filter((cue) => !cue.discovery);
+                      const uniform =
+                        primaries.length > 1 &&
+                        primaries.every(
+                          (cue) => Math.abs(cue.affinity - primaries[0].affinity) < 0.001,
+                        );
+                      return uniform
+                        ? "Qloo affinity is uniform for this brief; ordered by popularity."
+                        : "Ranked by Qloo affinity, highest first.";
+                    })()}
                   </p>
                 </div>
                 <div className="grid gap-4 xl:grid-cols-2">
