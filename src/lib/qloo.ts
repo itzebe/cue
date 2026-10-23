@@ -334,9 +334,16 @@ function extractEntities(json: unknown): unknown[] {
 /**
  * Affinity is exposed inconsistently: `query.affinity` on heatmap-style
  * responses, `query.measurements.affinity` elsewhere, sometimes top-level.
- * Fall back to popularity so the UI always has a usable ranking number.
+ * Fall back to popularity so the UI always has a usable ranking number, but
+ * report which of the two the number is — affinity is a measured position for
+ * *this* signal set, while popularity is a global percentile that says nothing
+ * about the audience. Without the provenance a panel cannot avoid labelling a
+ * popularity figure as "Qloo affinity".
  */
-function extractAffinity(raw: Record<string, unknown>): number {
+function extractAffinity(raw: Record<string, unknown>): {
+  value: number;
+  source: "query" | "popularity";
+} {
   const query = asRecord(raw.query);
   const measurements = asRecord(query.measurements);
   const candidates = [
@@ -348,10 +355,10 @@ function extractAffinity(raw: Record<string, unknown>): number {
   ];
   for (const candidate of candidates) {
     if (typeof candidate === "number" && Number.isFinite(candidate)) {
-      return candidate;
+      return { value: candidate, source: "query" };
     }
   }
-  return num(raw.popularity, 0);
+  return { value: num(raw.popularity, 0), source: "popularity" };
 }
 
 function extractImage(props: Record<string, unknown>): string | undefined {
@@ -409,12 +416,15 @@ export function normaliseEntity(raw: unknown): QlooEntity | null {
     };
   });
 
+  const affinity = extractAffinity(record);
+
   return {
     entity_id: id,
     name,
     type: str(record.subtype ?? record.type),
     subtype: str(record.subtype) || undefined,
-    affinity: extractAffinity(record),
+    affinity: affinity.value,
+    affinitySource: affinity.source,
     popularity: num(record.popularity, 0),
     description: str(props.description) || undefined,
     image: extractImage(props),

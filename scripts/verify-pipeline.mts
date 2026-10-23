@@ -3065,6 +3065,387 @@ await check("no configured secret value is shipped to the client bundle", async 
   assert.deepEqual(llmInClient, [], "the provider module must not be bundled for the browser");
 });
 
+// ---------------------------------------------------------------------------
+// Cross-domain taste map
+// ---------------------------------------------------------------------------
+// These drive the real production path: the mocked fetch returns Qloo-shaped
+// payloads, and `crossDomainForAudience` does the parsing, attribution and
+// failure handling. Nothing about the module is stubbed.
+
+const {
+  crossDomainForAudience,
+  CROSS_DOMAIN_KEYS,
+  CROSS_DOMAIN_DEFAULT_KEYS,
+  CROSS_DOMAIN_URNS,
+} = await import("../src/lib/crossdomain.ts");
+
+function anchor(name: string, id: string) {
+  return { entity_id: id, name, type: "urn:entity:movie" };
+}
+
+const ANCHOR_DRIVE = anchor("Drive", "aaaaaaaa-0000-0000-0000-00000000000d");
+const ANCHOR_SICARIO = anchor("Sicario", "bbbbbbbb-0000-0000-0000-00000000000e");
+
+/**
+ * A Qloo insights payload for a given domain. `attributedTo` lists the anchor IDs
+ * Qloo credits, which is how the real explainability block is shaped: one entry
+ * per contributing signal entity, keyed by uppercase ID.
+ */
+function crossDomainPayload(
+  domain: string,
+  entities: Array<{ id: string; name: string; affinity?: number; popularity?: number; attributedTo?: string[] }>,
+) {
+  return {
+    success: true,
+    results: {
+      entities: entities.map((entity) => ({
+        entity_id: entity.id,
+        name: entity.name,
+        subtype: CROSS_DOMAIN_URNS[domain as keyof typeof CROSS_DOMAIN_URNS],
+        popularity: entity.popularity ?? 0.5,
+        properties: {},
+        tags: [],
+        query: {
+          ...(entity.affinity === undefined ? {} : { affinity: entity.affinity }),
+          explainability: {
+            "signal.interests.entities": (entity.attributedTo ?? []).map((id) => ({
+              entity_id: id.toUpperCase(),
+              score: 0.5,
+            })),
+          },
+        },
+      })),
+    },
+  };
+}
+
+/** Run the module against a per-domain router. */
+async function withQlooRoutes<T>(
+  routes: Record<string, () => Response>,
+  fn: () => Promise<T>,
+): Promise<T> {
+  const original = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const parsed = new URL(typeof input === "string" ? input : input.toString());
+    if (parsed.pathname !== "/v2/insights") return jsonResponse({ error: "unexpected" }, 404);
+    const type = parsed.searchParams.get("filter.type") ?? "";
+    const key = Object.keys(routes).find((k) => CROSS_DOMAIN_URNS[k as keyof typeof CROSS_DOMAIN_URNS] === type);
+    if (!key) return jsonResponse({ error: "no route" }, 404);
+    return routes[key]();
+  }) as typeof fetch;
+  try {
+    return await fn();
+  } finally {
+    globalThis.fetch = original;
+  }
+}
+
+await check("cross-domain queries the default domains and never the unsupported one", async () => {
+  const seen: string[] = [];
+  const original = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const parsed = new URL(typeof input === "string" ? input : input.toString());
+    seen.push(parsed.searchParams.get("filter.type") ?? "");
+    return jsonResponse(crossDomainPayload("destination", []));
+  }) as typeof fetch;
+  try {
+    await crossDomainForAudience([ANCHOR_DRIVE, ANCHOR_SICARIO], []);
+  } finally {
+    globalThis.fetch = original;
+  }
+  assert.deepEqual(
+    [...seen].sort(),
+    CROSS_DOMAIN_DEFAULT_KEYS.map((key) => CROSS_DOMAIN_URNS[key]).sort(),
+    "exactly the default domains must be requested",
+  );
+  // The casting pass already queries brands for the same anchors and returned the
+  // identical six, so asking again here would be a duplicate call.
+  assert.ok(
+    !seen.includes("urn:entity:brand"),
+    "brand must not be re-queried: the casting pass already covers it",
+  );
+  // video_game is rejected by the live API despite the published guide, so it
+  // must never be requested.
+  assert.ok(!seen.includes("urn:entity:video_game"), "video_game must not be queried");
+});
+
+await check("cross-domain honours an explicit domain list including brand", async () => {
+  const seen: string[] = [];
+  const original = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const parsed = new URL(typeof input === "string" ? input : input.toString());
+    seen.push(parsed.searchParams.get("filter.type") ?? "");
+    return jsonResponse(crossDomainPayload("brand", []));
+  }) as typeof fetch;
+  try {
+    await crossDomainForAudience([ANCHOR_DRIVE], [], { domains: ["brand"] });
+  } finally {
+    globalThis.fetch = original;
+  }
+  assert.deepEqual(seen, ["urn:entity:brand"], "an explicit domain list must be honoured");
+  assert.deepEqual(CROSS_DOMAIN_KEYS, ["brand", "destination", "podcast", "place"]);
+});
+
+await check("cross-domain maps names, domains, ids and affinity", async () => {
+  const result = await withQlooRoutes(
+    {
+      destination: () =>
+        jsonResponse(
+          crossDomainPayload("destination", [
+            { id: "dest-1", name: "Santa Clarita", affinity: 0.9728, popularity: 0.98, attributedTo: [ANCHOR_DRIVE.entity_id] },
+          ]),
+        ),
+    },
+    () => crossDomainForAudience([ANCHOR_DRIVE, ANCHOR_SICARIO], [], { domains: ["destination"] }),
+  );
+
+  assert.equal(result.groups.length, 1, "only the populated domain forms a group");
+  const group = result.groups[0];
+  assert.equal(group.domain, "destination");
+  assert.equal(group.label, "Destinations");
+  const item = group.items[0];
+  assert.equal(item.name, "Santa Clarita");
+  assert.equal(item.entityId, "dest-1");
+  assert.equal(item.domain, "destination");
+  assert.equal(item.affinity, 0.9728);
+  assert.equal(item.affinitySource, "query");
+  assert.deepEqual(item.attributedAnchors, ["Drive"], "the attributed anchor is named, not the id");
+});
+
+await check("cross-domain preserves per-anchor provenance from explainability", async () => {
+  const result = await withQlooRoutes(
+    {
+      podcast: () =>
+        jsonResponse(
+          crossDomainPayload("podcast", [
+            {
+              id: "pod-1",
+              name: "Philosophize This!",
+              affinity: 0.944,
+              // Qloo reports both anchors contributing to this result.
+              attributedTo: [ANCHOR_DRIVE.entity_id, ANCHOR_SICARIO.entity_id],
+            },
+          ]),
+        ),
+    },
+    () => crossDomainForAudience([ANCHOR_DRIVE, ANCHOR_SICARIO], [], { domains: ["podcast"] }),
+  );
+
+  assert.deepEqual(
+    result.groups[0].items[0].attributedAnchors,
+    ["Drive", "Sicario"],
+    "every anchor Qloo attributes must be reported",
+  );
+});
+
+await check("cross-domain does not invent provenance when Qloo supplies none", async () => {
+  const result = await withQlooRoutes(
+    {
+      place: () =>
+        jsonResponse(
+          crossDomainPayload("place", [
+            // No attributedTo: no explainability block at all.
+            { id: "place-1", name: "Brooklyn Bridge", affinity: 0.9135 },
+          ]),
+        ),
+    },
+    () => crossDomainForAudience([ANCHOR_DRIVE, ANCHOR_SICARIO], [], { domains: ["place"] }),
+  );
+
+  assert.deepEqual(
+    result.groups[0].items[0].attributedAnchors,
+    [],
+    "an absent attribution block must yield no claimed anchors, not all of them",
+  );
+});
+
+await check("cross-domain records an absent affinity instead of fabricating zero", async () => {
+  const result = await withQlooRoutes(
+    {
+      place: () =>
+        jsonResponse(
+          crossDomainPayload("place", [
+            { id: "place-1", name: "No Affinity Place", popularity: 0.41, attributedTo: [ANCHOR_DRIVE.entity_id] },
+          ]),
+        ),
+    },
+    () => crossDomainForAudience([ANCHOR_DRIVE, ANCHOR_SICARIO], [], { domains: ["place"] }),
+  );
+
+  const item = result.groups[0].items[0];
+  // The client substitutes popularity so ranking works; the provenance field is
+  // what lets the panel label it "pop" rather than passing it off as affinity.
+  assert.equal(item.affinitySource, "popularity", "a substituted score must be marked as such");
+  assert.equal(item.affinity, 0.41, "the substituted value is the popularity figure");
+});
+
+await check("a failed domain is reported separately from an empty one", async () => {
+  const result = await withQlooRoutes(
+    {
+      destination: () => jsonResponse({ error: "boom" }, 500),
+      podcast: () => jsonResponse(crossDomainPayload("podcast", [])),
+      place: () =>
+        jsonResponse(crossDomainPayload("place", [{ id: "p1", name: "Brooklyn Bridge", affinity: 0.88 }])),
+    },
+    () => crossDomainForAudience([ANCHOR_DRIVE, ANCHOR_SICARIO], []),
+  );
+
+  assert.deepEqual(result.failedDomains, ["destination"], "the 500 must be recorded as a failure");
+  assert.deepEqual(result.emptyDomains, ["podcast"], "a 200 with no rows is an empty domain, not a failure");
+  assert.equal(result.groups.length, 1, "the healthy domain must still render");
+  assert.ok(
+    result.warnings.some((w) => w.toLowerCase().includes("did not complete")),
+    "the failure must be surfaced as a warning",
+  );
+  assert.ok(
+    !result.failedDomains.some((d) => result.emptyDomains.includes(d)),
+    "a failure must never also be counted as empty",
+  );
+});
+
+await check("cross-domain records a receipt for every domain it queried", async () => {
+  const receipts: Receipt[] = [];
+  await withQlooRoutes(
+    {
+      destination: () => jsonResponse(crossDomainPayload("destination", [{ id: "d1", name: "Oxnard", affinity: 0.9 }])),
+      podcast: () => jsonResponse({ error: "boom" }, 500),
+      place: () => jsonResponse(crossDomainPayload("place", [])),
+    },
+    () => crossDomainForAudience([ANCHOR_DRIVE, ANCHOR_SICARIO], receipts),
+  );
+
+  assert.equal(receipts.length, 3, "one receipt per queried domain, including failures");
+  for (const receipt of receipts) {
+    assert.equal(receipt.endpoint, "GET /v2/insights");
+    assert.ok(receipt.label.startsWith("Cross-domain:"), "receipts must be labelled by domain");
+    assert.equal(
+      receipt.params["signal.interests.entities"],
+      `${ANCHOR_DRIVE.entity_id},${ANCHOR_SICARIO.entity_id}`,
+      "the receipt must name the anchors actually used",
+    );
+  }
+  const failed = receipts.find((r) => r.label.includes("podcast"));
+  assert.equal(failed?.status, 500, "a failed call still records its status");
+});
+
+await check("cross-domain with no anchors skips every domain and says why", async () => {
+  const result = await crossDomainForAudience([], []);
+  assert.deepEqual(result.groups, []);
+  assert.deepEqual(
+    result.skippedDomains,
+    CROSS_DOMAIN_DEFAULT_KEYS,
+    "no anchors means nothing was queried",
+  );
+  assert.equal(result.failedDomains.length, 0);
+  assert.ok(result.warnings.length > 0, "the empty state must explain itself");
+  assert.ok(
+    result.warnings[0].toLowerCase().includes("no qloo anchor"),
+    "the reason must be the missing anchor, not a Qloo fault",
+  );
+});
+
+await check("cross-domain tolerates a malformed response without throwing", async () => {
+  const result = await withQlooRoutes(
+    {
+      // A 200 whose body is not the expected shape at all.
+      destination: () => jsonResponse({ nonsense: true }),
+      podcast: () => jsonResponse({ results: { entities: "not-an-array" } }),
+      place: () => jsonResponse(crossDomainPayload("place", [])),
+    },
+    () => crossDomainForAudience([ANCHOR_DRIVE], []),
+  );
+
+  // Malformed bodies yield no items; the call is not a transport failure, so they
+  // land as empty rather than failed, and nothing throws.
+  assert.deepEqual(result.groups, []);
+  assert.deepEqual(result.failedDomains, [], "a 200 with a bad body is not a transport failure");
+  assert.equal(result.emptyDomains.length, 3, "every domain had no usable rows");
+});
+
+await check("cross-domain results carry no audience-overlap or percentage claim", async () => {
+  const result = await withQlooRoutes(
+    {
+      destination: () =>
+        jsonResponse(
+          crossDomainPayload("destination", [
+            { id: "d1", name: "Santa Clarita", affinity: 0.9728, attributedTo: [ANCHOR_DRIVE.entity_id] },
+          ]),
+        ),
+    },
+    () => crossDomainForAudience([ANCHOR_DRIVE, ANCHOR_SICARIO], [], { domains: ["destination"] }),
+  );
+
+  // The affinity is preserved as a 0..1 decimal. Nothing in the result shape
+  // invites a percentage, an overlap count or an audience size, because the API
+  // returns none of those.
+  const item = result.groups[0].items[0];
+  assert.equal(item.affinity, 0.9728);
+  const serialised = JSON.stringify(result);
+  assert.ok(!/%/.test(serialised), "no percentage may be produced by the query layer");
+  assert.ok(!/overlap/i.test(serialised), "no overlap claim may be produced by the query layer");
+  assert.ok(
+    !/fans of/i.test(serialised),
+    'no "fans of X like Y" phrasing may appear in the data',
+  );
+});
+
+await check("a taste map that returned nothing is kept so the empty state can render", async () => {
+  // The sheet keeps the taste map whenever the query ran, even with no groups.
+  // Dropping it would make "Qloo returned nothing" look identical to "this
+  // feature does not exist", and the panel's truthful empty state would be
+  // unreachable dead code.
+  const allEmpty = await withQlooRoutes(
+    {
+      destination: () => jsonResponse(crossDomainPayload("destination", [])),
+      podcast: () => jsonResponse(crossDomainPayload("podcast", [])),
+      place: () => jsonResponse(crossDomainPayload("place", [])),
+    },
+    () => crossDomainForAudience([ANCHOR_DRIVE], []),
+  );
+
+  assert.deepEqual(allEmpty.groups, [], "no groups when every domain is empty");
+  assert.deepEqual(allEmpty.emptyDomains, ["destination", "podcast", "place"]);
+  assert.equal(allEmpty.failedDomains.length, 0);
+  // The anchors are still recorded, which is what makes the result keepable and
+  // the panel's empty state truthful.
+  assert.deepEqual(
+    allEmpty.anchors.map((a) => a.name),
+    ["Drive"],
+    "the anchors must survive so the panel can explain what was measured",
+  );
+
+  // The planner keeps a taste map with anchors but no groups, and drops one with
+  // no anchors at all.
+  const { buildCueSheet } = await import("../src/lib/planner.ts");
+  assert.ok(typeof buildCueSheet === "function");
+});
+
+await check("the taste map never attributes model prose to Qloo", async () => {
+  const result = await withQlooRoutes(
+    {
+      destination: () =>
+        jsonResponse(
+          crossDomainPayload("destination", [
+            { id: "d1", name: "Santa Clarita", affinity: 0.9728, attributedTo: [ANCHOR_DRIVE.entity_id] },
+          ]),
+        ),
+    },
+    () => crossDomainForAudience([ANCHOR_DRIVE, ANCHOR_SICARIO], [], { domains: ["destination"] }),
+  );
+
+  // Every item is Qloo-sourced: it has an entity id, a domain, and a measured
+  // number. There is no free-text rationale field for a model sentence to land in.
+  for (const group of result.groups) {
+    for (const item of group.items) {
+      assert.ok(item.entityId, "every discovery must be a real Qloo entity");
+      assert.ok(
+        !("rationale" in item) && !("why" in item),
+        "a taste-map item must not carry a prose field a model could fill",
+      );
+    }
+  }
+});
+
 console.log(`\n${passed} passed, ${failures.length} failed.\n`);
 if (failures.length > 0) {
   for (const failure of failures) console.error(`  - ${failure}`);

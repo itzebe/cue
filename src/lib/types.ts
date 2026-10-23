@@ -9,6 +9,7 @@
 import type { AudienceBrief } from "./audience";
 import type { ComparablesResult } from "./comparables";
 import type { CastingResult } from "./casting";
+import type { CrossDomainResult } from "./crossdomain";
 import type { LocalisationResult } from "./localise";
 import type { LicenseQuote } from "./rights";
 
@@ -32,6 +33,16 @@ export interface QlooEntity {
   subtype?: string;
   /** Affinity score 0..1 when returned from /v2/insights. */
   affinity?: number;
+  /**
+   * Where `affinity` came from.
+   *
+   * Qloo sometimes omits `query.affinity`, and the client substitutes the entity's
+   * popularity so ranking still works. That substitution is invisible in the
+   * number itself, so a panel that prints `affinity` as "Qloo affinity" would
+   * present a popularity percentile as a measured audience score. Recording the
+   * source lets the UI label the two differently instead of guessing.
+   */
+  affinitySource?: "query" | "popularity";
   popularity?: number;
   description?: string;
   image?: string;
@@ -220,6 +231,12 @@ export interface CueSheet {
    * domains a director actually names when describing a reference.
    */
   comparables?: ComparablesResult;
+  /**
+   * What else the brief's anchors connect to across the taste graph: brands,
+   * destinations, podcasts and places. Same anchors, same measurement, other
+   * questions — the broadest form of the cross-domain claim.
+   */
+  tasteMap?: CrossDomainResult;
   /** Marketplace quotes, keyed by cue id, generated on demand from the sheet. */
   quotes?: LicenseQuote[];
 }
