@@ -88,7 +88,13 @@ scene brief
    │
    ├─ 6. cross-domain              people + brands → casting and partner fit
    │
-   └─ 7. assemble                  placement, clearance, confidence, receipts
+   ├─ 7. comparables               films + TV + books → "what is this like?"
+   │
+   └─ 8. assemble                  placement, clearance, confidence, receipts
+
+Also read off the anchor search, at no extra cost:
+
+   audience_identity → who each anchor's audience is, in Qloo's own words
 ```
 
 Localisation is deliberately **not** a stage of the cue sheet. Each market is a location-filtered place query that measured 3.6s–19.2s on the hackathon sandbox — a cost every sheet would pay for a feature most sheets do not use. It lives behind its own endpoint, `POST /api/localise`, that the user triggers when they want it. The cue sheet itself stays around 20s.
@@ -113,7 +119,7 @@ npm run dev                  # http://localhost:12000
 npm run verify
 ```
 
-71 checks covering normalisation, affinity extraction, explainability parsing, momentum derivation, failure degradation, cue assembly, concurrency limits, place-based localisation, casting and licence pricing. Only `fetch` is stubbed — everything under test is the production code path.
+78 checks covering normalisation, affinity extraction, explainability parsing, momentum derivation, failure degradation, cue assembly, concurrency limits, request-budget accounting, place-based localisation, casting, cross-domain comparables, the audience brief and licence pricing. Only `fetch` is stubbed — everything under test is the production code path.
 
 ### Environment
 
