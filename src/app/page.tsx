@@ -286,6 +286,19 @@ export default function StudioPage() {
 
           {sheet ? (
             <>
+              {sheet.mode === "fixture" ? (
+                <div className="panel border-ember-500/40 bg-ember-500/[0.07] p-4">
+                  <p className="text-xs font-medium uppercase tracking-wider text-ember-400">
+                    Cached example — not live Qloo output
+                  </p>
+                  <p className="mt-1.5 text-xs leading-relaxed text-haze-300">
+                    This deployment has no <code className="font-mono">QLOO_API_KEY</code>, so the
+                    numbers below are pre-computed samples. Set the key to rank against the live
+                    Taste Graph.
+                  </p>
+                </div>
+              ) : null}
+
               {sheet.warnings.length > 0 ? (
                 <ul className="panel space-y-2 p-4">
                   {sheet.warnings.map((warning, index) => (

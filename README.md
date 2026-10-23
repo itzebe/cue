@@ -84,7 +84,7 @@ npm run dev                  # http://localhost:12000
 npm run verify
 ```
 
-23 checks covering normalisation, affinity extraction, explainability parsing, momentum derivation, failure degradation and cue assembly. Only `fetch` is stubbed — everything under test is the production code path.
+24 checks covering normalisation, affinity extraction, explainability parsing, momentum derivation, failure degradation and cue assembly. Only `fetch` is stubbed — everything under test is the production code path.
 
 ### Environment
 

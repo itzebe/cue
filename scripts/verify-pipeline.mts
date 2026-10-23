@@ -328,12 +328,22 @@ await check("deterministic parser extracts mood, era, anchors and diegesis", () 
   assert.equal(brief.audience.age, "25_to_29");
 });
 
+await check("fixture mode is explicit and never masquerades as live", async () => {
+  // The deployed demo runs without a key, so it must say so loudly rather than
+  // presenting pre-computed samples as Qloo output.
+  const sheet = await buildCueSheet({ scene: "Anything at all here.", forceFixture: true });
+  assert.equal(sheet.mode, "fixture");
+  assert.ok(
+    sheet.warnings.some((warning) => /fixture|cached|pre-computed/i.test(warning)),
+    "fixture mode should warn that the numbers are not live",
+  );
+});
+
 await check("full cue sheet assembles from live Qloo data", async () => {
   const sheet = await buildCueSheet({
     scene:
       'A 90s noir thriller. Rain on the glass. Reference "Drive" and Sicario. Los Angeles, audience 25-34.',
   });
-
   assert.equal(sheet.mode, "live");
   assert.ok(sheet.cues.length >= 3, "expected at least three cues");
 
