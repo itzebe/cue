@@ -362,3 +362,44 @@ export function summariseQuotes(quotes: LicenseQuote[]): QuoteSummary {
     currency: "USD",
   };
 }
+
+/**
+ * The most a catalogue can be worth and still fit a budget.
+ *
+ * `quoteLicense` is non-decreasing in popularity — a more famous catalogue never
+ * costs less — which makes it invertible. That inversion is the whole point of
+ * substitution: it lets a supervisor start from the number they have rather than
+ * the artist they want, and ask Qloo for what else serves the scene inside it.
+ *
+ * Everything except popularity is held at the cue's own values, so the ceiling
+ * describes this placement under these terms rather than a generic one. The
+ * result is a search hint, not a guarantee: the caller must still price each
+ * candidate it gets back, because the model quantises fees and a candidate's own
+ * momentum and discovery discount move its price off the curve.
+ *
+ * Returns 0 when even the cheapest catalogue at these terms exceeds the budget,
+ * which the caller should surface as "no substitute exists at this budget"
+ * rather than silently returning nothing.
+ */
+export function popularityCeilingForBudget(
+  cue: Cue,
+  terms: LicenseTerms,
+  budget: number,
+): number {
+  const feeAt = (popularity: number) =>
+    quoteLicense({ ...cue, popularity }, terms).fee.recommended;
+
+  if (budget <= 0) return 0;
+  if (feeAt(0) > budget) return 0;
+  if (feeAt(1) <= budget) return 1;
+
+  let low = 0;
+  let high = 1;
+  // 30 halvings is far past float resolution on 0..1, so this converges.
+  for (let step = 0; step < 30; step += 1) {
+    const mid = (low + high) / 2;
+    if (feeAt(mid) <= budget) low = mid;
+    else high = mid;
+  }
+  return low;
+}
