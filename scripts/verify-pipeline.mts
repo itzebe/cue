@@ -6,7 +6,7 @@
  * assembly, placement/clearance inference) is the production code path, using
  * response bodies shaped like real Qloo payloads.
  *
- * Run: npx tsx scripts/verify-pipeline.ts
+ * Run: npx tsx scripts/verify-pipeline.mts
  */
 
 import assert from "node:assert/strict";
