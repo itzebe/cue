@@ -112,19 +112,33 @@ export function parseSceneBrief(raw: string): SceneBrief {
 
   const moodLexicon: Record<string, string> = {
     melancholic: "melancholy",
-    sad: "melancholy",
+    melancholy: "melancholy",
+    grief: "grief",
+    mournful: "mourning",
+    sad: "sad",
     lonely: "isolation",
+    isolation: "isolation",
     tense: "tension",
-    tense_: "tension",
+    tension: "tension",
+    suspense: "suspense",
+    ominous: "ominous",
+    eerie: "eerie",
+    brooding: "brooding",
+    noir: "noir",
     hopeful: "hope",
+    hope: "hope",
     euphoric: "euphoria",
     romantic: "romance",
     nostalgic: "nostalgia",
-    gritty: "grit",
+    gritty: "gritty",
     dreamy: "dreamlike",
     triumphant: "triumph",
     intimate: "intimacy",
     chaotic: "chaos",
+    somber: "somber",
+    moody: "moody",
+    wistful: "wistful",
+    defiant: "defiance",
   };
   const mood = Object.entries(moodLexicon)
     .filter(([needle]) => lower.includes(needle.replace("_", "")))
@@ -152,6 +166,12 @@ export function parseSceneBrief(raw: string): SceneBrief {
     funk: "funk",
     disco: "disco",
     gospel: "gospel",
+    score: "soundtrack",
+    soundtrack: "soundtrack",
+    underscore: "soundtrack",
+    cinematic: "cinematic",
+    indie: "indie",
+    pop: "pop",
   };
   const genre = Object.entries(genreLexicon)
     .filter(([needle]) => lower.includes(needle))
@@ -205,8 +225,10 @@ export function parseSceneBrief(raw: string): SceneBrief {
   return {
     title,
     raw: text,
-    mood: mood.length > 0 ? mood : ["open", "unresolved"],
-    genre: genre.length > 0 ? genre : ["underscore"],
+    // Neutral fallbacks only. Words like "open"/"unresolved"/"underscore" are
+    // not real Qloo tags and previously matched unrelated tags by fuzzy search.
+    mood: mood.length > 0 ? mood : ["cinematic"],
+    genre: genre.length > 0 ? genre : ["soundtrack"],
     era,
     setting: text.split(/[.\n]/)[0].slice(0, 120),
     arc: "Establish the emotional register, then hold it without resolving.",
@@ -392,14 +414,14 @@ export async function buildCueSheet(
     warnings.push(
       hasLlm()
         ? "Scene parsing fell back to the deterministic reader."
-        : "No LLM configured; using the deterministic scene reader and track suggestions.",
+        : "No LLM configured; using the deterministic scene reader. Specific track titles are left for you to choose.",
     );
   }
 
   const context: GroundingContext = {
     brief,
     anchorEntities: [],
-    tagIds: [],
+    tags: [],
     receipts,
     warnings,
   };
@@ -412,7 +434,7 @@ export async function buildCueSheet(
       "None of the scene's named references resolved to Qloo entities. Falling back to mood and genre tags.",
     );
   }
-  context.tagIds = await resolveTags([...brief.genre, ...brief.mood], receipts);
+  context.tags = await resolveTags([...brief.genre, ...brief.mood], receipts);
 
   // Stage 2: Qloo ranks the artists. This is the load-bearing call.
   const rankedArtists = await groundArtistCues(context);
@@ -427,27 +449,45 @@ export async function buildCueSheet(
   ]);
 
   const combined = [...rankedArtists];
+  const seenIds = new Set(combined.map((entity) => entity.entity_id));
   for (const entity of backfill) {
-    if (!combined.some((existing) => existing.entity_id === entity.entity_id)) {
-      combined.push(entity);
-    }
+    if (seenIds.has(entity.entity_id)) continue;
+    seenIds.add(entity.entity_id);
+    // Mark provenance so the cue sheet can say how each pick was found.
+    combined.push({ ...entity, backfill: true });
   }
+
+  // Compose the sheet: primary affinity picks first, then the cross-domain
+  // discovery picks. Taking a flat slice of `combined` would silently discard
+  // every backfill result, because the primary call already returns more rows
+  // than the sheet holds.
+  const primary = combined.filter((entity) => !entity.backfill);
+  const discovery = combined.filter((entity) => entity.backfill);
+  const DISCOVERY_SLOTS = 2;
+  const SHEET_SIZE = 8;
+  const selected = [
+    ...primary.slice(0, SHEET_SIZE - DISCOVERY_SLOTS),
+    ...discovery.slice(0, DISCOVERY_SLOTS),
+  ].slice(0, SHEET_SIZE);
 
   // Stage 4: one specific track per Qloo-ranked artist, from the LLM.
   const trackMap = await proposeTracks(
-    combined.slice(0, 8).map((entity) => entity.name),
+    selected.map((entity) => entity.name),
     brief,
   );
 
   // Stage 5: momentum per artist, computed from Qloo's own trend series.
   const momentum = await Promise.all(
-    combined.slice(0, 8).map((entity) => artistMomentumSafe(entity.entity_id, receipts)),
+    selected.map((entity) => artistMomentumSafe(entity.entity_id, receipts)),
   );
 
-  const cues: Cue[] = combined.slice(0, 8).map((entity, index) => {
+  const cues: Cue[] = selected.map((entity, index) => {
     const proposed = trackMap.get(entity.name.toLowerCase());
-    const fallbackTrack = `${entity.name} — signature cut (verify with Qloo search)`;
+    // Without an LLM there is no track proposal, and Cue must not invent one.
+    // The artist is Qloo-grounded; the specific cut is left for the supervisor.
+    const fallbackTrack = "Track TBD — pick from this artist's catalogue";
     const cue = toCue(entity, index, context, momentum[index] ?? 0, proposed?.track ?? fallbackTrack);
+    if (!proposed) cue.trackUnverified = true;
     if (proposed?.album) cue.album = proposed.album;
     if (proposed?.year) cue.year = proposed.year;
     if (proposed?.rationale) cue.why = [proposed.rationale, ...cue.why];

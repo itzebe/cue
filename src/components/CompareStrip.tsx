@@ -62,7 +62,9 @@ export function CompareStrip({ sheet }: { sheet: CueSheet }) {
                 <div className="flex items-baseline justify-between gap-3">
                   <p className="text-sm text-haze-100">
                     {cue.artist}
-                    <span className="text-haze-500"> — “{cue.track}”</span>
+                    {cue.trackUnverified ? null : (
+                      <span className="text-haze-500"> — “{cue.track}”</span>
+                    )}
                   </p>
                   <span className="shrink-0 font-mono text-xs text-ember-400">
                     {cue.affinity.toFixed(2)}
@@ -76,8 +78,8 @@ export function CompareStrip({ sheet }: { sheet: CueSheet }) {
           </ul>
           <p className="mt-4 rounded-lg border border-ember-500/15 bg-ember-500/5 p-3 text-xs leading-relaxed text-haze-300">
             Every pick is ranked by measured affinity, checked against the target
-            audience, and dated against 90 days of momentum. Ask why, and Cue can
-            name the exact signal that caused it.
+            audience, and dated against Qloo's own trend series. Ask why, and Cue
+            can name the exact signal that caused it.
           </p>
         </div>
       </div>

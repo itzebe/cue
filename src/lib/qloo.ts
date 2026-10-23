@@ -21,6 +21,34 @@ export const QLOO_BASE_URL =
   "https://hackathon.api.qloo.com";
 
 const DEFAULT_TIMEOUT_MS = 12_000;
+const MAX_ATTEMPTS = 3;
+
+/**
+ * Qloo rate-limits the hackathon key aggressively, and a cue sheet fires a
+ * dozen-plus calls at once. A 429 or 5xx is retried with exponential backoff so
+ * a burst degrades into a slower run rather than empty cues.
+ */
+const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 504]);
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** Bounds how many Qloo calls are in flight at once, to stay under the rate limit. */
+const MAX_CONCURRENCY = 4;
+let active = 0;
+const waiting: Array<() => void> = [];
+
+async function withSlot<T>(fn: () => Promise<T>): Promise<T> {
+  if (active >= MAX_CONCURRENCY) {
+    await new Promise<void>((resolve) => waiting.push(resolve));
+  }
+  active += 1;
+  try {
+    return await fn();
+  } finally {
+    active -= 1;
+    waiting.shift()?.();
+  }
+}
 
 export interface QlooCallResult<T> {
   ok: boolean;
@@ -45,13 +73,36 @@ export function hasQlooKey(): boolean {
   return apiKey().length > 0;
 }
 
-function flattenParams(
-  params: Record<string, string | string[] | number | boolean | undefined>,
-): Record<string, string> {
+/** A tag signal. Qloo rejects bare tag strings and requires `{tag, weight}` objects. */
+export interface TagSignal {
+  tag: string;
+  weight?: number;
+}
+
+type ParamValue =
+  | string
+  | number
+  | boolean
+  | string[]
+  | TagSignal[]
+  | undefined;
+
+function flattenParams(params: Record<string, ParamValue>): Record<string, string> {
   const out: Record<string, string> = {};
   for (const [key, value] of Object.entries(params)) {
     if (value === undefined || value === null || value === "") continue;
-    out[key] = Array.isArray(value) ? value.join(",") : String(value);
+    if (Array.isArray(value)) {
+      // An empty array must be omitted entirely. Sending `key=` makes Qloo
+      // reject the request with 400 ("must be an array of at least one
+      // element") rather than ignoring the parameter.
+      if (value.length === 0) continue;
+      out[key] =
+        typeof value[0] === "object"
+          ? JSON.stringify(value)
+          : (value as string[]).join(",");
+      continue;
+    }
+    out[key] = String(value);
   }
   return out;
 }
@@ -62,7 +113,7 @@ function flattenParams(
  */
 async function qlooGet<T>(
   endpoint: string,
-  params: Record<string, string | string[] | number | boolean | undefined>,
+  params: Record<string, ParamValue>,
   normalise: (json: unknown) => T,
   emptyValue: T,
 ): Promise<QlooCallResult<T>> {
@@ -88,29 +139,48 @@ async function qlooGet<T>(
   const timer = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
 
   try {
-    const res = await fetch(url, {
-      method: "GET",
-      headers: { "X-Api-Key": key, accept: "application/json" },
-      signal: controller.signal,
-      cache: "no-store",
-    });
+    let res: Response | undefined;
+    let lastError = "";
+
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
+      res = await withSlot(() =>
+        fetch(url, {
+          method: "GET",
+          headers: { "X-Api-Key": key, accept: "application/json" },
+          signal: controller.signal,
+          cache: "no-store",
+        }),
+      );
+      if (!RETRYABLE_STATUS.has(res.status) || attempt === MAX_ATTEMPTS) break;
+
+      // Honour Retry-After when the gateway supplies it, else back off 300/900ms.
+      const header = Number(res.headers.get("retry-after"));
+      const waitMs = Number.isFinite(header) && header > 0
+        ? Math.min(header * 1000, 4_000)
+        : 300 * 3 ** (attempt - 1);
+      lastError = `${res.status} retrying in ${waitMs}ms`;
+      await res.text().catch(() => "");
+      await sleep(waitMs);
+    }
+
     const ms = Date.now() - started;
 
-    if (!res.ok) {
-      let detail = "";
+    if (!res || !res.ok) {
+      const status = res?.status ?? 0;
+      let detail = lastError;
       try {
-        detail = JSON.stringify(await res.json()).slice(0, 300);
+        detail = res ? JSON.stringify(await res.json()).slice(0, 300) : lastError;
       } catch {
-        detail = await res.text().catch(() => "");
+        detail = lastError || (await res?.text().catch(() => "")) || "";
       }
       return {
         ok: false,
-        status: res.status,
+        status,
         ms,
         data: emptyValue,
         params: flat,
         endpoint,
-        error: `${res.status} ${detail}`.trim(),
+        error: `${status} ${detail}`.trim(),
       };
     }
 
@@ -199,18 +269,6 @@ function extractAffinity(raw: Record<string, unknown>): number {
   return num(raw.popularity, 0);
 }
 
-/** Momentum is derived from Qloo's audience_growth measurement when present. */
-function extractMomentum(raw: Record<string, unknown>): number {
-  const measurements = asRecord(asRecord(raw.query).measurements);
-  const growth = measurements.audience_growth;
-  if (typeof growth === "number" && Number.isFinite(growth)) {
-    if (growth > 0.02) return 1;
-    if (growth < -0.02) return -1;
-    return 0;
-  }
-  return 0;
-}
-
 function extractImage(props: Record<string, unknown>): string | undefined {
   const image = props.image;
   if (typeof image === "string") return image;
@@ -222,20 +280,33 @@ function extractImage(props: Record<string, unknown>): string | undefined {
 function extractExplainability(raw: Record<string, unknown>): ExplainabilityEntry[] {
   const query = asRecord(raw.query);
   const block = asRecord(query.explainability);
-  const inputs =
-    asArray(block.inputs).length > 0
-      ? asArray(block.inputs)
-      : asArray(block.signal_interests_entities);
-  return inputs
-    .map((entry) => {
-      const record = asRecord(entry);
-      return {
-        entity_id: str(record.entity_id ?? record.id),
+  // Qloo namespaces contributions by the parameter that produced them, e.g.
+  // `{"signal.interests.entities": [{entity_id, score}]}`. Flatten every such
+  // group, keeping the group name so the UI can say *which* signal drove it.
+  const entries: ExplainabilityEntry[] = [];
+
+  const pushGroup = (group: unknown, signal: string) => {
+    for (const item of asArray(group)) {
+      const record = asRecord(item);
+      const entity_id = str(record.entity_id ?? record.id ?? record.tag);
+      if (!entity_id) continue;
+      entries.push({
+        entity_id,
         name: str(record.name) || undefined,
         score: num(record.score ?? record.contribution ?? record.weight),
-      };
-    })
-    .filter((entry) => entry.entity_id.length > 0);
+        signal,
+      });
+    }
+  };
+
+  for (const [key, value] of Object.entries(block)) {
+    if (key === "inputs") continue;
+    pushGroup(value, key);
+  }
+  // Older/alternate shape: a flat `inputs` array.
+  pushGroup(block.inputs, "inputs");
+
+  return entries.sort((a, b) => b.score - a.score);
 }
 
 export function normaliseEntity(raw: unknown): QlooEntity | null {
@@ -302,11 +373,16 @@ export function searchEntities(
           const id = str(record.entity_id ?? record.id);
           const name = str(record.name);
           if (!id || !name) return null;
+          // /search returns a `types` array and no `subtype`; other endpoints
+          // return `subtype`. Normalise both onto the same fields.
+          const types = asArray(record.types).map((type) => String(type));
+          const subtype = str(record.subtype) || types[0] || "";
           return {
             entity_id: id,
             name,
-            type: str(record.subtype ?? record.type),
-            subtype: str(record.subtype) || undefined,
+            type: subtype || str(record.type),
+            subtype: subtype || undefined,
+            types: types.length > 0 ? types : undefined,
             properties: asRecord(record.properties),
           };
         })
@@ -318,10 +394,14 @@ export function searchEntities(
 
 export interface InsightsParams {
   filterType: string;
+  /** Bare Qloo entity IDs (no `urn:` prefix) — Qloo rejects URN-prefixed values here. */
   signalEntities?: string[];
-  signalTags?: string[];
+  /** Tag signals. Must be `{tag, weight}` objects; bare tag strings return 400. */
+  signalTags?: TagSignal[];
   filterTags?: string[];
   excludeTags?: string[];
+  /** Exclude specific entities from results. Comma-separated bare IDs. */
+  excludeEntities?: string[];
   demographics?: { age?: string; gender?: string; audiences?: string[] };
   locationQuery?: string;
   locationRadius?: number;
@@ -331,19 +411,20 @@ export interface InsightsParams {
   releaseYearMin?: number;
   explainability?: boolean;
   take?: number;
-  extra?: Record<string, string | string[] | number | boolean | undefined>;
+  extra?: Record<string, ParamValue>;
 }
 
 /** GET /v2/insights — the primary recommendation + explainability endpoint. */
 export function insights(
   params: InsightsParams,
 ): Promise<QlooCallResult<QlooEntity[]>> {
-  const query: Record<string, string | string[] | number | boolean | undefined> = {
+  const query: Record<string, ParamValue> = {
     "filter.type": params.filterType,
     "signal.interests.entities": params.signalEntities,
     "signal.interests.tags": params.signalTags,
     "filter.tags": params.filterTags,
     "filter.exclude.tags": params.excludeTags,
+    "filter.exclude.entities": params.excludeEntities,
     "signal.demographics.age": params.demographics?.age,
     "signal.demographics.gender": params.demographics?.gender,
     "signal.demographics.audiences": params.demographics?.audiences,
@@ -371,8 +452,12 @@ export function searchTags(
     "/v2/tags",
     {
       "filter.query": query,
-      "filter.tag.types": tagTypes,
-      "feature.typo_tolerance": "true",
+      // Must be omitted when empty: Qloo 400s on `filter.tag.types=`.
+      "filter.tag.types": tagTypes.length > 0 ? tagTypes : undefined,
+      // Typo tolerance is deliberately OFF. With it on, fuzzy matching returns
+      // unrelated tags — "tension" resolves to "Venison", "dark" to "Park",
+      // "open" to "Oven" — which silently poisons the grounding signal.
+      "feature.typo_tolerance": "false",
       take,
     },
     (json) => {
@@ -401,31 +486,127 @@ export function searchTags(
   );
 }
 
-/** GET /v2/analysis/compare — head-to-head between two creative directions. */
+export interface DirectionCompare {
+  aLabel: string;
+  bLabel: string;
+  /** Tag names both directions share, strongest first. */
+  shared: string[];
+  /** Tag names that distinguish direction A. */
+  aOnly: string[];
+  /** Tag names that distinguish direction B. */
+  bOnly: string[];
+  /** Overlap ratio 0..1 — how much the two readings agree. */
+  overlap: number;
+  verdict: string;
+}
+
+interface CompareTag {
+  tag_id: string;
+  name: string;
+  score: number;
+}
+
+function normaliseCompareGroup(raw: unknown): CompareTag[] {
+  return asArray(raw)
+    .map((item): CompareTag | null => {
+      const record = asRecord(item);
+      const tag_id = str(record.tag_id ?? record.id);
+      const name = str(record.name);
+      if (!tag_id || !name) return null;
+      const query = asRecord(record.query);
+      return {
+        tag_id,
+        name,
+        score: num(query.score ?? record.score ?? record.popularity),
+      };
+    })
+    .filter((tag): tag is CompareTag => tag !== null)
+    .sort((a, b) => b.score - a.score);
+}
+
+/**
+ * GET /v2/analysis/compare — head-to-head between two creative directions.
+ *
+ * The endpoint returns the *taste tags* each direction over-indexes on
+ * (`results.a` / `results.b`), not entities. The intersection of those two tag
+ * sets is the shared audience, which is the question a supervisor actually
+ * asks: do these two readings pull the same people, or split the room?
+ */
 export function compareGroups(
   groupA: string[],
   groupB: string[],
   filterType: string,
-  take = 10,
-): Promise<QlooCallResult<QlooEntity[]>> {
+  labels: { a: string; b: string } = { a: "Direction A", b: "Direction B" },
+): Promise<QlooCallResult<DirectionCompare>> {
+  const empty: DirectionCompare = {
+    aLabel: labels.a,
+    bLabel: labels.b,
+    shared: [],
+    aOnly: [],
+    bOnly: [],
+    overlap: 0,
+    verdict: "",
+  };
+
   return qlooGet(
     "/v2/analysis/compare",
     {
       "a.signal.interests.entities": groupA,
       "b.signal.interests.entities": groupB,
       "filter.type": filterType,
-      take,
     },
-    normaliseEntities,
-    [],
+    (json) => {
+      const results = asRecord(asRecord(json).results);
+      const a = normaliseCompareGroup(results.a);
+      const b = normaliseCompareGroup(results.b);
+
+      const bIds = new Set(b.map((tag) => tag.tag_id));
+      const aIds = new Set(a.map((tag) => tag.tag_id));
+      const shared = a.filter((tag) => bIds.has(tag.tag_id)).map((tag) => tag.name);
+      const aOnly = a.filter((tag) => !bIds.has(tag.tag_id)).map((tag) => tag.name);
+      const bOnly = b.filter((tag) => !aIds.has(tag.tag_id)).map((tag) => tag.name);
+
+      const denominator = Math.min(a.length, b.length);
+      const overlap = denominator > 0 ? shared.length / denominator : 0;
+
+      let verdict: string;
+      if (a.length === 0 || b.length === 0) {
+        verdict =
+          "Qloo had too little signal to compare these directions. Add a named film, show or artist to each.";
+      } else if (shared.length === 0) {
+        verdict =
+          "No shared taste tags between the two directions. Qloo reads these as pulling different audiences — expect the choice to visibly split the room.";
+      } else if (overlap >= 0.5) {
+        verdict = `${shared.length} taste tags bridge both directions (${Math.round(overlap * 100)}% overlap). Qloo reads them as landing with substantially the same audience, so the difference between them is stylistic rather than a different crowd.`;
+      } else {
+        verdict = `${shared.length} taste tags bridge both directions — only ${Math.round(overlap * 100)}% overlap. Qloo reads them as related but distinct audiences, so the choice will move who the scene reaches.`;
+      }
+
+      return {
+        aLabel: labels.a,
+        bLabel: labels.b,
+        shared: shared.slice(0, 24),
+        aOnly: aOnly.slice(0, 12),
+        bOnly: bOnly.slice(0, 12),
+        overlap,
+        verdict,
+      };
+    },
+    empty,
   );
 }
 
 export interface TrendingPoint {
   date: string;
+  /** Population rank, parsed from Qloo's string field. Lower is more popular. */
   rank?: number;
-  velocity?: number;
-  acceleration?: number;
+  /** Rank movement over the period. Positive means climbing. */
+  rankVelocity?: number;
+  /** Fractional change in population share. */
+  percentDelta?: number;
+  /** Multiplier on prior-period velocity. */
+  velocityFoldChange?: number;
+  /** Share of the population, 0..1. */
   percentile?: number;
 }
 
@@ -453,16 +634,22 @@ export function trending(
         : asArray(root.results);
       return raw.map((item) => {
         const record = asRecord(item);
+        // `population_rank` arrives as a string ("1007"); parse it so callers
+        // can compare ranks numerically.
+        const rawRank = record.population_rank;
+        const rank =
+          typeof rawRank === "number"
+            ? rawRank
+            : typeof rawRank === "string" && rawRank.trim() !== ""
+              ? Number(rawRank)
+              : undefined;
         return {
           date: str(record.date ?? record.week ?? record.start_date),
-          rank: typeof record.rank === "number" ? record.rank : undefined,
-          velocity: typeof record.velocity === "number" ? record.velocity : undefined,
-          acceleration:
-            typeof record.acceleration === "number" ? record.acceleration : undefined,
-          percentile:
-            typeof record.population_percentile === "number"
-              ? record.population_percentile
-              : undefined,
+          rank: rank !== undefined && Number.isFinite(rank) ? rank : undefined,
+          rankVelocity: num(record.population_rank_velocity, NaN),
+          percentDelta: num(record.population_percent_delta, NaN),
+          velocityFoldChange: num(record.velocity_fold_change, NaN),
+          percentile: num(record.population_percentile, NaN),
         } satisfies TrendingPoint;
       });
     },

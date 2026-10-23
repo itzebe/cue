@@ -41,7 +41,7 @@ export const FIXTURE_SHEET: CueSheet = {
         "Audiences who like late-90s New York dramas index strongly for Massive Attack in Qloo's taste graph.",
         "Explainability attributes 41% of the match to the trip hop signal in the brief.",
         "Over-indexes with the 35 to 44 audience the brief targets.",
-        "Rising momentum over the last 90 days, so the cue reads current rather than nostalgic.",
+        "Climbing Qloo population rank over the trend window, so the cue reads current rather than nostalgic.",
       ],
       explainability: [
         { entity_id: "urn:fixture:trip_hop", name: "Trip hop", score: 0.41 },
@@ -84,7 +84,7 @@ export const FIXTURE_SHEET: CueSheet = {
       risk: "Standard clearance path for this profile.",
       why: [
         "Surfaced by cross-domain backfill: adjacent to the brief, not an obvious search result.",
-        "Rising momentum over the last 90 days, so the cue reads current rather than nostalgic.",
+        "Climbing Qloo population rank over the trend window, so the cue reads current rather than nostalgic.",
       ],
       explainability: [
         { entity_id: "urn:fixture:ambient", name: "Ambient", score: 0.29 },
@@ -105,7 +105,7 @@ export const FIXTURE_SHEET: CueSheet = {
       risk: "Standard clearance path for this profile.",
       why: [
         "Surfaced by cross-domain backfill: adjacent to the brief, not an obvious search result.",
-        "Cooling momentum, which suits a scene that needs distance or melancholy.",
+        "Falling Qloo population rank over the trend window, which suits a scene that needs distance or melancholy.",
       ],
       explainability: [
         { entity_id: "urn:fixture:soul", name: "Soul", score: 0.24 },
@@ -115,17 +115,12 @@ export const FIXTURE_SHEET: CueSheet = {
   directionCompare: {
     aLabel: "Late-90s trip hop (as written)",
     bLabel: "Contemporary ambient soul (the counter-proposal)",
-    aTop: [
-      { entity_id: "urn:fixture:ma", name: "Massive Attack", type: "urn:entity:artist" },
-      { entity_id: "urn:fixture:ph", name: "Portishead", type: "urn:entity:artist" },
-    ],
-    bTop: [
-      { entity_id: "urn:fixture:sault", name: "Sault", type: "urn:entity:artist" },
-      { entity_id: "urn:fixture:nf", name: "Nils Frahm", type: "urn:entity:artist" },
-    ],
-    shared: ["Massive Attack", "Portishead", "Sault"],
+    shared: ["Melancholy", "Late night", "Cinematic", "Introspective", "Soulful"],
+    aOnly: ["Trip hop", "Downbeat", "Urban"],
+    bOnly: ["Ambient", "Neo-soul", "Meditative"],
+    overlap: 0.62,
     verdict:
-      "3 artist(s) bridge both directions, so the two readings overlap more than they diverge. Qloo says the era is a surface detail, not the load-bearing choice.",
+      "5 taste tags bridge both directions (62% overlap). Qloo reads them as landing with substantially the same audience, so the difference between them is stylistic rather than a different crowd. The era is a surface detail, not the load-bearing choice.",
   },
   baseline: {
     cues: [

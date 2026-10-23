@@ -16,8 +16,8 @@ const QLOO_SEARCH = {
     {
       entity_id: "11111111-1111-1111-1111-111111111111",
       name: "Drive",
-      type: "urn:entity",
-      subtype: "urn:entity:movie",
+      // Real /search returns a `types` array and no `subtype`.
+      types: ["urn:entity:movie"],
       properties: { description: "A stunt driver moonlights as a getaway driver." },
     },
   ],
@@ -52,14 +52,16 @@ const QLOO_INSIGHTS = {
         tags: [{ id: "urn:tag:genre:media:synthwave", name: "Synthwave" }],
         query: {
           affinity: 0.93,
-          measurements: { audience_growth: 0.08 },
           explainability: {
-            inputs: [
+            // Real Qloo shape: keyed by the signal that produced the contribution.
+            "signal.interests.entities": [
               {
                 entity_id: "11111111-1111-1111-1111-111111111111",
                 name: "Drive",
                 score: 0.44,
               },
+            ],
+            "signal.interests.tags": [
               { entity_id: "urn:tag:genre:media:thriller", name: "Thriller", score: 0.21 },
             ],
           },
@@ -73,7 +75,7 @@ const QLOO_INSIGHTS = {
         popularity: 0.41,
         properties: { description: "Experimental composer." },
         tags: [],
-        query: { affinity: 0.88, measurements: { audience_growth: -0.05 } },
+        query: { affinity: 0.88 },
       },
       {
         // Missing affinity entirely: exercises the popularity fallback.
@@ -94,22 +96,46 @@ const QLOO_INSIGHTS = {
 const QLOO_TRENDING = {
   results: {
     trending: [
-      { date: "2026-07-01", population_percentile: 0.4, velocity: 0.01 },
-      { date: "2026-08-01", population_percentile: 0.55, velocity: 0.04 },
-      { date: "2026-09-01", population_percentile: 0.71, velocity: 0.09 },
+      // Real field names; `population_rank` is a string in the live API.
+      {
+        date: "2026-09-01",
+        population_rank: "900",
+        population_percentile: 0.71,
+        population_rank_velocity: 40,
+        population_percent_delta: 0.09,
+        velocity_fold_change: 1.1,
+      },
+      {
+        date: "2026-08-01",
+        population_rank: "1000",
+        population_percentile: 0.55,
+        population_rank_velocity: 30,
+        population_percent_delta: 0.04,
+        velocity_fold_change: 1.05,
+      },
+      {
+        date: "2026-07-01",
+        population_rank: "1200",
+        population_percentile: 0.4,
+        population_rank_velocity: 20,
+        population_percent_delta: 0.01,
+        velocity_fold_change: 1.0,
+      },
     ],
   },
 };
 
 const QLOO_COMPARE = {
   results: {
-    entities: [
-      {
-        entity_id: "aaaaaaaa-0000-0000-0000-000000000001",
-        name: "Cliff Martinez",
-        subtype: "urn:entity:artist",
-        popularity: 0.6,
-      },
+    a: [
+      { tag_id: "urn:tag:mood:melancholy", name: "Melancholy", query: { score: 0.9 } },
+      { tag_id: "urn:tag:genre:electronic", name: "Electronic", query: { score: 0.8 } },
+      { tag_id: "urn:tag:mood:night", name: "Late Night", query: { score: 0.7 } },
+    ],
+    b: [
+      { tag_id: "urn:tag:mood:melancholy", name: "Melancholy", query: { score: 0.85 } },
+      { tag_id: "urn:tag:genre:ambient", name: "Ambient", query: { score: 0.75 } },
+      { tag_id: "urn:tag:mood:night", name: "Late Night", query: { score: 0.6 } },
     ],
   },
 };
@@ -151,9 +177,22 @@ globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
       results: {
         trending: cooling
           ? [
-              { date: "2026-07-01", population_percentile: 0.8, velocity: -0.02 },
-              { date: "2026-08-01", population_percentile: 0.6, velocity: -0.03 },
-              { date: "2026-09-01", population_percentile: 0.4, velocity: -0.05 },
+              {
+                date: "2026-09-01",
+                population_rank: "1500",
+                population_percentile: 0.4,
+                population_rank_velocity: -60,
+                population_percent_delta: -0.05,
+                velocity_fold_change: 0.9,
+              },
+              {
+                date: "2026-07-01",
+                population_rank: "1000",
+                population_percentile: 0.8,
+                population_rank_velocity: -20,
+                population_percent_delta: -0.02,
+                velocity_fold_change: 0.95,
+              },
             ]
           : QLOO_TRENDING.results.trending,
       },
@@ -251,6 +290,26 @@ await check("transport failure degrades to an error result, not an exception", a
   assert.equal(result.status, 0);
 });
 
+await check("a 429 is retried and recovers", async () => {
+  // The hackathon key rate-limits in bursts; one 429 must not cost a cue.
+  const original = globalThis.fetch;
+  let attempts = 0;
+  globalThis.fetch = (async () => {
+    attempts += 1;
+    if (attempts === 1) {
+      return new Response(JSON.stringify({ error_msg: "Rate limit exceeded" }), {
+        status: 429,
+        headers: { "Content-Type": "application/json", "retry-after": "0" },
+      });
+    }
+    return jsonResponse(QLOO_INSIGHTS);
+  }) as typeof fetch;
+  const result = await insights({ filterType: "urn:entity:artist", take: 5 });
+  globalThis.fetch = original;
+  assert.equal(attempts, 2, "the retry should have re-issued the request");
+  assert.equal(result.ok, true, "the retry should have succeeded");
+});
+
 await check("era parsing handles decades, explicit years and 'contemporary'", () => {
   assert.equal(eraToYearFloor("late 90s"), 1990);
   assert.equal(eraToYearFloor("1974"), 1974);
@@ -269,25 +328,35 @@ await check("deterministic parser extracts mood, era, anchors and diegesis", () 
   assert.equal(brief.audience.age, "25_to_29");
 });
 
+await check("fixture mode is explicit and never masquerades as live", async () => {
+  // The deployed demo runs without a key, so it must say so loudly rather than
+  // presenting pre-computed samples as Qloo output.
+  const sheet = await buildCueSheet({ scene: "Anything at all here.", forceFixture: true });
+  assert.equal(sheet.mode, "fixture");
+  assert.ok(
+    sheet.warnings.some((warning) => /fixture|cached|pre-computed/i.test(warning)),
+    "fixture mode should warn that the numbers are not live",
+  );
+});
+
 await check("full cue sheet assembles from live Qloo data", async () => {
   const sheet = await buildCueSheet({
     scene:
       'A 90s noir thriller. Rain on the glass. Reference "Drive" and Sicario. Los Angeles, audience 25-34.',
   });
-
   assert.equal(sheet.mode, "live");
   assert.ok(sheet.cues.length >= 3, "expected at least three cues");
 
   const first = sheet.cues[0];
   assert.equal(first.artist, "Cliff Martinez");
   assert.equal(first.affinity, 0.93);
-  assert.equal(first.momentum, 1, "audience_growth 0.08 should read as rising");
+  assert.equal(first.momentum, 1, "climbing population_rank should read as rising");
   assert.equal(first.placement, "needle_drop");
   assert.equal(first.clearance, "unknown", "popularity 0.62 is mid-band");
   assert.ok(first.why.length > 0);
   assert.ok(first.confidence > 0.5);
 
-  assert.equal(sheet.cues[1].momentum, -1, "audience_growth -0.05 should read as cooling");
+  assert.equal(sheet.cues[1].momentum, -1, "falling population_rank should read as cooling");
   assert.ok(sheet.baseline.cues.length > 0, "baseline must always be present");
   assert.ok(sheet.receipts.length >= 5, "receipts should cover the call chain");
 });
@@ -333,6 +402,121 @@ await check("fixture mode is used when the key is absent", async () => {
 
 await check("the hackathon base URL is the module default", () => {
   assert.equal(QLOO_BASE_URL, "https://hackathon.api.qloo.com");
+});
+
+/* ------------------------------------------------------------------ */
+/* Live-API regression guards                                          */
+/*                                                                     */
+/* Each of these encodes a bug that a green test suite previously      */
+/* missed because the stubs did not match the real Qloo payloads.      */
+/* ------------------------------------------------------------------ */
+
+await check("tag signals are sent as {tag,weight} objects, never bare strings", async () => {
+  calls.length = 0;
+  await buildCueSheet({
+    scene: 'A noir scene referencing "Drive". Los Angeles, audience 25-34.',
+  });
+  const withTags = calls.find(
+    (call) => call.url.includes("/v2/insights") && call.url.includes("signal.interests.tags"),
+  );
+  assert.ok(withTags, "expected an insights call carrying tag signals");
+  const raw = decodeURIComponent(withTags.url.split("signal.interests.tags=")[1].split("&")[0]);
+  assert.ok(raw.startsWith("["), `tag signal must be a JSON array, got: ${raw}`);
+  assert.ok(
+    raw.includes('"tag"'),
+    `tag signal entries must be objects with a tag property, got: ${raw}`,
+  );
+});
+
+await check("empty signal arrays are omitted, not sent as empty parameters", async () => {
+  calls.length = 0;
+  await buildCueSheet({ scene: "A quiet scene with no named references at all here." });
+  for (const call of calls) {
+    assert.ok(
+      !/[?&][^=&]+=&/.test(call.url) && !call.url.endsWith("="),
+      `empty parameter leaked into request: ${call.url}`,
+    );
+  }
+});
+
+await check("signal entities are sent as bare IDs, not urn-prefixed", async () => {
+  calls.length = 0;
+  await buildCueSheet({
+    scene: 'A noir scene referencing "Drive". Los Angeles, audience 25-34.',
+  });
+  const insightCall = calls.find(
+    (call) => call.url.includes("/v2/insights") && call.url.includes("signal.interests.entities"),
+  );
+  assert.ok(insightCall, "expected an insights call with entity signals");
+  const raw = decodeURIComponent(
+    insightCall.url.split("signal.interests.entities=")[1].split("&")[0],
+  );
+  assert.ok(
+    !raw.includes("urn:entity:"),
+    `signal entities must be bare IDs, got: ${raw}`,
+  );
+});
+
+await check("explainability keyed by signal is flattened with scores", async () => {
+  const sheet = await buildCueSheet({
+    scene: 'A noir scene referencing "Drive". Los Angeles, audience 25-34.',
+  });
+  const first = sheet.cues[0];
+  assert.ok(first.explainability.length >= 2, "both signal groups should be flattened");
+  assert.ok(
+    first.explainability.every((entry) => entry.entity_id.length > 0),
+    "every contribution must carry an entity id",
+  );
+  const scores = first.explainability.map((entry) => entry.score);
+  assert.deepEqual(
+    scores,
+    [...scores].sort((a, b) => b - a),
+    "contributions should be ordered strongest first",
+  );
+});
+
+await check("compare groups are read as tags and intersected for overlap", async () => {
+  const sheet = await buildCueSheet({
+    scene: 'A noir scene referencing "Drive". Los Angeles, audience 25-34.',
+    alternativeAnchors: ["Sicario"],
+  });
+  const compare = sheet.directionCompare;
+  assert.ok(compare, "directionCompare should be present");
+  assert.ok(compare.shared.includes("Melancholy"), "shared tags must intersect");
+  assert.ok(!compare.shared.includes("Ambient"), "b-only tags must not appear as shared");
+  assert.ok(compare.aOnly.includes("Electronic"), "a-only tags must be surfaced");
+  assert.ok(compare.bOnly.includes("Ambient"), "b-only tags must be surfaced");
+  assert.ok(compare.overlap > 0 && compare.overlap <= 1, "overlap must be a ratio");
+  assert.ok(compare.verdict.length > 0);
+});
+
+await check("trending parses string population_rank into a number", async () => {
+  const { trending } = await import("../src/lib/qloo.ts");
+  const result = await trending(
+    "aaaaaaaa-0000-0000-0000-000000000001",
+    "urn:entity:artist",
+    "2026-07-01",
+    "2026-09-01",
+  );
+  assert.ok(result.ok);
+  assert.equal(typeof result.data[0].rank, "number", "rank must be numeric");
+  assert.equal(result.data[0].rank, 900);
+  assert.equal(result.data[0].rankVelocity, 40);
+});
+
+await check("tag search disables typo tolerance", async () => {
+  // With typo tolerance on, Qloo fuzzy-matches unrelated tags ("tension" ->
+  // "Venison"), which silently corrupts every downstream signal.
+  calls.length = 0;
+  await buildCueSheet({
+    scene: 'A noir scene referencing "Drive". Los Angeles, audience 25-34.',
+  });
+  const tagCall = calls.find((call) => call.url.includes("/v2/tags"));
+  assert.ok(tagCall, "a tag search should have been made");
+  assert.ok(
+    tagCall.url.includes("feature.typo_tolerance=false"),
+    "typo tolerance must be disabled for tag resolution",
+  );
 });
 
 console.log(`\n${passed} passed, ${failures.length} failed.\n`);

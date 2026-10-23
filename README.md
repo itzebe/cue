@@ -21,7 +21,7 @@ Paste a scene brief — a script page, a treatment, or two sentences — and Cue
 - **Culturally grounded options.** Artists ranked by *measured* cross-domain affinity with the scene's taste profile, not by what's popular.
 - **A reason attached to every pick.** Each cue names the signal that caused it, using Qloo's explainability data. No black box.
 - **Audience fit.** Demographic signals confirm the pick lands with the people the scene is made for.
-- **Momentum.** 90 days of Qloo trend data, so a supervisor knows whether a cue reads current or nostalgic.
+- **Momentum.** Qloo's own trend series, so a supervisor knows whether a cue reads current or nostalgic.
 - **Placement and clearance notes.** Which cue is the needle drop, which is the score bed, and what each will cost to clear.
 - **A creative A/B.** Two competing directions run through `/v2/analysis/compare` to see whether they split the audience or share it.
 - **Full receipts.** Every Qloo endpoint called, with parameters, status, latency and row count.
@@ -84,7 +84,7 @@ npm run dev                  # http://localhost:12000
 npm run verify
 ```
 
-15 checks covering normalisation, affinity extraction, explainability parsing, momentum derivation, failure degradation and cue assembly. Only `fetch` is stubbed — everything under test is the production code path.
+24 checks covering normalisation, affinity extraction, explainability parsing, momentum derivation, failure degradation and cue assembly. Only `fetch` is stubbed — everything under test is the production code path.
 
 ### Environment
 
@@ -113,6 +113,10 @@ vercel --prod
 - **Invalid parameters fail silently.** Qloo ignores unsupported parameters and returns `200` with an empty entity list rather than an error. Cue resolves entities and tags *before* ranking, which is why the call chain has more steps than a naive integration — and why it does not quietly return nothing.
 - **Legacy `/recs` and `/recommendations` are unsupported** for the hackathon and are not used anywhere in this codebase.
 - **No "song" entity type exists in Qloo.** Cue grounds the *artist* and *vibe* with Qloo, then proposes specific tracks from those artists. This is stated openly rather than papered over.
+- **Momentum is measured, never invented.** The trend series exposed by the hackathon sandbox is a frozen snapshot: `population_rank_velocity`, `population_percent_delta` and `population_percentile` are constant across every artist tested, so the derivation legitimately returns `0` (steady) on live data. The field is parsed, ranked and rendered; it simply reports "steady" rather than fabricating a trend. The unit tests cover the rising and cooling branches with a varying series.
+- **Tag-only briefs return a uniform affinity.** When a brief names no film, director or artist, `/v2/insights` matches on tags alone and returns the same affinity score for every entity. Cue detects this (zero spread with no signal entities), orders by popularity as a deterministic tiebreak, and says so in the warnings instead of presenting an arbitrary order as a ranking. Naming an anchor restores true affinity ranking.
+- **The key rate-limits in bursts, and the client absorbs it.** A cue sheet issues 20+ calls, and the hackathon key returns `429` under that load. Requests are capped at four in flight and retried up to three times with exponential backoff, honouring `Retry-After` when present. A rate-limited run comes back complete instead of half-empty.
+- **Typo tolerance is off on purpose.** With `feature.typo_tolerance=true`, Qloo fuzzy-matches unrelated tags — `tension` → *Venison*, `dark` → *Park*, `open` → *Oven* — which silently corrupts the grounding. Tag resolution pins `feature.typo_tolerance=false` so a tag means what it says.
 
 ## License
 
