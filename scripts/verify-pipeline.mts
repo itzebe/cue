@@ -858,6 +858,61 @@ await check("concurrent Qloo calls never exceed the in-flight cap", async () => 
   assert.ok(peak <= 4, `no more than 4 calls may be in flight, saw ${peak}`);
 });
 
+await check("LLM env values are trimmed and never echoed", async () => {
+  const { resolveLlmConfig, llmDiagnostics } = await import("../src/lib/llm.ts");
+  const saved = { ...process.env };
+  try {
+    // A trailing newline survives a dashboard paste and produces a 401 that looks
+    // like a bad key. Trimming has to happen at read time.
+    process.env.LLM_API_KEY = "  sk-test-abc  \n";
+    process.env.LLM_BASE_URL = "https://example.test/v1/\n";
+    process.env.LLM_MODEL = " test-model \n";
+    delete process.env.OPENAI_API_KEY;
+    delete process.env.OPENAI_BASE_URL;
+    delete process.env.OH_LLM_API_KEY_REFRESH_BASE_URLS;
+    delete process.env.OH_LLM_PROXY_KEY;
+
+    const config = resolveLlmConfig();
+    assert.equal(config?.apiKey, "sk-test-abc", "the key must be trimmed");
+    assert.equal(config?.model, "test-model", "the model must be trimmed");
+    assert.equal(config?.baseUrl, "https://example.test/v1", "one trailing slash survives");
+
+    // /api/cue is public, so the diagnostics must describe the key, never print it.
+    const diagnostics = llmDiagnostics();
+    assert.equal(diagnostics.configured, true);
+    assert.equal(diagnostics.source, "llm");
+    assert.equal(diagnostics.keyLength, "sk-test-abc".length);
+    const serialised = JSON.stringify(diagnostics);
+    assert.ok(!serialised.includes("sk-test-abc"), "the raw key must never be serialised");
+    assert.ok(
+      !serialised.includes("sk-test"),
+      "no prefix of the key may be serialised either",
+    );
+  } finally {
+    process.env = saved;
+  }
+});
+
+await check("a whitespace-only key counts as unconfigured", async () => {
+  const { resolveLlmConfig, hasLlm } = await import("../src/lib/llm.ts");
+  const saved = { ...process.env };
+  try {
+    // An empty variable is how a dashboard shows a deleted secret; it must not be
+    // read as "configured", or the app reports readiness it does not have.
+    process.env.OPENAI_API_KEY = "   \n";
+    delete process.env.LLM_API_KEY;
+    delete process.env.LLM_BASE_URL;
+    delete process.env.LLM_MODEL;
+    delete process.env.OPENAI_BASE_URL;
+    delete process.env.OH_LLM_API_KEY_REFRESH_BASE_URLS;
+    delete process.env.OH_LLM_PROXY_KEY;
+    assert.equal(resolveLlmConfig(), null);
+    assert.equal(hasLlm(), false);
+  } finally {
+    process.env = saved;
+  }
+});
+
 await check("a malformed cue cannot produce a NaN price", async () => {
   const { quoteLicense, DEFAULT_TERMS } = await import("../src/lib/rights.ts");
   // /api/quote prices cues supplied by the client, so every field the model
