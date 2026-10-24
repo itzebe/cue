@@ -16,6 +16,14 @@ Built for the [Qloo Agentic Hackathon](https://qloo.devpost.com/).
 
 ![Cue — the opening screen: a creative brief in, a grounded answer out](docs/screenshots/01-hero-brief.jpg)
 
+**[▶ Watch the product demo (2:35)](https://github.com/itzebe/cue/releases/tag/demo-video)** —
+a single live run, recorded end to end against the real Qloo Taste Graph: brief in, cue sheet,
+Cross-Domain Taste Map, comparison and the Qloo receipts behind each pick.
+
+> The demo is hosted as a GitHub release asset, so the link **downloads** the MP4
+> ([direct file](https://github.com/itzebe/cue/releases/download/demo-video/cue-demo.mp4),
+> 24 MB) rather than streaming in the browser.
+
 ---
 
 ## The problem, and who has it
