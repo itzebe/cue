@@ -22,6 +22,9 @@ import type { CueSheet } from "@/lib/types";
 export function CompareStrip({ sheet }: { sheet: CueSheet }) {
   const baseline = sheet.baseline;
   const baselineIsModel = baseline.source === "llm";
+  // Without a ranking there is no right-hand column to compare, and claiming one
+  // would repeat the badge's mistake one panel further down.
+  const ranked = sheet.cues.length > 0;
 
   // A real, computable difference: how many artists both answers name.
   const baselineArtists = new Set(baseline.cues.map((cue) => cue.artist.toLowerCase()));
@@ -39,9 +42,11 @@ export function CompareStrip({ sheet }: { sheet: CueSheet }) {
           Same scene, same model &mdash; one answer has cultural data
         </h2>
         <p className="text-xs text-haze-500">
-          {baselineIsModel
-            ? "Both lists were produced from this scene."
-            : "Right column is live Qloo output; left is a fixed sample."}
+          {!ranked
+            ? "Qloo returned no ranking for this scene, so there is nothing to compare against."
+            : baselineIsModel
+              ? "Both lists were produced from this scene."
+              : "Right column is live Qloo output; left is a fixed sample."}
         </p>
       </div>
 
@@ -116,9 +121,18 @@ export function CompareStrip({ sheet }: { sheet: CueSheet }) {
             })}
           </ul>
           <p className="mt-4 rounded-lg border border-ember-500/15 bg-ember-500/5 p-3 text-xs leading-relaxed text-haze-300">
-            Every figure above is a Qloo field, shown as returned: affinity is the
-            artist&rsquo;s measured position against this scene&rsquo;s taste profile. Nothing in
-            this column is scored by the model.
+            {!ranked ? (
+              <>
+                No ranking was produced, so this column is empty. The receipts panel
+                below records which call failed and why.
+              </>
+            ) : (
+              <>
+                Every figure above is a Qloo field, shown as returned: affinity is the
+                artist&rsquo;s measured position against this scene&rsquo;s taste profile. Nothing in
+                this column is scored by the model.
+              </>
+            )}
           </p>
         </div>
       </div>
@@ -129,50 +143,65 @@ export function CompareStrip({ sheet }: { sheet: CueSheet }) {
           What differs
         </h3>
         <ul className="mt-2 space-y-1.5 text-xs leading-relaxed text-haze-300">
-          <li className="flex gap-2">
-            <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-ember-500" />
-            <span>
-              The two lists name{" "}
-              <span className="font-mono text-haze-100">{shared.length}</span>{" "}
-              {shared.length === 1 ? "artist" : "artists"} in common
-              {shared.length > 0 ? `: ${shared.map((cue) => cue.artist).join(", ")}` : ""}. The
-              right column is a different answer, not the same answer reordered.
-            </span>
-          </li>
-          {topReason ? (
+          {!ranked ? (
             <li className="flex gap-2">
               <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-ember-500" />
               <span>
-                The top pick rests on a measured relationship rather than a description:{" "}
-                <span className="text-haze-100">{topReason}</span>
+                There is no Qloo ranking for this scene, so there is no comparison to
+                draw. Fix the call named above and rebuild to see the two answers side
+                by side.
               </span>
             </li>
-          ) : null}
-          {top ? (
+          ) : (
+            <>
             <li className="flex gap-2">
               <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-ember-500" />
               <span>
-                That pick carries a Qloo affinity of{" "}
-                <span className="font-mono text-haze-100">{top.affinity.toFixed(3)}</span>{" "}
-                against this scene&rsquo;s profile. The left column has no comparable figure,
-                because there is nothing behind it to measure.
+                The two lists name{" "}
+                <span className="font-mono text-haze-100">{shared.length}</span>{" "}
+                {shared.length === 1 ? "artist" : "artists"} in common
+                {shared.length > 0 ? `: ${shared.map((cue) => cue.artist).join(", ")}` : ""}. The
+                right column is a different answer, not the same answer reordered.
               </span>
             </li>
-          ) : null}
-          {audienceLine ? (
-            <li className="flex gap-2">
-              <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-ember-500" />
-              <span>
-                Qloo describes the anchor&rsquo;s audience as:{" "}
-                <span className="text-haze-100 italic">&ldquo;{audienceLine}&rdquo;</span>
-              </span>
-            </li>
-          ) : null}
+            {topReason ? (
+              <li className="flex gap-2">
+                <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-ember-500" />
+                <span>
+                  The top pick rests on a measured relationship rather than a description:{" "}
+                  <span className="text-haze-100">{topReason}</span>
+                </span>
+              </li>
+            ) : null}
+            {top ? (
+              <li className="flex gap-2">
+                <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-ember-500" />
+                <span>
+                  That pick carries a Qloo affinity of{" "}
+                  <span className="font-mono text-haze-100">{top.affinity.toFixed(3)}</span>{" "}
+                  against this scene&rsquo;s profile. The left column has no comparable figure,
+                  because there is nothing behind it to measure.
+                </span>
+              </li>
+            ) : null}
+            {audienceLine ? (
+              <li className="flex gap-2">
+                <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-ember-500" />
+                <span>
+                  Qloo describes the anchor&rsquo;s audience as:{" "}
+                  <span className="text-haze-100 italic">&ldquo;{audienceLine}&rdquo;</span>
+                </span>
+              </li>
+            ) : null}
+            </>
+          )}
         </ul>
-        <p className="mt-3 text-[11px] leading-relaxed text-haze-500">
-          This panel makes no claim about which answer is creatively better. It shows that the
-          two answers are different, and that one of them arrives with measurements.
-        </p>
+        {ranked ? (
+          <p className="mt-3 text-[11px] leading-relaxed text-haze-500">
+            This panel makes no claim about which answer is creatively better. It shows that the
+            two answers are different, and that one of them arrives with measurements.
+          </p>
+        ) : null}
       </div>
     </section>
   );

@@ -14,6 +14,21 @@ export function ReceiptsPanel({ sheet }: { sheet: CueSheet }) {
   const live = sheet.mode === "live";
   const totalMs = sheet.receipts.reduce((sum, receipt) => sum + receipt.ms, 0);
   const failures = sheet.receipts.filter((receipt) => receipt.status !== 200).length;
+  // The badge reflects the workflow's real state, not just that live calls were
+  // attempted. A sheet whose key was rejected is "live" by mode and failed in
+  // fact, and the badge must not show green for it.
+  const statusKind = sheet.status?.kind;
+  const badgeText = sheet.status ? sheet.status.label : live ? "live" : "fixture";
+  const badgeTone =
+    statusKind === "live"
+      ? "border-signal-500/30 bg-signal-500/10 text-signal-400"
+      : statusKind === "empty"
+        ? "border-white/10 bg-white/5 text-haze-300"
+        : statusKind === "failed" || statusKind === "degraded"
+          ? "border-ember-500/30 bg-ember-500/10 text-ember-400"
+          : live
+            ? "border-signal-500/30 bg-signal-500/10 text-signal-400"
+            : "border-ember-500/30 bg-ember-500/10 text-ember-400";
 
   return (
     <section id="receipts" className="panel grain relative scroll-mt-20 overflow-hidden p-5" aria-label="Qloo call receipts">
@@ -26,13 +41,9 @@ export function ReceiptsPanel({ sheet }: { sheet: CueSheet }) {
             </p>
           </div>
           <span
-            className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-wider ${
-              live
-                ? "border-signal-500/30 bg-signal-500/10 text-signal-400"
-                : "border-ember-500/30 bg-ember-500/10 text-ember-400"
-            }`}
+            className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-wider ${badgeTone}`}
           >
-            {live ? "live" : "fixture"}
+            {badgeText}
           </span>
         </header>
 
@@ -101,8 +112,10 @@ export function ReceiptsPanel({ sheet }: { sheet: CueSheet }) {
 
         {failures > 0 ? (
           <p className="mt-3 text-xs text-ember-400">
-            {failures} call{failures === 1 ? "" : "s"} did not return 200. Cue degrades
-            per-call rather than failing the sheet.
+            {failures} call{failures === 1 ? "" : "s"} did not return 200.
+            {sheet.status?.kind === "failed"
+              ? " The workflow could not complete; the status above says which integration failed."
+              : " Cue degrades per-call rather than failing the sheet."}
           </p>
         ) : null}
       </div>

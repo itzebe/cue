@@ -29,6 +29,7 @@ import { crossDomainForAudience } from "./crossdomain";
 import type { ComparablesResult } from "./comparables";
 import type { CrossDomainResult } from "./crossdomain";
 import { localiseBrief, type LocalisationResult } from "./localise";
+import { computeSheetStatus } from "./status";
 import { FIXTURE_SHEET } from "@/data/fixtures";
 
 /**
@@ -523,11 +524,13 @@ export async function buildCueSheet(
     const reason = options.forceFixture
       ? "Fixture mode requested."
       : "QLOO_API_KEY is not configured, so Cue is serving a cached, pre-computed cue sheet. Add a key to run live.";
-    return {
+    const fixture: CueSheet = {
       ...FIXTURE_SHEET,
       warnings: [reason, ...FIXTURE_SHEET.warnings],
       mode: "fixture",
+      llmConfigured: hasLlm(),
     };
+    return { ...fixture, status: computeSheetStatus(fixture) };
   }
 
   const {
@@ -717,7 +720,7 @@ export async function buildCueSheet(
     );
   }
 
-  return {
+  const sheet: CueSheet = {
     brief,
     cues,
     sceneParse: {
@@ -736,6 +739,7 @@ export async function buildCueSheet(
     receipts,
     warnings: [...warnings, ...casting.warnings, ...comparables.warnings, ...tasteMap.warnings],
     mode: "live",
+    llmConfigured: hasLlm(),
     casting: casting.candidates.length > 0 ? casting : undefined,
     audienceBrief,
     comparables: comparables.groups.length > 0 ? comparables : undefined,
@@ -747,6 +751,10 @@ export async function buildCueSheet(
     // nothing truthful to say.
     tasteMap: tasteMap.anchors.length > 0 ? tasteMap : undefined,
   };
+
+  // Computed last, from the assembled sheet, so the status is derived from what
+  // the pipeline actually produced rather than from any intermediate assumption.
+  return { ...sheet, status: computeSheetStatus(sheet) };
 }
 
 export interface LocaliseOptions {

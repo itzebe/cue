@@ -195,6 +195,16 @@ export const FIXTURE_SHEET: CueSheet = {
   warnings: [
     "Fixture mode: these numbers are pre-computed examples, not live Qloo results.",
   ],
+  // Declared here too so the cached example renders the same status model as a
+  // live sheet. `buildCueSheet` recomputes it, which is what keeps the two in
+  // step if the fixture's own fields ever change.
+  status: {
+    kind: "fixture",
+    label: "fixture",
+    detail:
+      "No Qloo key is configured, so this is a cached, pre-computed example rather than live output.",
+    reasons: [],
+  },
 };
 
 /** Ready-made scene briefs so a judge can try Cue in one click. */
