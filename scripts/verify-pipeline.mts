@@ -3446,6 +3446,392 @@ await check("the taste map never attributes model prose to Qloo", async () => {
   }
 });
 
+
+// ---------------------------------------------------------------------------
+// Live-status regression tests.
+//
+// `mode` records that live calls were *attempted*, not that the workflow
+// succeeded: a rejected Qloo key produced `mode: "live"` with zero cues and a
+// green badge. These tests pin the computed status against every combination of
+// integration outcome, so success is never inferred from the HTTP status, the
+// presence of a key, or `mode`.
+// ---------------------------------------------------------------------------
+
+const AFFINITY_ENTITIES = QLOO_INSIGHTS.results.entities;
+
+type LlmMode = "ok" | "auth" | "none" | "tracks-fail";
+
+interface StackOptions {
+  artist?: { status: number; entities?: unknown[] };
+  backfill?: { status: number; entities?: unknown[] };
+  /** When set, the artist-affinity fetch rejects instead of responding. */
+  artistThrows?: boolean;
+  llm?: LlmMode;
+}
+
+function briefToolCall() {
+  return {
+    choices: [
+      {
+        message: {
+          tool_calls: [
+            {
+              function: {
+                name: "emit_scene_brief",
+                arguments: JSON.stringify({
+                  title: "Tokyo Night",
+                  mood: ["introspective", "melancholic"],
+                  genre: ["ambient", "electronic"],
+                  era: "contemporary",
+                  setting: "Tokyo at night",
+                  arc: "Hold the mood without resolving it.",
+                  audience: { age: "25_to_29" },
+                  anchors: ["Drive"],
+                  diegetic: false,
+                }),
+              },
+            },
+          ],
+        },
+      },
+    ],
+  };
+}
+
+function tracksToolCall() {
+  return {
+    choices: [
+      {
+        message: {
+          tool_calls: [
+            {
+              function: {
+                name: "emit_tracks",
+                arguments: JSON.stringify({
+                  tracks: [
+                    { artist: "Cliff Martinez", track: "Sonata", rationale: "A slow pulse." },
+                  ],
+                }),
+              },
+            },
+          ],
+        },
+      },
+    ],
+  };
+}
+
+/** Install a mocked stack: Groq as the only LLM provider, Qloo routed per call. */
+function installStack(options: StackOptions): () => void {
+  const original = globalThis.fetch;
+  const saved = { ...process.env };
+
+  delete process.env.LLM_API_KEY;
+  delete process.env.LLM_BASE_URL;
+  delete process.env.LLM_MODEL;
+  delete process.env.OPENROUTER_API_KEY;
+  delete process.env.GEMINI_API_KEY;
+  delete process.env.GOOGLE_API_KEY;
+  delete process.env.OPENAI_API_KEY;
+  delete process.env.OH_LLM_PROXY_KEY;
+  delete process.env.OH_LLM_API_KEY_REFRESH_BASE_URLS;
+  if (options.llm === "none") {
+    delete process.env.GROQ_API_KEY;
+  } else {
+    process.env.GROQ_API_KEY = "gsk-test-status";
+  }
+  process.env.QLOO_API_KEY = "qloo-test-status";
+
+  globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = typeof input === "string" ? input : input.toString();
+    const parsed = new URL(url);
+
+    if (parsed.hostname === "api.groq.com") {
+      if (options.llm === "auth") {
+        return jsonResponse(
+          { error: { message: "Invalid API Key", code: "invalid_api_key" } },
+          401,
+        );
+      }
+      const body = JSON.parse(String(init?.body ?? "{}"));
+      const toolName = body?.tools?.[0]?.function?.name;
+      if (toolName === "emit_scene_brief") return jsonResponse(briefToolCall());
+      if (toolName === "emit_tracks") {
+        if (options.llm === "tracks-fail") return jsonResponse({ error: { message: "boom" } }, 500);
+        return jsonResponse(tracksToolCall());
+      }
+      return jsonResponse({
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({ cues: [{ artist: "A", track: "B", why: "C" }] }),
+            },
+          },
+        ],
+      });
+    }
+
+    if (parsed.pathname === "/v2/search") return jsonResponse(QLOO_SEARCH);
+    if (parsed.pathname === "/v2/tags") return jsonResponse(QLOO_TAGS);
+
+    if (parsed.pathname === "/v2/insights") {
+      const type = parsed.searchParams.get("filter.type");
+      const isArtist = type === "urn:entity:artist";
+      const isBackfill = isArtist && parsed.searchParams.has("filter.exclude.entities");
+      const spec = isBackfill ? options.backfill : isArtist ? options.artist : undefined;
+
+      if (isArtist && !isBackfill && options.artistThrows) {
+        const aborted = new Error("aborted");
+        aborted.name = "AbortError";
+        throw aborted;
+      }
+      if (spec) {
+        if (spec.status !== 200) {
+          return jsonResponse({ error: { message: "boom" } }, spec.status);
+        }
+        return jsonResponse({
+          success: true,
+          results: { entities: spec.entities ?? AFFINITY_ENTITIES },
+        });
+      }
+      return jsonResponse({ success: true, results: { entities: [] } });
+    }
+
+    if (parsed.pathname === "/v2/trending") return jsonResponse({ results: { trending: [] } });
+    return jsonResponse({ success: true, results: { entities: [] } });
+  }) as typeof fetch;
+
+  return () => {
+    globalThis.fetch = original;
+    for (const key of Object.keys(process.env)) {
+      if (!(key in saved)) delete process.env[key];
+    }
+    Object.assign(process.env, saved);
+  };
+}
+
+const STATUS_SCENE =
+  'A neon-soaked drive through Los Angeles at night. Brooding, 1980s synth. Reference "Drive". Audience 25-34.';
+
+await check("1. Groq configured and successful reports a live workflow", async () => {
+  const restore = installStack({ artist: { status: 200 }, llm: "ok" });
+  try {
+    const sheet = await buildCueSheet({ scene: STATUS_SCENE });
+    assert.equal(sheet.status?.kind, "live", "a fully successful run must be live");
+    assert.equal(sheet.status?.label, "live");
+    assert.equal(sheet.status?.reasons.length, 0, "a healthy run carries no fault reasons");
+    assert.equal(sheet.llmConfigured, true);
+    assert.equal(sheet.sceneParse?.source, "llm", "the model read the scene");
+    assert.ok(sheet.cues.length > 0);
+    assert.equal(sheet.mode, "live");
+  } finally {
+    restore();
+  }
+});
+
+await check("2. A Groq authentication failure degrades the sheet, not fails it", async () => {
+  const restore = installStack({ artist: { status: 200 }, llm: "auth" });
+  try {
+    const sheet = await buildCueSheet({ scene: STATUS_SCENE });
+    assert.equal(sheet.status?.kind, "degraded", "a dead model must degrade, not succeed");
+    assert.equal(sheet.llmConfigured, true, "the deployment does have a model configured");
+    assert.equal(sheet.sceneParse?.source, "deterministic", "the parser produced the brief");
+    assert.equal(sheet.sceneParse?.provider, null, "no provider may be credited");
+    assert.ok(
+      sheet.status?.reasons.some((reason) => /scene reader/i.test(reason)),
+      "the reason must name the scene reader",
+    );
+    assert.ok(sheet.cues.length > 0, "the Qloo ranking must survive a model failure");
+    assert.equal(sheet.mode, "live", "mode still records that live calls were attempted");
+    assert.notEqual(sheet.status?.label, "live", "the badge must not read as success");
+  } finally {
+    restore();
+  }
+});
+
+await check("3. A Qloo authentication failure is reported as failed", async () => {
+  const restore = installStack({ artist: { status: 401 }, llm: "ok" });
+  try {
+    const sheet = await buildCueSheet({ scene: STATUS_SCENE });
+    assert.equal(sheet.status?.kind, "failed", "a rejected key cannot be a success");
+    assert.equal(sheet.status?.label, "failed");
+    assert.match(sheet.status?.detail ?? "", /authentication/i, "the cause must be named");
+    assert.equal(sheet.cues.length, 0);
+    assert.equal(sheet.mode, "live", "mode alone would still say live — which is the bug");
+  } finally {
+    restore();
+  }
+});
+
+await check("4a. A Qloo unavailable response (503) is reported as failed", async () => {
+  const restore = installStack({ artist: { status: 503 }, llm: "ok" });
+  try {
+    const sheet = await buildCueSheet({ scene: STATUS_SCENE });
+    assert.equal(sheet.status?.kind, "failed");
+    assert.match(sheet.status?.detail ?? "", /outage or timeout/i);
+    assert.notEqual(sheet.status?.kind, "empty", "an outage is not an absence of results");
+  } finally {
+    restore();
+  }
+});
+
+await check("4b. A Qloo timeout (no response) is reported as failed", async () => {
+  const restore = installStack({ artist: { status: 0 }, artistThrows: true, llm: "ok" });
+  try {
+    const sheet = await buildCueSheet({ scene: STATUS_SCENE });
+    assert.equal(sheet.status?.kind, "failed", "a timeout must not read as success");
+    assert.match(sheet.status?.detail ?? "", /outage or timeout/i);
+    assert.notEqual(sheet.status?.kind, "empty");
+  } finally {
+    restore();
+  }
+});
+
+await check("5. A partial failure with otherwise usable results is degraded", async () => {
+  const restore = installStack({
+    artist: { status: 200 },
+    backfill: { status: 503 },
+    llm: "ok",
+  });
+  try {
+    const sheet = await buildCueSheet({ scene: STATUS_SCENE });
+    assert.equal(sheet.status?.kind, "degraded");
+    assert.ok(sheet.cues.length > 0, "the ranking is still usable");
+    assert.ok(
+      sheet.status?.reasons.some((reason) => /cross-domain discovery/i.test(reason)),
+      "the failed optional call must be named",
+    );
+  } finally {
+    restore();
+  }
+});
+
+await check("6. A critical failure preventing completion is failed", async () => {
+  const restore = installStack({ artist: { status: 400 }, llm: "ok" });
+  try {
+    const sheet = await buildCueSheet({ scene: STATUS_SCENE });
+    assert.equal(sheet.status?.kind, "failed", "no ranking means no sheet");
+    assert.equal(sheet.cues.length, 0);
+    assert.equal(sheet.status?.reasons.length, 1);
+  } finally {
+    restore();
+  }
+});
+
+await check("7. Legitimate empty results are distinguished from a fault", async () => {
+  const restore = installStack({ artist: { status: 200, entities: [] }, llm: "ok" });
+  try {
+    const sheet = await buildCueSheet({ scene: STATUS_SCENE });
+    assert.equal(sheet.status?.kind, "empty", "a 200 with no rows is a real absence");
+    assert.equal(sheet.status?.label, "no results");
+    assert.equal(sheet.status?.reasons.length, 0, "an empty result is not a fault");
+    assert.match(sheet.status?.detail ?? "", /nothing failed/i);
+    assert.equal(sheet.cues.length, 0);
+  } finally {
+    restore();
+  }
+});
+
+await check("8. Missing Gemini and OpenRouter credentials leave Groq as the only provider", async () => {
+  const { llmDiagnostics } = await import("../src/lib/llm.ts");
+  const restore = installStack({ artist: { status: 200 }, llm: "ok" });
+  try {
+    const diag = llmDiagnostics();
+    assert.equal(diag.configured, true);
+    assert.equal(diag.source, "groq");
+    assert.equal(diag.keyVar, "GROQ_API_KEY");
+    assert.deepEqual(
+      diag.providerChain,
+      ["groq"],
+      "an unconfigured provider must be skipped, never offered as a fallback",
+    );
+    assert.deepEqual(diag.presentKeyVars, ["GROQ_API_KEY"]);
+    assert.equal(diag.model, "openai/gpt-oss-120b");
+  } finally {
+    restore();
+  }
+});
+
+await check("9. No false success status when a required integration fails", async () => {
+  const restore = installStack({ artist: { status: 401 }, llm: "ok" });
+  try {
+    const sheet = await buildCueSheet({ scene: STATUS_SCENE });
+    // The three signals that previously implied success, none of which may.
+    assert.equal(sheet.mode, "live", "mode is 'attempted', and stays that way");
+    assert.ok(sheet.receipts.length > 0, "calls were made");
+    assert.equal(sheet.status?.kind !== "live", true, "status must not claim success");
+    assert.equal(sheet.status?.label !== "live", true, "the badge must not read 'live'");
+    assert.notEqual(sheet.status?.kind, "degraded", "a dead integration is not a degradation");
+  } finally {
+    restore();
+  }
+});
+
+await check("10. An existing successful live workflow remains successful", async () => {
+  const restore = installStack({ artist: { status: 200 }, llm: "ok" });
+  try {
+    const sheet = await buildCueSheet({ scene: STATUS_SCENE, alternativeAnchors: ["Sault"] });
+    assert.equal(sheet.status?.kind, "live");
+    assert.equal(sheet.mode, "live");
+    assert.equal(sheet.cues.length, 3, "all three ranked artists become cues");
+    assert.equal(sheet.baseline.source, "llm");
+    assert.equal(sheet.sceneParse?.source, "llm");
+    assert.equal(sheet.sceneParse?.provider, "groq");
+    // Warnings and faults are different things, and the status must keep them
+    // apart: the optional panels legitimately explain an empty result ("no
+    // comparables for this brief") without that being a failure.
+    assert.equal(
+      sheet.status?.reasons.length,
+      0,
+      "a successful run must report no fault reasons",
+    );
+    assert.ok(
+      sheet.warnings.every((warning) => !/failed|rejected|unauthorised/i.test(warning)),
+      "a successful run must carry no failure warnings",
+    );
+  } finally {
+    restore();
+  }
+});
+
+await check("11. No model configured reports live without claiming a model ran", async () => {
+  const restore = installStack({ artist: { status: 200 }, llm: "none" });
+  try {
+    const sheet = await buildCueSheet({ scene: STATUS_SCENE });
+    assert.equal(sheet.llmConfigured, false, "the client must be told there is no model");
+    assert.equal(sheet.sceneParse?.source, "deterministic");
+    assert.equal(sheet.status?.kind, "live", "a working Qloo run with no model is still live");
+    assert.equal(
+      sheet.status?.reasons.length,
+      0,
+      "an absent model is a configuration, not a fault to report",
+    );
+    assert.match(sheet.status?.detail ?? "", /no model is configured/i);
+  } finally {
+    restore();
+  }
+});
+
+await check("12. A failed track-naming call degrades a sheet that still ranked", async () => {
+  const restore = installStack({ artist: { status: 200 }, llm: "tracks-fail" });
+  try {
+    const sheet = await buildCueSheet({ scene: STATUS_SCENE });
+    assert.equal(sheet.sceneParse?.source, "llm", "the scene read itself succeeded");
+    assert.ok(sheet.cues.length > 0, "Qloo still ranked artists");
+    assert.ok(
+      sheet.cues.every((cue) => cue.trackUnverified),
+      "no cue may carry a track the model did not name",
+    );
+    assert.equal(sheet.status?.kind, "degraded", "a missing track name is a degradation");
+    assert.ok(
+      sheet.status?.reasons.some((reason) => /track/i.test(reason)),
+      "the reason must name the missing track proposal",
+    );
+  } finally {
+    restore();
+  }
+});
+
 console.log(`\n${passed} passed, ${failures.length} failed.\n`);
 if (failures.length > 0) {
   for (const failure of failures) console.error(`  - ${failure}`);

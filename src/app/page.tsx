@@ -174,8 +174,23 @@ export default function StudioPage() {
           </div>
           <div>
             <dt className="text-[10px] uppercase tracking-wider text-haze-500">Mode</dt>
-            <dd className="font-mono text-sm text-haze-100">
-              {sheet ? sheet.mode : "ready"}
+            <dd
+              className={`font-mono text-sm ${
+                !sheet
+                  ? "text-haze-100"
+                  : sheet.status?.kind === "live"
+                    ? "text-signal-400"
+                    : sheet.status?.kind === "failed"
+                      ? "text-ember-500"
+                      : sheet.status?.kind === "degraded" || sheet.status?.kind === "fixture"
+                        ? "text-ember-400"
+                        : "text-haze-300"
+              }`}
+            >
+              {/* The label comes from the status, never from `mode`. `mode` only
+                  records that live calls were attempted, so a sheet with a
+                  rejected key used to read "live" here while carrying no cues. */}
+              {sheet ? (sheet.status?.label ?? sheet.mode) : "ready"}
             </dd>
           </div>
         </dl>
@@ -335,6 +350,59 @@ export default function StudioPage() {
 
           {sheet ? (
             <>
+              {/* The workflow's real completion state. `mode` alone cannot say
+                  whether the requested workflow succeeded, so this is rendered
+                  from the computed status: a rejected key, a timeout, a provider
+                  error and a legitimate empty result are four different things
+                  and the reader has to be able to tell them apart. Fixture mode
+                  keeps its own banner below. */}
+              {sheet.status && sheet.status.kind !== "fixture" ? (
+                <div
+                  role="status"
+                  className={`panel p-4 ${
+                    sheet.status.kind === "live"
+                      ? "border-signal-500/30 bg-signal-500/[0.06]"
+                      : sheet.status.kind === "empty"
+                        ? "border-white/10 bg-white/[0.03]"
+                        : "border-ember-500/40 bg-ember-500/[0.07]"
+                  }`}
+                >
+                  <p
+                    className={`text-xs font-medium uppercase tracking-wider ${
+                      sheet.status.kind === "live"
+                        ? "text-signal-400"
+                        : sheet.status.kind === "empty"
+                          ? "text-haze-300"
+                          : "text-ember-400"
+                    }`}
+                  >
+                    {sheet.status.kind === "live"
+                      ? "Live workflow completed"
+                      : sheet.status.kind === "empty"
+                        ? "No results — not an error"
+                        : sheet.status.kind === "degraded"
+                          ? "Partially degraded"
+                          : "Workflow failed"}
+                  </p>
+                  <p className="mt-1.5 text-xs leading-relaxed text-haze-300">
+                    {sheet.status.detail}
+                  </p>
+                  {sheet.status.reasons.length > 0 ? (
+                    <ul className="mt-2 space-y-1.5">
+                      {sheet.status.reasons.map((reason, index) => (
+                        <li
+                          key={index}
+                          className="flex gap-2 text-xs leading-relaxed text-ember-400"
+                        >
+                          <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-ember-500" />
+                          {reason}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
+              ) : null}
+
               {sheet.mode === "fixture" ? (
                 <div className="panel border-ember-500/40 bg-ember-500/[0.07] p-4">
                   <p className="text-xs font-medium uppercase tracking-wider text-ember-400">

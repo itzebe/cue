@@ -157,6 +157,41 @@ export interface Cue {
   proposalRationale?: string;
 }
 
+/**
+ * How far a cue sheet actually got.
+ *
+ * `mode` alone cannot answer this: it records that live calls were *attempted*,
+ * not that the workflow succeeded. A rejected Qloo key produced a sheet with
+ * `mode: "live"`, zero cues and a green "live" badge, which reads as success.
+ * The status is computed from the receipts and the scene read, so the badge and
+ * the sheet can never disagree.
+ *
+ * - `live`     — every required step ran: Qloo ranked the artists and the scene
+ *                reader (when one is configured) produced the brief.
+ * - `degraded` — the sheet is usable, but something in the workflow failed. The
+ *                `reasons` say what.
+ * - `failed`   — a required integration failed, so the requested workflow could
+ *                not complete.
+ * - `empty`    — Qloo answered normally and matched nothing. A real absence of
+ *                results, not a fault.
+ * - `fixture`  — no Qloo key, so this is a cached example rather than live data.
+ */
+export type SheetStatusKind = "live" | "degraded" | "failed" | "empty" | "fixture";
+
+export interface SheetStatus {
+  kind: SheetStatusKind;
+  /** Short badge text: "live", "degraded", "failed", "no results", "fixture". */
+  label: string;
+  /** One sentence explaining the state, in terms the reader can act on. */
+  detail: string;
+  /**
+   * The specific faults behind a `degraded` or `failed` sheet, one per line.
+   * Empty for every other kind, so the UI never shows a reason list on a healthy
+   * run.
+   */
+  reasons: string[];
+}
+
 export interface CueSheet {
   brief: SceneBrief;
   cues: Cue[];
@@ -212,6 +247,19 @@ export interface CueSheet {
   receipts: Receipt[];
   warnings: string[];
   mode: "live" | "fixture";
+  /**
+   * Whether a language model is configured for this deployment.
+   *
+   * The client needs this to tell "the model failed" from "there is no model",
+   * which are different situations with different explanations. It is a boolean
+   * only — never a key, a name or a length.
+   */
+  llmConfigured?: boolean;
+  /**
+   * Whether the requested workflow actually completed, and if not, why. Computed
+   * from the receipts and the scene read, never from `mode` or the HTTP status.
+   */
+  status?: SheetStatus;
   /**
    * Cross-domain extensions. These exist to demonstrate that the same audience
    * measurement answers questions beyond music — casting and market fit are the
