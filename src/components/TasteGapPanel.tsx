@@ -628,6 +628,13 @@ export function TasteGapPanel({ sheet }: { sheet: CueSheet }) {
               cultural quality — only wider spread across the dimensions Qloo measured for this
               brief.
             </li>
+            <li>
+              The revised slate is chosen by this same index, then reported by it. So the
+              &ldquo;after revision&rdquo; figure is the highest this measure reaches in this
+              pool, not independent confirmation that the revised slate is better. What it
+              shows is the size of the gap: how much of the pool&rsquo;s shared taste the
+              affinity order leaves on the table.
+            </li>
           </ul>
         </div>
       </div>

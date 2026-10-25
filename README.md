@@ -1,6 +1,11 @@
 # Cue
 
+[![ci](https://github.com/itzebe/cue/actions/workflows/ci.yml/badge.svg)](https://github.com/itzebe/cue/actions/workflows/ci.yml)
+
 **A creative brief goes in. A culturally grounded cue sheet comes out.**
+
+> **[▶ Try Cue live](https://cue-nine-iota.vercel.app/)** — no signup, no key. Paste a scene or
+> pick a sample, and the full pipeline runs against the real Qloo Taste Graph.
 
 Cue is an agentic music supervisor for film, TV and advertising. You paste a scene — a script
 page, a treatment, or two sentences — and Cue returns ranked music cues, where every ranking
@@ -23,6 +28,34 @@ Cross-Domain Taste Map, comparison and the Qloo receipts behind each pick.
 > The demo is hosted as a GitHub release asset, so the link **downloads** the MP4
 > ([direct file](https://github.com/itzebe/cue/releases/download/demo-video/cue-demo.mp4),
 > 24 MB) rather than streaming in the browser.
+
+---
+
+## For judges
+
+Everything the submission needs, in one place:
+
+| | |
+|---|---|
+| **Live demo** | [cue-nine-iota.vercel.app](https://cue-nine-iota.vercel.app/) — hosted on Vercel, no signup, no key |
+| **Source** | [github.com/itzebe/cue](https://github.com/itzebe/cue) — public, MIT |
+| **Run it locally** | `npm install && npm run dev` → [localhost:12000](http://localhost:12000). Works with no keys at all (see [Run it](#run-it)) |
+| **Verify it** | `npm run verify` (152 checks) · `npm run reproduce` (rebuilds the Taste Gap figures offline) |
+| **The Qloo difference** | [The Taste Gap](#the-taste-gap) — a measurement no LLM can produce, on a feature that would not exist without the taste graph |
+
+**The sixty-second read.** A brief goes in; Qloo ranks artists by measured audience affinity and
+Cue assembles a cue sheet where every number is traced to a Qloo call. The distinctive part is the
+Taste Gap: eight individually defensible picks can still all serve one corner of the audience, so
+Cue measures how much of the candidate pool's shared taste the slate actually reaches, and what a
+different arrangement would reach instead. It is the first panel on the page once a sheet exists.
+The numbers are reproducible from the committed Qloo responses with `npm run reproduce` — no key
+and no network required.
+
+**How Qloo is load-bearing.** Remove the Qloo API and there is no product: affinity ranking, the
+taste tags the audit counts, momentum, audience fit, the cross-domain map and casting all originate
+there. The LLM only reads the scene and names a track. A generic LLM asked the same brief returns a
+plausible list; Cue returns one it can defend with a number. The README states exactly which
+figures are measured and which are modelled — see [What is honest and what is not](#what-is-honest-and-what-is-not).
 
 ---
 
@@ -80,8 +113,9 @@ that separation is the whole design:
 ![Cue architecture: the LLM reads the scene, Qloo decides the ranking](docs/architecture.svg)
 
 The pipeline, in order: read the scene → resolve anchors and tags to Qloo entity IDs → rank
-candidates by affinity → enrich in parallel (momentum, cross-domain people and brands, comparables,
-cross-domain taste map) → assemble placement, clearance and receipts.
+candidates by affinity → audit the selected slate against the whole candidate pool (the Taste Gap,
+pure computation over the ranking response) → enrich in parallel (momentum, cross-domain people and
+brands, comparables, cross-domain taste map) → assemble placement, clearance and receipts.
 
 Each stage degrades independently: a failed trending call costs one cue its momentum badge, not the
 whole sheet. Every failure is surfaced in the receipts panel rather than hidden.
@@ -140,6 +174,10 @@ revision now covers.
 
 ![The audit headline: baseline index, revised index, and the gain](docs/screenshots/08-audit-headline.png)
 
+*One live run, so the figures are this pool's, not constants — the index is pool-relative by
+construction. [The table below](#measured-on-live-qloo-and-reproducible-offline) is the reproducible
+one: same code, a recorded pool, checked by `npm run reproduce`.*
+
 ### The measurement, exactly
 
 The index is one division, with the numerator and denominator both displayed in the product so a
@@ -195,6 +233,18 @@ not on the same scale.
 Improvement is only ever reported when the index actually rose. When no reordering helps, the panel
 says the original slate stands rather than manufacturing a gain.
 
+![The full evidence panel: both slates side by side, the tags each reaches, the tags it misses, and what the measure does not establish](docs/screenshots/09-taste-gap-evidence.jpg)
+
+### Scored by the metric it optimises
+
+The revision is chosen by the index and then reported by it, which is a circularity worth naming
+rather than hiding. The "after revision" figure is therefore the best value this measure reaches in
+this pool — a ceiling, not independent confirmation that the revised slate is better. What the
+comparison does establish is the size of the gap between the affinity order and what the pool
+allows, which is the decision a supervisor actually faces. The panel prints this caveat alongside
+the numbers, and `npm run reproduce` lets a reader change the selection rule and watch the figures
+move.
+
 ### No extra API calls
 
 The metric is computed from the `tags[]` Qloo already returns on the affinity call
@@ -209,27 +259,45 @@ A pool too small or too sparse to measure shows the limitation, never a zero. A 
 evidence warnings — a selection index outside the pool, for instance — and the panel renders them
 rather than presenting a flagged measurement as clean.
 
-### Measured on live Qloo
+### Measured on live Qloo, and reproducible offline
 
-Reproduced end to end against the hackathon API. The index is pool-dependent by construction — the
-denominator is the tag union of the candidates *that brief* returned — so every row below is one run
-of one brief, and the numerator and denominator are shown because they change between runs:
+The index is pool-dependent by construction — the denominator is the tag union of the candidates
+*that brief* returned — so a figure only means something alongside the pool it was measured on.
+Rather than quote numbers a reader has to take on trust, the raw Qloo responses behind them are
+committed: `docs/reference-pool.json` holds the entities Qloo returned for each brief below,
+recorded from the hackathon API, and `npm run reproduce` rebuilds each pool from that file and
+recomputes the index **through the production coverage module** with no network access:
+
+```bash
+npm run reproduce   # 3 checks, no API key, no network
+```
 
 | Brief | Index | After revision | Gain | Tags not reached |
 |---|---|---|---|---|
-| Massive Attack + Portishead | 84.6% (126/149) | 95.3% (142/149) | +10.7 | 23 |
-| Sault | 69.1% (96/139) | 97.1% (135/139) | +28.1 | 43 |
-| Nils Frahm | 89.5% (111/124) | 96.8% (120/124) | +7.3 | 13 |
+| Massive Attack + Portishead | 90.6% (135/149) | 98.7% (147/149) | +8.1 | 14 |
+| Sault | 78.4% (109/139) | 100.0% (139/139) | +21.6 | 30 |
+| Nils Frahm | 96.8% (120/124) | 100.0% (124/124) | +3.2 | 4 |
 
-The first row was recomputed independently from the raw Qloo response and the documented selection
-rule, without calling the coverage module's arithmetic, and matched to nine decimal places. That is
-the check that the formula above is the whole calculation and not an approximation of it.
+Those rows are printed by `npm run reproduce`, which also asserts them, so they cannot drift away
+from the code without the check failing. Every number is a count of tags against a pool, and every
+input is in the repository — a judge can change the selection rule or the support threshold and
+watch the figures move.
 
-The same brief run through the application's own tag extraction measures 85.2% (132/155) → 95.5%
-(148/155), +10.3, because the app derives its mood and instrumentation tags from the brief text
-rather than from the hand-picked tag list used in the reproduction above. The formula is identical;
-the pool is not. That sensitivity is inherent to a pool-relative index, which is why the denominator
-is printed alongside every figure rather than hidden behind a single percentage.
+Two things the table does not say, and should not be read into it:
+
+- **The numerator changes between runs of the same brief; the denominator held steady.** These three
+  briefs returned 149, 139 and 124 shared tags on every recording — but the *picks* differ, because
+  the app's tag set comes from its own reading of the brief text and Qloo's candidate ordering
+  varies. An earlier recording of the same three briefs measured 84.6%, 69.1% and 89.5%, which is
+  the same code on a different pool. The gain is a property of a pool, not a constant of the brief.
+- **The revision is scored by the metric it optimises.** `reviseSelection` searches for the slate
+  with the highest index and the panel then reports that same index. So the "after revision" column
+  is the best value this metric reaches in this pool — it is a ceiling under this measurement, not
+  evidence that the revised slate is better in any independent sense. What it does establish is the
+  size of the gap: if eight picks can reach 98.7% of a pool's shared tags and the affinity ranking
+  reaches 90.6%, the ranking is leaving reach on the table. What it cannot establish is that
+  coverage of these tags is the same thing as serving the audience. The panel says so in its own
+  words under "What this measures, and what it does not".
 
 **What it contributes to the central use case:** it is the difference between a ranking and a
 judgement. A supervisor is not only asking "what is the best track"; they are asking whether the
@@ -344,6 +412,7 @@ React and Next — the pipeline is plain TypeScript in `src/lib/`.
 
 ```bash
 npm run verify      # 152 checks
+npm run reproduce   # 3 checks: rebuilds the README's Taste Gap table offline
 npm run typecheck   # tsc --noEmit
 npm run build       # production build
 ```
@@ -455,6 +524,13 @@ npm run dev                  # http://localhost:12000
 **It runs without any keys.** With no `QLOO_API_KEY`, Cue serves a pre-computed fixture cue sheet
 through the exact same rendering path, so you can explore the full product before a hackathon key
 arrives. The mode badge tells you which path you are on (`live` vs `fixture`).
+
+One thing the keyless path does not show: **the Taste Gap**. That measurement needs the candidate
+pool Qloo returns for the brief, and a fixture has no pool behind it — the panel is derived, not
+hard-coded, so it has nothing to compute from. It stays hidden rather than showing invented
+numbers, which is the same rule the rest of the product follows. The live demo runs with a key, so
+the audit is there. To see it locally, set `QLOO_API_KEY`; to check the arithmetic without a key at
+all, run `npm run reproduce`, which recomputes the README's figures from committed Qloo responses.
 
 To see the full experience including the live comparison baseline, set an LLM key as well — see the
 environment table below. Without one, Cue uses its deterministic scene reader and the sheet labels

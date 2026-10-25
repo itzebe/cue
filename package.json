@@ -10,7 +10,8 @@
     "start": "next start -p 12000",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "verify": "tsx scripts/verify-pipeline.mts"
+    "verify": "tsx scripts/verify-pipeline.mts",
+    "reproduce": "tsx scripts/reproduce-taste-gap.mts"
   },
   "dependencies": {
     "next": "^14.2.35",
