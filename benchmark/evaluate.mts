@@ -29,6 +29,7 @@ import {
   topByAffinity,
   mean,
   median,
+  normalise,
   type ArmItem,
   type ArmSummary,
   type SlateMetrics,
@@ -161,8 +162,6 @@ function coverageForItems(
         ? `${unmeasurable.length} of ${items.length} item(s) do not resolve into the pool; ` +
           `coverage is measured over the ${indices.length} that do`
         : undefined,
-    // Not part of the number, but kept so a reader can see the partial measurement.
-    ...(Object.keys(matched).length > 0 ? {} : {}),
   };
 }
 
@@ -373,7 +372,9 @@ function loadHumanReviews() {
   if (!existsSync(reviewDir)) {
     return { available: false, reason: "no reviews/ directory", reviews: [] as any[] };
   }
-  const files = readdirSync(reviewDir).filter((n) => n.endsWith(".json"));
+  const files = readdirSync(reviewDir).filter(
+    (n) => n.endsWith(".json") && n !== "TEMPLATE.json",
+  );
   if (files.length === 0) {
     return {
       available: false,
@@ -383,14 +384,163 @@ function loadHumanReviews() {
       reviews: [] as any[],
     };
   }
-  return {
-    available: true,
-    reason: `${files.length} review file(s) present`,
-    reviews: files.map((f) => JSON.parse(readFileSync(resolve(reviewDir, f), "utf8"))),
-  };
+
+  const reviews = files.map((f) => ({
+    file: f,
+    data: JSON.parse(readFileSync(resolve(reviewDir, f), "utf8")),
+  }));
+
+  // Only reviews that actually carry ratings count. A copied template with null
+  // ratings is not evidence and must not be reported as if it were.
+  const scored = reviews.filter((review) =>
+    (review.data.ratings ?? []).some((brief: any) =>
+      ["X", "Y"].some((label) =>
+        ["relevance", "variety", "wouldUse"].some(
+          (criterion) => typeof brief?.answers?.[label]?.[criterion] === "number",
+        ),
+      ),
+    ),
+  );
+
+  if (scored.length === 0) {
+    return {
+      available: false,
+      reason:
+        `${files.length} review file(s) present but none contain ratings; ` +
+        `human preference is NOT computed`,
+      reviews: [],
+    };
+  }
+
+  return { available: true, reason: `${scored.length} review file(s) with ratings`, reviews: scored };
 }
 
 const humanPreference = loadHumanReviews();
+
+// ---------------------------------------------------------------------------
+// Exploratory findings (POST-HOC, not preregistered)
+// ---------------------------------------------------------------------------
+
+/**
+ * Cross-brief distinctiveness: how different is a slate from the slate the same
+ * arm produced for a different brief?
+ *
+ * This metric is NOT in the frozen protocol. It was computed after the protocol
+ * was committed, because building the review worksheet exposed a case where two
+ * briefs received the same answer. It is reported separately and labelled
+ * post-hoc so it is never mistaken for a preregistered test.
+ *
+ * It is deterministic and derived only from the recorded evidence, so it is
+ * still replayable.
+ */
+function crossBriefDistinctiveness(
+  pick: (e: BriefEvaluation) => string[],
+): { meanPairwiseJaccard: number; identicalPairs: string[]; distinctArtistRatio: number } {
+  const scorable = evaluations.filter((e) => !e.excluded);
+  const slates = scorable.map((e) => ({ briefId: e.briefId, artists: pick(e).map(normalise) }));
+
+  const pairs: Array<{ a: string; b: string; jaccard: number }> = [];
+  for (let i = 0; i < slates.length; i += 1) {
+    for (let j = i + 1; j < slates.length; j += 1) {
+      const setA = new Set(slates[i].artists);
+      const setB = new Set(slates[j].artists);
+      const union = new Set([...setA, ...setB]);
+      let intersection = 0;
+      for (const artist of setA) if (setB.has(artist)) intersection += 1;
+      pairs.push({
+        a: slates[i].briefId,
+        b: slates[j].briefId,
+        jaccard: union.size === 0 ? 0 : intersection / union.size,
+      });
+    }
+  }
+
+  const all = slates.flatMap((s) => s.artists);
+  return {
+    meanPairwiseJaccard: pairs.length === 0 ? 0 : mean(pairs.map((p) => p.jaccard)),
+    identicalPairs: pairs
+      .filter((p) => p.jaccard === 1)
+      .map((p) => `${p.a} == ${p.b}`),
+    distinctArtistRatio: all.length === 0 ? 0 : new Set(all).size / all.length,
+  };
+}
+
+const crossBriefA = crossBriefDistinctiveness((e) => e.armA.items.map((i) => i.artist));
+const crossBriefB = crossBriefDistinctiveness((e) => e.armB.items.map((i) => i.artist));
+
+// Find pairs of briefs whose requested genre sets are disjoint, then check
+// whether the grounding actually differed between them.
+const genreDisjointPairs: Array<{
+  a: string;
+  b: string;
+  armAJaccard: number;
+  armBJaccard: number;
+}> = [];
+const loaded = evidenceFiles.map((name) => {
+  const evidence = JSON.parse(readFileSync(resolve(evidenceDir, name), "utf8"));
+  return {
+    briefId: evidence.briefId,
+    genre: new Set((evidence.raw.brief?.genre ?? []).map((g: string) => normalise(g))),
+    armA: new Set(
+      (evidence.raw.baseline?.cues ?? []).slice(0, K).map((c: any) => normalise(String(c.artist))),
+    ),
+    armB: new Set(
+      topByAffinity(
+        (evidence.raw.cues ?? []).map((c: any) => ({
+          artist: String(c.artist),
+          track: "",
+          why: "",
+          affinity: c.affinity ?? 0,
+        })),
+        K,
+      ).map((c) => normalise(c.artist)),
+    ),
+  };
+});
+for (let i = 0; i < loaded.length; i += 1) {
+  for (let j = i + 1; j < loaded.length; j += 1) {
+    const a = loaded[i];
+    const b = loaded[j];
+    if (a.genre.size === 0 || b.genre.size === 0) continue;
+    const overlap = [...a.genre].some((g) => b.genre.has(g));
+    if (overlap) continue;
+    const jaccard = (x: Set<string>, y: Set<string>) => {
+      const union = new Set([...x, ...y]);
+      let intersection = 0;
+      for (const v of x) if (y.has(v)) intersection += 1;
+      return union.size === 0 ? 0 : intersection / union.size;
+    };
+    genreDisjointPairs.push({
+      a: a.briefId,
+      b: b.briefId,
+      armAJaccard: jaccard(a.armA, b.armA),
+      armBJaccard: jaccard(a.armB, b.armB),
+    });
+  }
+}
+
+const exploratoryFindings = [
+  {
+    id: "E1-cross-brief-distinctiveness",
+    status: "post-hoc",
+    label: "Cross-brief distinctiveness",
+    finding:
+      "Arm B's slate varies less between briefs than Arm A's. On one pair of briefs with " +
+      "disjoint requested genres, Arm B returned an identical slate while Arm A did not.",
+    measured: {
+      armA: crossBriefA,
+      armB: crossBriefB,
+      genreDisjointPairs,
+    },
+    caveat:
+      "This metric is NOT in the frozen protocol and was computed after it was committed. It is " +
+      "reported as an exploratory observation, not as a preregistered hypothesis, and no " +
+      "significance is claimed. n = 6 briefs, so a single identical pair is a lead to investigate, " +
+      "not a settled result. The repository already documents that tag-only briefs (no named " +
+      "reference) return a low-spread affinity; this finding is consistent with that and locates " +
+      "where it becomes visible in the comparison.",
+  },
+];
 
 // ---------------------------------------------------------------------------
 // Results artifact
@@ -463,6 +613,7 @@ const results = {
   comparisons,
   sensitivity,
   humanPreference,
+  exploratoryFindings,
   limitations: [
     "Pool parity is not achievable: Arm A answers open-book and is never given the candidate pool, so pool-relative metrics cannot be compared like-for-like. See protocol.poolParity.",
     "Brief relevance is a lexical word-overlap proxy, not a human judgement and not a measure of quality. It rewards restating the brief's vocabulary. It applies no stemming, so 'tense' does not match 'Tension'; this under-counts related word forms, conservatively and equally for both arms.",
@@ -551,4 +702,25 @@ if (report) {
   );
 
   console.log(`\nhuman preference: ${humanPreference.available ? humanPreference.reason : `NOT AVAILABLE - ${humanPreference.reason}`}`);
+
+  console.log("\nExploratory findings (POST-HOC, not preregistered)\n");
+  for (const finding of exploratoryFindings) {
+    console.log(`${finding.id}: ${finding.finding}`);
+    const m = finding.measured as any;
+    console.log(
+      `  cross-brief mean pairwise Jaccard — Arm A ${m.armA.meanPairwiseJaccard.toFixed(4)}, ` +
+        `Arm B ${m.armB.meanPairwiseJaccard.toFixed(4)}`,
+    );
+    if (m.armB.identicalPairs.length > 0) {
+      console.log(`  identical Arm B slates: ${m.armB.identicalPairs.join(", ")}`);
+    }
+    if (m.armA.identicalPairs.length > 0) {
+      console.log(`  identical Arm A slates: ${m.armA.identicalPairs.join(", ")}`);
+    }
+    console.log("  genre-disjoint brief pairs (Jaccard per arm):");
+    for (const pair of m.genreDisjointPairs) {
+      console.log(`    ${pair.a} vs ${pair.b}: Arm A ${pair.armAJaccard.toFixed(3)}, Arm B ${pair.armBJaccard.toFixed(3)}`);
+    }
+    console.log(`  caveat: ${finding.caveat}`);
+  }
 }

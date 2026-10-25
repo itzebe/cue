@@ -17,7 +17,8 @@
     "benchmark:verify": "tsx benchmark/verify-benchmark.mts",
     "benchmark:report": "tsx benchmark/evaluate.mts --report",
     "benchmark:record": "tsx benchmark/record.mts",
-    "benchmark:pool": "tsx benchmark/record-pool.mts"
+    "benchmark:pool": "tsx benchmark/record-pool.mts",
+    "benchmark:worksheet": "tsx benchmark/worksheet.mts"
   },
   "dependencies": {
     "next": "^14.2.35",

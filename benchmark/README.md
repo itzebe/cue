@@ -31,10 +31,13 @@ substituted (`sample`).
 | `record.mts` | The only network step. Calls the deployed app once per brief. |
 | `record-pool.mts` | Rebuilds each candidate pool and verifies it against a recorded fingerprint. |
 | `evaluate.mts` | Recomputes every metric offline; fails if the result drifts from the artifact. |
-| `verify-benchmark.mts` | 48 checks over the failure modes, not just the happy path. |
+| `worksheet.mts` | Emits the blinded review worksheet and the X/Y mapping. |
+| `verify-benchmark.mts` | 57 checks over the failure modes, not just the happy path. |
 | `results.json` | The published result, including the limitations. |
 | `evidence/*.json` | Raw live responses, with provenance per brief. |
 | `evidence/*.pool.json` | The frozen candidate pool per brief, with its verification proof. |
+| `reviews/worksheet.md` | The blinded worksheet a reviewer fills in. |
+| `reviews/mapping.json` | X/Y to arm mapping. Withheld from the reviewer until ratings are in. |
 
 ## Run it
 

@@ -455,6 +455,22 @@ Only one brief had any measurable Arm A pick. The protocol preregistered this as
 inconclusive *before* the data existed, precisely so that a low Arm A figure could not later be
 presented as a Cue win. An unmeasurable pick is recorded as unmeasurable, never scored as zero.
 
+### A post-hoc finding the automated metrics missed
+
+Building the blinded review worksheet exposed something the preregistered metrics do not measure.
+Two briefs with **disjoint requested genres** — afrobeats/hip hop, and electronic/ambient/noir —
+received a **byte-identical Arm B slate**: `Cachao`, `Peter Phillips: The Tallis Scholars`,
+`God of Shamisen`, and four more, in the same order. Arm A's slates for those two briefs share
+nothing. Across all 15 brief pairs, Arm B's mean slate overlap is 0.067 against Arm A's 0.013, and
+the one pair with total overlap is that disjoint-genre pair.
+
+This is reported as `exploratoryFindings` in the results, labelled `post-hoc` with its caveat,
+because **it was not in the frozen protocol**. It is a lead, not a settled result: n = 6, and one
+identical pair could be a coincidence of the tag-only path. It is consistent with the limitation
+already documented below — when a brief names no artist or film, `/v2/insights` matches on tags
+alone and returns a low-spread affinity, so Qloo has little signal to separate the briefs with. The
+finding is that the comparison makes it visible; the fix belongs in the pipeline, not the benchmark.
+
 ### What this does and does not establish
 
 It establishes that the comparison is reproducible and that its own weaknesses are reported. It does
@@ -478,7 +494,7 @@ The limits are stated in the artifact rather than left to be discovered:
 
 ```bash
 npm run benchmark          # recompute every metric and assert it matches the committed artifact
-npm run benchmark:verify   # the benchmark's own test suite (48 checks)
+npm run benchmark:verify   # the benchmark's own test suite (57 checks)
 npm run benchmark:report   # the tables above
 ```
 
@@ -486,8 +502,9 @@ Replay needs **no network and no credentials** — it reads the committed raw re
 recomputes. Recording new evidence is the only step that touches the network:
 
 ```bash
-npm run benchmark:record   # call the deployed app once per brief, write raw evidence
-npm run benchmark:pool     # rebuild each candidate pool and verify it against the recorded fingerprint
+npm run benchmark:record     # call the deployed app once per brief, write raw evidence
+npm run benchmark:pool       # rebuild each candidate pool and verify it against the recorded fingerprint
+npm run benchmark:worksheet  # emit the blinded review worksheet and the X/Y mapping
 ```
 
 The candidate pool is not in the app's response and coverage is pool-relative, so the pool has to be
@@ -497,6 +514,11 @@ recorded — pool size, vocabulary size, covered tags and redundancy. All six ma
 the index to full precision, so the frozen pools are the pools that produced the published figures.
 A mismatch writes nothing, and coverage becomes unavailable rather than being measured on the wrong
 pool.
+
+The human-preference metric is left **empty rather than filled with a proxy**. To run it, generate
+the worksheet, have reviewers rate the two answers per brief without knowing which arm each is, then
+copy `benchmark/reviews/TEMPLATE.json` and record their scores. The evaluator ignores the template
+and any file with no numeric ratings, so an unfilled review cannot masquerade as a result.
 
 
 ## Mobile
@@ -576,7 +598,7 @@ npm run verify               # 167 checks
 npm run reproduce            # 3 checks: rebuilds the README's Taste Gap table offline
 npm run reproduce:benchmark  # 20 checks: exhaustive null distribution for the same briefs
 npm run benchmark            # replay the Qloo-vs-LLM-only metrics and assert they match the artifact
-npm run benchmark:verify     # 48 checks: the benchmark's own verification suite
+npm run benchmark:verify     # 57 checks: the benchmark's own verification suite
 npm run typecheck            # tsc --noEmit
 npm run build                # production build
 ```

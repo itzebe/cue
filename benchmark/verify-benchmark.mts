@@ -621,6 +621,154 @@ await check("no composite score is reported", () => {
 });
 
 // ---------------------------------------------------------------------------
+// Exploratory findings are labelled as such
+// ---------------------------------------------------------------------------
+
+await check("exploratory findings are labelled post-hoc, never preregistered", () => {
+  assert.ok(Array.isArray(results.exploratoryFindings), "exploratoryFindings must be present");
+  for (const finding of results.exploratoryFindings) {
+    assert.equal(finding.status, "post-hoc", `${finding.id} must be marked post-hoc`);
+    assert.ok(
+      typeof finding.caveat === "string" && finding.caveat.length > 40,
+      `${finding.id} must carry a substantive caveat`,
+    );
+  }
+});
+
+await check("no exploratory finding is counted as a preregistered hypothesis", () => {
+  // The protocol's hypotheses are H1-H4. An exploratory finding must not appear
+  // among the comparisons, which are the preregistered tests.
+  const comparisonNames = results.comparisons.map((c: any) => c.metric);
+  assert.deepEqual(comparisonNames, [
+    "briefRelevance",
+    "anchorRecycling",
+    "distinctArtistRatio",
+    "tagCoverage",
+  ]);
+});
+
+await check("the identical-slate finding is reproducible from the evidence", () => {
+  // Recompute cross-brief overlap straight from the evidence files and confirm
+  // the recorded finding matches. This is what makes the post-hoc result
+  // checkable rather than merely asserted.
+  const slates = new Map<string, string[]>();
+  for (const name of evidenceFiles) {
+    const evidence = loadEvidence(name);
+    const items: ArmItem[] = (evidence.raw.cues ?? []).map((c: any) => ({
+      artist: String(c.artist),
+      track: "",
+      why: "",
+      affinity: c.affinity ?? 0,
+    }));
+    slates.set(
+      evidence.briefId,
+      topByAffinity(items, results.commonSlateSize).map((i) => normalise(i.artist)),
+    );
+  }
+
+  const afrobeats = slates.get("afrobeats-sports-montage")!;
+  const noir = slates.get("modern-noir-procedural")!;
+  assert.deepEqual(
+    afrobeats,
+    noir,
+    "the two briefs no longer share an Arm B slate; the recorded finding would be stale",
+  );
+
+  const finding = results.exploratoryFindings.find(
+    (f: any) => f.id === "E1-cross-brief-distinctiveness",
+  );
+  assert.ok(finding, "the exploratory finding must be present");
+  assert.ok(
+    finding.measured.armB.identicalPairs.some((pair: string) =>
+      pair.includes("afrobeats-sports-montage") && pair.includes("modern-noir-procedural"),
+    ),
+    "the identical pair must be recorded in the finding",
+  );
+});
+
+await check("the two identical-slate briefs really do request disjoint genres", () => {
+  const a = loadEvidence("afrobeats-sports-montage.json").raw.brief.genre.map(normalise);
+  const b = loadEvidence("modern-noir-procedural.json").raw.brief.genre.map(normalise);
+  const overlap = a.filter((g: string) => b.includes(g));
+  assert.equal(
+    overlap.length,
+    0,
+    `the briefs must request disjoint genres for the finding to mean anything; shared: ${overlap}`,
+  );
+});
+
+await check("the post-hoc metric is not presented as a significance test", () => {
+  const finding = results.exploratoryFindings.find(
+    (f: any) => f.id === "E1-cross-brief-distinctiveness",
+  );
+  const text = `${finding.finding} ${finding.caveat}`;
+  assert.match(text, /not in the frozen protocol/i);
+  assert.match(text, /no significance is claimed/i);
+});
+
+// ---------------------------------------------------------------------------
+// Blinded review worksheet
+// ---------------------------------------------------------------------------
+
+await check("the review worksheet shows no arm-identifying detail", () => {
+  const worksheetPath = resolve(here, "reviews", "worksheet.md");
+  if (!existsSync(worksheetPath)) return; // generated on demand
+  const text = readFileSync(worksheetPath, "utf8");
+  // Arm B's provenance boilerplate must never reach the reviewer.
+  assert.ok(!/Qloo's taste graph/i.test(text), "the worksheet leaks Arm B's rationale");
+  assert.ok(!/urn:(entity|tag)/i.test(text), "the worksheet leaks a Qloo URN");
+  assert.ok(!/[0-9a-f]{8}-[0-9a-f]{4}-/i.test(text), "the worksheet leaks an entity id");
+  assert.ok(!/affinity/i.test(text), "the worksheet leaks affinity scores");
+  assert.ok(!/^\*\*Arm [AB]\*\*/m.test(text), "the worksheet labels an arm directly");
+});
+
+await check("the worksheet covers every brief at the common slate size", () => {
+  const worksheetPath = resolve(here, "reviews", "worksheet.md");
+  if (!existsSync(worksheetPath)) return;
+  const text = readFileSync(worksheetPath, "utf8");
+  for (const brief of protocol.briefs) {
+    assert.ok(text.includes(`## ${brief.id}`), `worksheet is missing ${brief.id}`);
+  }
+  const answerCount = (text.match(/\*\*Answer [XY]\*\*/g) ?? []).length;
+  assert.equal(answerCount, protocol.briefs.length * 2, "each brief needs exactly two answers");
+});
+
+await check("the X/Y mapping is deterministic and hidden from the worksheet", () => {
+  const mappingPath = resolve(here, "reviews", "mapping.json");
+  if (!existsSync(mappingPath)) return;
+  const mapping = JSON.parse(readFileSync(mappingPath, "utf8"));
+  assert.equal(mapping.protocolHash, protocolHash);
+  for (const brief of protocol.briefs) {
+    const entry = mapping.mapping[brief.id];
+    assert.ok(entry, `mapping is missing ${brief.id}`);
+    assert.notEqual(entry.X, entry.Y, "X and Y must be different arms");
+  }
+});
+
+await check("a template review file is not counted as human evidence", () => {
+  // The evaluator ignores TEMPLATE.json and ignores review files with no
+  // numeric ratings, so an unfilled template cannot masquerade as a result.
+  const reviewDir = resolve(here, "reviews");
+  if (!existsSync(reviewDir)) return;
+  if (results.humanPreference.available) {
+    // If it reports available, the underlying files must carry real numbers.
+    assert.ok(results.humanPreference.reviews.length > 0);
+    for (const review of results.humanPreference.reviews) {
+      const hasRating = (review.data.ratings ?? []).some((brief: any) =>
+        ["X", "Y"].some((label) =>
+          ["relevance", "variety", "wouldUse"].some(
+            (c) => typeof brief?.answers?.[label]?.[c] === "number",
+          ),
+        ),
+      );
+      assert.ok(hasRating, `${review.file} is counted but contains no ratings`);
+    }
+  } else {
+    assert.equal(results.humanPreference.reviews.length, 0);
+  }
+});
+
+// ---------------------------------------------------------------------------
 // Cross-check against the deployment's own numbers
 // ---------------------------------------------------------------------------
 

@@ -1,0 +1,31 @@
+{
+  "mappingVersion": "1.0.0",
+  "protocolHash": "c079c8f74dc182d42a7d7c51bee44b4afdcb3baba4950bad6b835aef7ad7d556",
+  "note": "X/Y to arm mapping. Do not open this until the review is submitted.",
+  "mapping": {
+    "afrobeats-sports-montage": {
+      "X": "B",
+      "Y": "A"
+    },
+    "eighties-synth-teen-comedy": {
+      "X": "B",
+      "Y": "A"
+    },
+    "late-90s-trip-hop": {
+      "X": "B",
+      "Y": "A"
+    },
+    "modern-noir-procedural": {
+      "X": "B",
+      "Y": "A"
+    },
+    "nordic-noir-minimal-piano": {
+      "X": "A",
+      "Y": "B"
+    },
+    "seventies-soul-family-drama": {
+      "X": "A",
+      "Y": "B"
+    }
+  }
+}

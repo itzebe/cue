@@ -1234,9 +1234,106 @@
   ],
   "humanPreference": {
     "available": false,
-    "reason": "no blinded review files present; human preference is NOT computed and no automated score is substituted for it",
+    "reason": "1 review file(s) present but none contain ratings; human preference is NOT computed",
     "reviews": []
   },
+  "exploratoryFindings": [
+    {
+      "id": "E1-cross-brief-distinctiveness",
+      "status": "post-hoc",
+      "label": "Cross-brief distinctiveness",
+      "finding": "Arm B's slate varies less between briefs than Arm A's. On one pair of briefs with disjoint requested genres, Arm B returned an identical slate while Arm A did not.",
+      "measured": {
+        "armA": {
+          "meanPairwiseJaccard": 0.013333333333333334,
+          "identicalPairs": [],
+          "distinctArtistRatio": 0.9444444444444444
+        },
+        "armB": {
+          "meanPairwiseJaccard": 0.06666666666666667,
+          "identicalPairs": [
+            "afrobeats-sports-montage == modern-noir-procedural"
+          ],
+          "distinctArtistRatio": 0.8333333333333334
+        },
+        "genreDisjointPairs": [
+          {
+            "a": "afrobeats-sports-montage",
+            "b": "eighties-synth-teen-comedy",
+            "armAJaccard": 0,
+            "armBJaccard": 0
+          },
+          {
+            "a": "afrobeats-sports-montage",
+            "b": "late-90s-trip-hop",
+            "armAJaccard": 0,
+            "armBJaccard": 0
+          },
+          {
+            "a": "afrobeats-sports-montage",
+            "b": "modern-noir-procedural",
+            "armAJaccard": 0,
+            "armBJaccard": 1
+          },
+          {
+            "a": "afrobeats-sports-montage",
+            "b": "nordic-noir-minimal-piano",
+            "armAJaccard": 0,
+            "armBJaccard": 0
+          },
+          {
+            "a": "afrobeats-sports-montage",
+            "b": "seventies-soul-family-drama",
+            "armAJaccard": 0,
+            "armBJaccard": 0
+          },
+          {
+            "a": "eighties-synth-teen-comedy",
+            "b": "late-90s-trip-hop",
+            "armAJaccard": 0,
+            "armBJaccard": 0
+          },
+          {
+            "a": "eighties-synth-teen-comedy",
+            "b": "modern-noir-procedural",
+            "armAJaccard": 0,
+            "armBJaccard": 0
+          },
+          {
+            "a": "eighties-synth-teen-comedy",
+            "b": "nordic-noir-minimal-piano",
+            "armAJaccard": 0,
+            "armBJaccard": 0
+          },
+          {
+            "a": "eighties-synth-teen-comedy",
+            "b": "seventies-soul-family-drama",
+            "armAJaccard": 0,
+            "armBJaccard": 0
+          },
+          {
+            "a": "late-90s-trip-hop",
+            "b": "seventies-soul-family-drama",
+            "armAJaccard": 0,
+            "armBJaccard": 0
+          },
+          {
+            "a": "modern-noir-procedural",
+            "b": "seventies-soul-family-drama",
+            "armAJaccard": 0,
+            "armBJaccard": 0
+          },
+          {
+            "a": "nordic-noir-minimal-piano",
+            "b": "seventies-soul-family-drama",
+            "armAJaccard": 0,
+            "armBJaccard": 0
+          }
+        ]
+      },
+      "caveat": "This metric is NOT in the frozen protocol and was computed after it was committed. It is reported as an exploratory observation, not as a preregistered hypothesis, and no significance is claimed. n = 6 briefs, so a single identical pair is a lead to investigate, not a settled result. The repository already documents that tag-only briefs (no named reference) return a low-spread affinity; this finding is consistent with that and locates where it becomes visible in the comparison."
+    }
+  ],
   "limitations": [
     "Pool parity is not achievable: Arm A answers open-book and is never given the candidate pool, so pool-relative metrics cannot be compared like-for-like. See protocol.poolParity.",
     "Brief relevance is a lexical word-overlap proxy, not a human judgement and not a measure of quality. It rewards restating the brief's vocabulary. It applies no stemming, so 'tense' does not match 'Tension'; this under-counts related word forms, conservatively and equally for both arms.",
