@@ -1,0 +1,68 @@
+{
+  "reviewVersion": "1.0.0",
+  "instructions": [
+    "This is a template. Copy it to benchmark/reviews/<your-name>.json and fill in the ratings.",
+    "Rate each answer 1-5 on the three criteria. Use whole numbers only.",
+    "The answer labels (X and Y) are assigned per brief by a hash of the protocol file, so they are stable and reproducible. They do not correspond to 'first' and 'second'.",
+    "If you cannot judge an answer, use null and give a reason. Do not guess.",
+    "Do not open benchmark/results.json until you have submitted your ratings."
+  ],
+  "criteria": {
+    "relevance": "How well does this set of tracks fit the scene as described?",
+    "variety": "How varied is this set, rather than several versions of the same idea?",
+    "wouldUse": "If you were the music supervisor, how likely would you be to put this in front of a director?"
+  },
+  "scale": {
+    "1": "poor",
+    "2": "weak",
+    "3": "acceptable",
+    "4": "good",
+    "5": "strong"
+  },
+  "reviewer": "REPLACE WITH A NAME OR HANDLE",
+  "reviewedAt": "REPLACE WITH AN ISO TIMESTAMP",
+  "ratings": [
+    {
+      "briefId": "late-90s-trip-hop",
+      "answers": {
+        "X": { "relevance": null, "variety": null, "wouldUse": null, "note": "" },
+        "Y": { "relevance": null, "variety": null, "wouldUse": null, "note": "" }
+      }
+    },
+    {
+      "briefId": "modern-noir-procedural",
+      "answers": {
+        "X": { "relevance": null, "variety": null, "wouldUse": null, "note": "" },
+        "Y": { "relevance": null, "variety": null, "wouldUse": null, "note": "" }
+      }
+    },
+    {
+      "briefId": "seventies-soul-family-drama",
+      "answers": {
+        "X": { "relevance": null, "variety": null, "wouldUse": null, "note": "" },
+        "Y": { "relevance": null, "variety": null, "wouldUse": null, "note": "" }
+      }
+    },
+    {
+      "briefId": "afrobeats-sports-montage",
+      "answers": {
+        "X": { "relevance": null, "variety": null, "wouldUse": null, "note": "" },
+        "Y": { "relevance": null, "variety": null, "wouldUse": null, "note": "" }
+      }
+    },
+    {
+      "briefId": "nordic-noir-minimal-piano",
+      "answers": {
+        "X": { "relevance": null, "variety": null, "wouldUse": null, "note": "" },
+        "Y": { "relevance": null, "variety": null, "wouldUse": null, "note": "" }
+      }
+    },
+    {
+      "briefId": "eighties-synth-teen-comedy",
+      "answers": {
+        "X": { "relevance": null, "variety": null, "wouldUse": null, "note": "" },
+        "Y": { "relevance": null, "variety": null, "wouldUse": null, "note": "" }
+      }
+    }
+  ]
+}

@@ -12,7 +12,13 @@
     "typecheck": "tsc --noEmit",
     "verify": "tsx scripts/verify-pipeline.mts",
     "reproduce": "tsx scripts/reproduce-taste-gap.mts",
-    "reproduce:benchmark": "tsx scripts/reproduce-taste-gap-null.mts"
+    "reproduce:benchmark": "tsx scripts/reproduce-taste-gap-null.mts",
+    "benchmark": "tsx benchmark/evaluate.mts",
+    "benchmark:verify": "tsx benchmark/verify-benchmark.mts",
+    "benchmark:report": "tsx benchmark/evaluate.mts --report",
+    "benchmark:record": "tsx benchmark/record.mts",
+    "benchmark:pool": "tsx benchmark/record-pool.mts",
+    "benchmark:worksheet": "tsx benchmark/worksheet.mts"
   },
   "dependencies": {
     "next": "^14.2.35",

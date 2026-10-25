@@ -1,0 +1,1347 @@
+{
+  "resultsVersion": "1.0.0",
+  "generatedBy": "benchmark/evaluate.mts",
+  "protocolVersion": "1.0.0",
+  "protocolHash": "c079c8f74dc182d42a7d7c51bee44b4afdcb3baba4950bad6b835aef7ad7d556",
+  "commonSlateSize": 3,
+  "evidence": [
+    {
+      "briefId": "afrobeats-sports-montage",
+      "scene": "A contemporary sports montage. Euphoric and triumphant, high-energy afrobeats and hip hop. The underdog team trains at dawn before the final. 2020s.",
+      "recordedAt": "2026-10-25T09:26:14.004Z",
+      "sourceUrl": "https://cue-nine-iota.vercel.app/api/cue",
+      "sourceCommit": "6d38c7d971afb47a54bd7f4e8b0eda565971f55d",
+      "httpStatus": 200,
+      "latencyMs": 8550,
+      "mode": "live",
+      "armAProvenance": {
+        "source": "llm",
+        "provider": "groq",
+        "model": null
+      },
+      "armBProvenance": {
+        "source": "llm",
+        "provider": "groq",
+        "model": null
+      },
+      "excluded": null,
+      "poolSize": 15,
+      "classification": "live"
+    },
+    {
+      "briefId": "eighties-synth-teen-comedy",
+      "scene": "An 1980s teen comedy. Hopeful and euphoric, synthwave and pop. The protagonist rides a bike at sunset after finally fitting in. 1980s.",
+      "recordedAt": "2026-10-25T09:26:38.226Z",
+      "sourceUrl": "https://cue-nine-iota.vercel.app/api/cue",
+      "sourceCommit": "6d38c7d971afb47a54bd7f4e8b0eda565971f55d",
+      "httpStatus": 200,
+      "latencyMs": 9884,
+      "mode": "live",
+      "armAProvenance": {
+        "source": "llm",
+        "provider": null,
+        "model": null
+      },
+      "armBProvenance": {
+        "source": "llm",
+        "provider": null,
+        "model": null
+      },
+      "excluded": null,
+      "poolSize": 14,
+      "classification": "live"
+    },
+    {
+      "briefId": "late-90s-trip-hop",
+      "scene": "A late-night drive home through a rainy city. Melancholy and cinematic, late 90s trip hop. The character is alone with their thoughts after a funeral.",
+      "recordedAt": "2026-10-25T09:25:40.305Z",
+      "sourceUrl": "https://cue-nine-iota.vercel.app/api/cue",
+      "sourceCommit": "6d38c7d971afb47a54bd7f4e8b0eda565971f55d",
+      "httpStatus": 200,
+      "latencyMs": 22547,
+      "mode": "live",
+      "armAProvenance": {
+        "source": "llm",
+        "provider": "groq",
+        "model": null
+      },
+      "armBProvenance": {
+        "source": "llm",
+        "provider": "groq",
+        "model": null
+      },
+      "excluded": null,
+      "poolSize": 14,
+      "classification": "live"
+    },
+    {
+      "briefId": "modern-noir-procedural",
+      "scene": "A modern noir procedural cold open. Tense and brooding, a sparse electronic score under a city at night. The detective finds the file they were not supposed to see. 2020s.",
+      "recordedAt": "2026-10-25T09:25:50.209Z",
+      "sourceUrl": "https://cue-nine-iota.vercel.app/api/cue",
+      "sourceCommit": "6d38c7d971afb47a54bd7f4e8b0eda565971f55d",
+      "httpStatus": 200,
+      "latencyMs": 8400,
+      "mode": "live",
+      "armAProvenance": {
+        "source": "llm",
+        "provider": "groq",
+        "model": null
+      },
+      "armBProvenance": {
+        "source": "llm",
+        "provider": "groq",
+        "model": null
+      },
+      "excluded": null,
+      "poolSize": 15,
+      "classification": "live"
+    },
+    {
+      "briefId": "nordic-noir-minimal-piano",
+      "scene": "A Nordic noir scene. Ominous and intimate, minimal classical piano and ambient texture. Snow, silence, a long corridor. In the spirit of Nils Frahm.",
+      "recordedAt": "2026-10-25T09:26:26.838Z",
+      "sourceUrl": "https://cue-nine-iota.vercel.app/api/cue",
+      "sourceCommit": "6d38c7d971afb47a54bd7f4e8b0eda565971f55d",
+      "httpStatus": 200,
+      "latencyMs": 11330,
+      "mode": "live",
+      "armAProvenance": {
+        "source": "llm",
+        "provider": null,
+        "model": null
+      },
+      "armBProvenance": {
+        "source": "llm",
+        "provider": null,
+        "model": null
+      },
+      "excluded": null,
+      "poolSize": 14,
+      "classification": "live"
+    },
+    {
+      "briefId": "seventies-soul-family-drama",
+      "scene": "A 1970s family drama. Warm and nostalgic, grounded in soul and funk. A Curtis Mayfield record plays on the kitchen radio while the family argues about money.",
+      "recordedAt": "2026-10-25T09:26:03.951Z",
+      "sourceUrl": "https://cue-nine-iota.vercel.app/api/cue",
+      "sourceCommit": "6d38c7d971afb47a54bd7f4e8b0eda565971f55d",
+      "httpStatus": 200,
+      "latencyMs": 12238,
+      "mode": "live",
+      "armAProvenance": {
+        "source": "llm",
+        "provider": "groq",
+        "model": null
+      },
+      "armBProvenance": {
+        "source": "llm",
+        "provider": "groq",
+        "model": null
+      },
+      "excluded": null,
+      "poolSize": 14,
+      "classification": "live"
+    }
+  ],
+  "metrics": {
+    "afrobeats-sports-montage": {
+      "anchors": [],
+      "armA": {
+        "items": [
+          {
+            "artist": "Imagine Dragons",
+            "track": "Thunder",
+            "why": "Pulsating drums and soaring synths create a triumphant, high‑energy feel that matches an underdog team’s sunrise workout and builds excitement for the final."
+          },
+          {
+            "artist": "BTS",
+            "track": "Dynamite",
+            "why": "Bright disco‑pop production, upbeat tempo, and anthemic chorus deliver euphoric optimism, perfect for a dawn training montage that feels victorious."
+          },
+          {
+            "artist": "Dua Lipa",
+            "track": "Physical",
+            "why": "Driving bass line, fast‑paced rhythm, and empowering lyrics give a high‑octane, triumphant vibe that fuels intense early‑morning training."
+          }
+        ],
+        "fullItemCount": 3,
+        "metrics": {
+          "briefRelevance": {
+            "value": 0.5,
+            "perItem": [
+              0.5,
+              0.5,
+              0.5
+            ],
+            "perFacet": {
+              "mood": 1,
+              "genre": 0,
+              "era": 0,
+              "setting": 1
+            }
+          },
+          "anchorRecycling": {
+            "value": null,
+            "unavailableReason": "the brief names no anchors, so recycling is not applicable",
+            "anchors": []
+          },
+          "diversity": {
+            "value": 1,
+            "distinctArtistRatio": 1,
+            "textJaccard": 0.07683982683982683
+          },
+          "tagCoverage": {
+            "value": null,
+            "unavailableReason": "none of the 3 item(s) resolve into the pool, so coverage is unmeasurable (not zero)",
+            "unmeasurableItems": [
+              "Imagine Dragons",
+              "BTS",
+              "Dua Lipa"
+            ],
+            "measurableCount": 0
+          }
+        }
+      },
+      "armB": {
+        "items": [
+          {
+            "artist": "MOOSE HILL",
+            "track": "Sunrise Run",
+            "why": "Surfaced by cross-domain backfill: adjacent to the brief, not an obvious search result.",
+            "affinity": 0.7649962877984056,
+            "entityId": "EBD11EAA-F163-4487-B65D-3AC6CC69720B"
+          },
+          {
+            "artist": "Cachao",
+            "track": "Descarga del Cobre",
+            "why": "Ranked by Qloo affinity against the scene's taste profile.",
+            "affinity": 0.6579770406236232,
+            "entityId": "CEDB5547-DFB5-4A7E-982E-68ACA6BC2312"
+          },
+          {
+            "artist": "Peter Phillips: The Tallis Scholars",
+            "track": "Missa Pange Lingua",
+            "why": "Ranked by Qloo affinity against the scene's taste profile.",
+            "affinity": 0.6579770406236232,
+            "entityId": "CC2602AC-E805-47E4-A86A-6F7C3E2BD70E"
+          }
+        ],
+        "fullItemCount": 7,
+        "metrics": {
+          "briefRelevance": {
+            "value": 0,
+            "perItem": [
+              0,
+              0,
+              0
+            ],
+            "perFacet": {
+              "mood": 0,
+              "genre": 0,
+              "era": 0,
+              "setting": 0
+            }
+          },
+          "anchorRecycling": {
+            "value": null,
+            "unavailableReason": "the brief names no anchors, so recycling is not applicable",
+            "anchors": []
+          },
+          "diversity": {
+            "value": 1,
+            "distinctArtistRatio": 1,
+            "textJaccard": 0.19382183908045977
+          },
+          "tagCoverage": {
+            "value": 35.41666666666667,
+            "coveredTags": 17,
+            "vocabularySize": 48,
+            "unmeasurableItems": [],
+            "measurableCount": 3
+          }
+        },
+        "coverageFullSlate": {
+          "value": 79.16666666666666,
+          "coveredTags": 38,
+          "vocabularySize": 48,
+          "unmeasurableItems": [],
+          "measurableCount": 7
+        }
+      },
+      "diffs": {
+        "briefRelevance": -0.5,
+        "anchorRecycling": null,
+        "distinctArtistRatio": 0,
+        "tagCoverage": null
+      }
+    },
+    "eighties-synth-teen-comedy": {
+      "anchors": [],
+      "armA": {
+        "items": [
+          {
+            "artist": "The Weeknd",
+            "track": "Blinding Lights",
+            "why": "Synth‑driven production, bright major chords, and an upbeat tempo capture 80s pop optimism while feeling fresh for modern audiences, perfect for a hopeful, euphoric teen moment."
+          },
+          {
+            "artist": "Walk The Moon",
+            "track": "Shut Up and Dance",
+            "why": "Glittering synth hooks, driving drum beat, and an anthemic chorus evoke the exuberance of 80s dance‑pop, delivering a feel‑good surge that matches teenage euphoria."
+          },
+          {
+            "artist": "CHVRCHES",
+            "track": "Never Ending Circles",
+            "why": "Bright, layered synths and soaring vocal melodies create an uplifting, hopeful atmosphere reminiscent of 80s new wave, while retaining a contemporary production polish."
+          }
+        ],
+        "fullItemCount": 3,
+        "metrics": {
+          "briefRelevance": {
+            "value": 0.75,
+            "perItem": [
+              0.75,
+              0.75,
+              0.75
+            ],
+            "perFacet": {
+              "mood": 1,
+              "genre": 0.6666666666666666,
+              "era": 0.3333333333333333,
+              "setting": 1
+            }
+          },
+          "anchorRecycling": {
+            "value": null,
+            "unavailableReason": "the brief names no anchors, so recycling is not applicable",
+            "anchors": []
+          },
+          "diversity": {
+            "value": 1,
+            "distinctArtistRatio": 1,
+            "textJaccard": 0.11321644042232278
+          },
+          "tagCoverage": {
+            "value": null,
+            "unavailableReason": "none of the 3 item(s) resolve into the pool, so coverage is unmeasurable (not zero)",
+            "unmeasurableItems": [
+              "The Weeknd",
+              "Walk The Moon",
+              "CHVRCHES"
+            ],
+            "measurableCount": 0
+          }
+        }
+      },
+      "armB": {
+        "items": [
+          {
+            "artist": "Specimen",
+            "track": "Track TBD — pick from this artist's catalogue",
+            "why": "Over-indexes with the 24 and younger audience the brief targets.",
+            "affinity": 0.7134200177415654,
+            "entityId": "F0A1E4B1-292B-4672-A9B0-2733049C61A9"
+          },
+          {
+            "artist": "death's dynamic shroud",
+            "track": "Track TBD — pick from this artist's catalogue",
+            "why": "Over-indexes with the 24 and younger audience the brief targets.",
+            "affinity": 0.7134200177415654,
+            "entityId": "F00C71B5-D787-496F-9FAD-8042556D7BE1"
+          },
+          {
+            "artist": "Manos de Topo",
+            "track": "Track TBD — pick from this artist's catalogue",
+            "why": "Over-indexes with the 24 and younger audience the brief targets.",
+            "affinity": 0.7134200177415654,
+            "entityId": "178BFAB6-30AF-4D11-AF60-A9966CC8757F"
+          }
+        ],
+        "fullItemCount": 6,
+        "metrics": {
+          "briefRelevance": {
+            "value": 0.25,
+            "perItem": [
+              0.25,
+              0.25,
+              0.25
+            ],
+            "perFacet": {
+              "mood": 0,
+              "genre": 0,
+              "era": 0,
+              "setting": 1
+            }
+          },
+          "anchorRecycling": {
+            "value": null,
+            "unavailableReason": "the brief names no anchors, so recycling is not applicable",
+            "anchors": []
+          },
+          "diversity": {
+            "value": 1,
+            "distinctArtistRatio": 1,
+            "textJaccard": 0.7860593512767426
+          },
+          "tagCoverage": {
+            "value": 67.21311475409836,
+            "coveredTags": 41,
+            "vocabularySize": 61,
+            "unmeasurableItems": [],
+            "measurableCount": 3
+          }
+        },
+        "coverageFullSlate": {
+          "value": 83.60655737704919,
+          "coveredTags": 51,
+          "vocabularySize": 61,
+          "unmeasurableItems": [],
+          "measurableCount": 6
+        }
+      },
+      "diffs": {
+        "briefRelevance": -0.5,
+        "anchorRecycling": null,
+        "distinctArtistRatio": 0,
+        "tagCoverage": null
+      }
+    },
+    "late-90s-trip-hop": {
+      "anchors": [
+        "Portishead",
+        "Massive Attack",
+        "Tricky",
+        "Morcheeba"
+      ],
+      "armA": {
+        "items": [
+          {
+            "artist": "Kavinsky",
+            "track": "Nightcall",
+            "why": "A moody synth‑driven piece with a slow, pulsing beat that evokes a neon‑lit, rain‑slicked city at night; its cinematic texture and melancholy vibe suit a reflective drive after a funeral."
+          },
+          {
+            "artist": "Ólafur Arnalds",
+            "track": "Near Light",
+            "why": "Minimal piano and string arrangements layered with subtle electronic ambience create a contemplative, cinematic soundscape that mirrors the quiet introspection of a late‑night journey in the rain."
+          },
+          {
+            "artist": "Bon Iver",
+            "track": "Holocene",
+            "why": "Gentle acoustic guitar, soft vocal harmonies, and a wistful melody convey deep melancholy and personal reflection, perfect for the somber, rain‑soaked atmosphere of a post‑funeral drive."
+          }
+        ],
+        "fullItemCount": 3,
+        "metrics": {
+          "briefRelevance": {
+            "value": 0.6666666666666666,
+            "perItem": [
+              0.75,
+              0.75,
+              0.5
+            ],
+            "perFacet": {
+              "mood": 1,
+              "genre": 0.6666666666666666,
+              "era": 0,
+              "setting": 1
+            }
+          },
+          "anchorRecycling": {
+            "value": 0,
+            "recycled": [],
+            "anchors": [
+              "Portishead",
+              "Massive Attack",
+              "Tricky",
+              "Morcheeba"
+            ]
+          },
+          "diversity": {
+            "value": 1,
+            "distinctArtistRatio": 1,
+            "textJaccard": 0.09433962264150943
+          },
+          "tagCoverage": {
+            "value": null,
+            "unavailableReason": "none of the 3 item(s) resolve into the pool, so coverage is unmeasurable (not zero)",
+            "unmeasurableItems": [
+              "Kavinsky",
+              "Ólafur Arnalds",
+              "Bon Iver"
+            ],
+            "measurableCount": 0
+          }
+        }
+      },
+      "armB": {
+        "items": [
+          {
+            "artist": "Hooverphonic",
+            "track": "Eden",
+            "why": "Audiences who like Portishead also index highly for Hooverphonic in Qloo's taste graph. Qloo attributes the match to C37FBFD3-C5E3-4907-8BC0-21415A3CF28F and E57B2F09-8078-4EDE-BEC0-4B02794A8D9E (weight 0.26). Over-indexes with the 25 to 29 audience the brief targets.",
+            "affinity": 0.7866608895226895,
+            "entityId": "3A7CAB8B-764F-46EF-AF77-45D5C1FC8C44"
+          },
+          {
+            "artist": "Skye",
+            "track": "The Long Way Home",
+            "why": "Audiences who like Portishead also index highly for Skye in Qloo's taste graph. Qloo attributes the match to C37FBFD3-C5E3-4907-8BC0-21415A3CF28F and E9D3AE82-4010-498C-8A0C-50EA88E17CE7 (weight 0.26). Over-indexes with the 25 to 29 audience the brief targets.",
+            "affinity": 0.7782011899099538,
+            "entityId": "8465EE76-6BDF-4A7B-B027-4FFE4E68381E"
+          },
+          {
+            "artist": "Waldeck",
+            "track": "She Said",
+            "why": "Audiences who like Portishead also index highly for Waldeck in Qloo's taste graph. Qloo attributes the match to C37FBFD3-C5E3-4907-8BC0-21415A3CF28F and E9D3AE82-4010-498C-8A0C-50EA88E17CE7 (weight 0.27). Over-indexes with the 25 to 29 audience the brief targets.",
+            "affinity": 0.7771795982612324,
+            "entityId": "2C2037D8-AC29-4824-90C1-EE63A1969723"
+          }
+        ],
+        "fullItemCount": 6,
+        "metrics": {
+          "briefRelevance": {
+            "value": 0,
+            "perItem": [
+              0,
+              0,
+              0
+            ],
+            "perFacet": {
+              "mood": 0,
+              "genre": 0,
+              "era": 0,
+              "setting": 0
+            }
+          },
+          "anchorRecycling": {
+            "value": 0,
+            "recycled": [],
+            "anchors": [
+              "Portishead",
+              "Massive Attack",
+              "Tricky",
+              "Morcheeba"
+            ]
+          },
+          "diversity": {
+            "value": 1,
+            "distinctArtistRatio": 1,
+            "textJaccard": 0.7041666666666666
+          },
+          "tagCoverage": {
+            "value": 59.44055944055944,
+            "coveredTags": 85,
+            "vocabularySize": 143,
+            "unmeasurableItems": [],
+            "measurableCount": 3
+          }
+        },
+        "coverageFullSlate": {
+          "value": 85.3146853146853,
+          "coveredTags": 122,
+          "vocabularySize": 143,
+          "unmeasurableItems": [],
+          "measurableCount": 6
+        }
+      },
+      "diffs": {
+        "briefRelevance": -0.6666666666666666,
+        "anchorRecycling": 0,
+        "distinctArtistRatio": 0,
+        "tagCoverage": null
+      }
+    },
+    "modern-noir-procedural": {
+      "anchors": [],
+      "armA": {
+        "items": [
+          {
+            "artist": "Mogwai",
+            "track": "Rano",
+            "why": "Post‑rock instrumental from 2021 with a slow‑building, brooding texture and minimal percussion, perfect for a tense, mysterious night‑city atmosphere."
+          },
+          {
+            "artist": "Arca",
+            "track": "Nonbinary",
+            "why": "Experimental electronic piece from 2020 that uses sparse synths, glitchy percussive hits, and an unsettling harmonic palette, matching a tense, mysterious urban vibe."
+          },
+          {
+            "artist": "Kuedo",
+            "track": "The Fire",
+            "why": "2021 synth‑driven track with a thin, echoing bass line and restrained, atmospheric layers that convey a sense of suspense and night‑time intrigue."
+          }
+        ],
+        "fullItemCount": 3,
+        "metrics": {
+          "briefRelevance": {
+            "value": 0.5,
+            "perItem": [
+              0.5,
+              0.75,
+              0.25
+            ],
+            "perFacet": {
+              "mood": 0.6666666666666666,
+              "genre": 0.3333333333333333,
+              "era": 0,
+              "setting": 1
+            }
+          },
+          "anchorRecycling": {
+            "value": null,
+            "unavailableReason": "the brief names no anchors, so recycling is not applicable",
+            "anchors": []
+          },
+          "diversity": {
+            "value": 1,
+            "distinctArtistRatio": 1,
+            "textJaccard": 0.07798481711525189
+          },
+          "tagCoverage": {
+            "value": null,
+            "unavailableReason": "none of the 3 item(s) resolve into the pool, so coverage is unmeasurable (not zero)",
+            "unmeasurableItems": [
+              "Mogwai",
+              "Arca",
+              "Kuedo"
+            ],
+            "measurableCount": 0
+          }
+        }
+      },
+      "armB": {
+        "items": [
+          {
+            "artist": "MOOSE HILL",
+            "track": "Nightfall",
+            "why": "Surfaced by cross-domain backfill: adjacent to the brief, not an obvious search result.",
+            "affinity": 0.7649962877984056,
+            "entityId": "EBD11EAA-F163-4487-B65D-3AC6CC69720B"
+          },
+          {
+            "artist": "Cachao",
+            "track": "Descarga",
+            "why": "Ranked by Qloo affinity against the scene's taste profile.",
+            "affinity": 0.6579770406236232,
+            "entityId": "CEDB5547-DFB5-4A7E-982E-68ACA6BC2312"
+          },
+          {
+            "artist": "Peter Phillips: The Tallis Scholars",
+            "track": "Spem in alium",
+            "why": "Ranked by Qloo affinity against the scene's taste profile.",
+            "affinity": 0.6579770406236232,
+            "entityId": "CC2602AC-E805-47E4-A86A-6F7C3E2BD70E"
+          }
+        ],
+        "fullItemCount": 7,
+        "metrics": {
+          "briefRelevance": {
+            "value": 0.08333333333333333,
+            "perItem": [
+              0.25,
+              0,
+              0
+            ],
+            "perFacet": {
+              "mood": 0,
+              "genre": 0,
+              "era": 0,
+              "setting": 0.3333333333333333
+            }
+          },
+          "anchorRecycling": {
+            "value": null,
+            "unavailableReason": "the brief names no anchors, so recycling is not applicable",
+            "anchors": []
+          },
+          "diversity": {
+            "value": 1,
+            "distinctArtistRatio": 1,
+            "textJaccard": 0.21381306865177832
+          },
+          "tagCoverage": {
+            "value": 35.41666666666667,
+            "coveredTags": 17,
+            "vocabularySize": 48,
+            "unmeasurableItems": [],
+            "measurableCount": 3
+          }
+        },
+        "coverageFullSlate": {
+          "value": 79.16666666666666,
+          "coveredTags": 38,
+          "vocabularySize": 48,
+          "unmeasurableItems": [],
+          "measurableCount": 7
+        }
+      },
+      "diffs": {
+        "briefRelevance": -0.4166666666666667,
+        "anchorRecycling": null,
+        "distinctArtistRatio": 0,
+        "tagCoverage": null
+      }
+    },
+    "nordic-noir-minimal-piano": {
+      "anchors": [
+        "Nils Frahm"
+      ],
+      "armA": {
+        "items": [
+          {
+            "artist": "Trent Reznor & Atticus Ross",
+            "track": "The Way It Is (Instrumental)",
+            "why": "Dark, atmospheric electronic textures with a slow, brooding pulse that match the ominous, intimate feel of a contemporary Nordic noir scene."
+          },
+          {
+            "artist": "Hildur Guðnadóttir",
+            "track": "Saman (from the \"Chernobyl\" soundtrack)",
+            "why": "Sparse, haunting strings and low drones create a cold, intimate tension that aligns with the noir aesthetic while remaining modern."
+          },
+          {
+            "artist": "Mogwai",
+            "track": "Take Me Somewhere Nice (Instrumental)",
+            "why": "Cinematic post‑rock with a melancholic melody and subtle crescendo, providing an ominous yet emotionally intimate backdrop suitable for contemporary Nordic noir."
+          }
+        ],
+        "fullItemCount": 3,
+        "metrics": {
+          "briefRelevance": {
+            "value": 0.6666666666666666,
+            "perItem": [
+              0.75,
+              0.5,
+              0.75
+            ],
+            "perFacet": {
+              "mood": 1,
+              "genre": 0,
+              "era": 0.6666666666666666,
+              "setting": 1
+            }
+          },
+          "anchorRecycling": {
+            "value": 0,
+            "recycled": [],
+            "anchors": [
+              "Nils Frahm"
+            ]
+          },
+          "diversity": {
+            "value": 1,
+            "distinctArtistRatio": 1,
+            "textJaccard": 0.1115784966468857
+          },
+          "tagCoverage": {
+            "value": null,
+            "unavailableReason": "none of the 3 item(s) resolve into the pool, so coverage is unmeasurable (not zero)",
+            "unmeasurableItems": [
+              "Trent Reznor & Atticus Ross",
+              "Hildur Guðnadóttir",
+              "Mogwai"
+            ],
+            "measurableCount": 0
+          }
+        }
+      },
+      "armB": {
+        "items": [
+          {
+            "artist": "Federico Albanese",
+            "track": "Track TBD — pick from this artist's catalogue",
+            "why": "Audiences who like Nils Frahm also index highly for Federico Albanese in Qloo's taste graph. Qloo attributes the match to 0D8EAFA4-CEEA-44D5-8E1F-26A8A9F49A77 (weight 1.00).",
+            "affinity": 0.7528675202298813,
+            "entityId": "44A7D755-C551-440C-9DF7-4B3798164F49"
+          },
+          {
+            "artist": "Ólafur Arnalds",
+            "track": "Track TBD — pick from this artist's catalogue",
+            "why": "Audiences who like Nils Frahm also index highly for Ólafur Arnalds in Qloo's taste graph. Qloo attributes the match to 0D8EAFA4-CEEA-44D5-8E1F-26A8A9F49A77 (weight 1.00).",
+            "affinity": 0.7524329962697127,
+            "entityId": "02940707-9635-45DA-B290-243F84C6B910"
+          },
+          {
+            "artist": "Luke Howard",
+            "track": "Track TBD — pick from this artist's catalogue",
+            "why": "Audiences who like Nils Frahm also index highly for Luke Howard in Qloo's taste graph. Qloo attributes the match to 0D8EAFA4-CEEA-44D5-8E1F-26A8A9F49A77 (weight 1.00).",
+            "affinity": 0.7516331427171747,
+            "entityId": "3691C25A-CE18-44CA-8DEE-A19579FC37E5"
+          }
+        ],
+        "fullItemCount": 6,
+        "metrics": {
+          "briefRelevance": {
+            "value": 0,
+            "perItem": [
+              0,
+              0,
+              0
+            ],
+            "perFacet": {
+              "mood": 0,
+              "genre": 0,
+              "era": 0,
+              "setting": 0
+            }
+          },
+          "anchorRecycling": {
+            "value": 0,
+            "recycled": [],
+            "anchors": [
+              "Nils Frahm"
+            ]
+          },
+          "diversity": {
+            "value": 1,
+            "distinctArtistRatio": 1,
+            "textJaccard": 0.8857142857142857
+          },
+          "tagCoverage": {
+            "value": 76.61290322580645,
+            "coveredTags": 95,
+            "vocabularySize": 124,
+            "unmeasurableItems": [],
+            "measurableCount": 3
+          }
+        },
+        "coverageFullSlate": {
+          "value": 89.51612903225806,
+          "coveredTags": 111,
+          "vocabularySize": 124,
+          "unmeasurableItems": [],
+          "measurableCount": 6
+        }
+      },
+      "diffs": {
+        "briefRelevance": -0.6666666666666666,
+        "anchorRecycling": 0,
+        "distinctArtistRatio": 0,
+        "tagCoverage": null
+      }
+    },
+    "seventies-soul-family-drama": {
+      "anchors": [
+        "Curtis Mayfield"
+      ],
+      "armA": {
+        "items": [
+          {
+            "artist": "The Carpenters",
+            "track": "We've Only Just Begun",
+            "why": "Soft piano and gentle vocal harmonies create a warm, nostalgic feeling that fits a 1970s family kitchen setting."
+          },
+          {
+            "artist": "Stevie Wonder",
+            "track": "You Are the Sunshine of My Life",
+            "why": "Bright, upbeat soul with a breezy groove evokes the comforting, home‑y atmosphere of a suburban kitchen while still feeling authentically 1970s."
+          },
+          {
+            "artist": "The Who",
+            "track": "Won't Get Fooled Again",
+            "why": "The driving synth‑rock intro and tense, building arrangement add an undercurrent of tension that can heighten a moment of conflict in the otherwise cozy scene."
+          }
+        ],
+        "fullItemCount": 3,
+        "metrics": {
+          "briefRelevance": {
+            "value": 0.5833333333333334,
+            "perItem": [
+              0.75,
+              0.75,
+              0.25
+            ],
+            "perFacet": {
+              "mood": 0.6666666666666666,
+              "genre": 0.3333333333333333,
+              "era": 0.6666666666666666,
+              "setting": 0.6666666666666666
+            }
+          },
+          "anchorRecycling": {
+            "value": 0,
+            "recycled": [],
+            "anchors": [
+              "Curtis Mayfield"
+            ]
+          },
+          "diversity": {
+            "value": 1,
+            "distinctArtistRatio": 1,
+            "textJaccard": 0.06328347578347579
+          },
+          "tagCoverage": {
+            "value": 42.58064516129032,
+            "coveredTags": 66,
+            "vocabularySize": 155,
+            "unmeasurableItems": [
+              "The Carpenters",
+              "The Who"
+            ],
+            "measurableCount": 1,
+            "unavailableReason": "2 of 3 item(s) do not resolve into the pool; coverage is measured over the 1 that do"
+          }
+        }
+      },
+      "armB": {
+        "items": [
+          {
+            "artist": "Sly & The Family Stone",
+            "track": "If You Want Me to Stay",
+            "why": "Audiences who like Curtis Mayfield also index highly for Sly & The Family Stone in Qloo's taste graph. Qloo attributes the match to 71A99A83-C424-408C-9C40-EDB5D2FC88E1 (weight 1.00).",
+            "affinity": 0.7822755780940619,
+            "entityId": "311A18BF-1323-4B09-AF35-907347525236"
+          },
+          {
+            "artist": "The Isley Brothers",
+            "track": "Love the One You're With (Live)",
+            "why": "Audiences who like Curtis Mayfield also index highly for The Isley Brothers in Qloo's taste graph. Qloo attributes the match to 71A99A83-C424-408C-9C40-EDB5D2FC88E1 (weight 1.00).",
+            "affinity": 0.7801377055850418,
+            "entityId": "02F0F62F-8113-4FFF-BE5D-66C900A51477"
+          },
+          {
+            "artist": "Isaac Hayes",
+            "track": "The Look of Love",
+            "why": "Audiences who like Curtis Mayfield also index highly for Isaac Hayes in Qloo's taste graph. Qloo attributes the match to 71A99A83-C424-408C-9C40-EDB5D2FC88E1 (weight 1.00).",
+            "affinity": 0.7801111425064325,
+            "entityId": "43C79817-C7EE-4EC4-92EC-E6BC5CF62B65"
+          }
+        ],
+        "fullItemCount": 6,
+        "metrics": {
+          "briefRelevance": {
+            "value": 0.08333333333333333,
+            "perItem": [
+              0.25,
+              0,
+              0
+            ],
+            "perFacet": {
+              "mood": 0,
+              "genre": 0,
+              "era": 0,
+              "setting": 0.3333333333333333
+            }
+          },
+          "anchorRecycling": {
+            "value": 0,
+            "recycled": [],
+            "anchors": [
+              "Curtis Mayfield"
+            ]
+          },
+          "diversity": {
+            "value": 1,
+            "distinctArtistRatio": 1,
+            "textJaccard": 0.6613729113729113
+          },
+          "tagCoverage": {
+            "value": 67.74193548387096,
+            "coveredTags": 105,
+            "vocabularySize": 155,
+            "unmeasurableItems": [],
+            "measurableCount": 3
+          }
+        },
+        "coverageFullSlate": {
+          "value": 94.19354838709677,
+          "coveredTags": 146,
+          "vocabularySize": 155,
+          "unmeasurableItems": [],
+          "measurableCount": 6
+        }
+      },
+      "diffs": {
+        "briefRelevance": -0.5,
+        "anchorRecycling": 0,
+        "distinctArtistRatio": 0,
+        "tagCoverage": 25.16129032258064
+      }
+    }
+  },
+  "comparisons": [
+    {
+      "metric": "briefRelevance",
+      "direction": "B>A",
+      "threshold": 0.1,
+      "diffs": [
+        {
+          "briefId": "afrobeats-sports-montage",
+          "a": 0.5,
+          "b": 0,
+          "diff": -0.5
+        },
+        {
+          "briefId": "eighties-synth-teen-comedy",
+          "a": 0.75,
+          "b": 0.25,
+          "diff": -0.5
+        },
+        {
+          "briefId": "late-90s-trip-hop",
+          "a": 0.6666666666666666,
+          "b": 0,
+          "diff": -0.6666666666666666
+        },
+        {
+          "briefId": "modern-noir-procedural",
+          "a": 0.5,
+          "b": 0.08333333333333333,
+          "diff": -0.4166666666666667
+        },
+        {
+          "briefId": "nordic-noir-minimal-piano",
+          "a": 0.6666666666666666,
+          "b": 0,
+          "diff": -0.6666666666666666
+        },
+        {
+          "briefId": "seventies-soul-family-drama",
+          "a": 0.5833333333333334,
+          "b": 0.08333333333333333,
+          "diff": -0.5
+        }
+      ],
+      "agreeing": 0,
+      "scorable": 6,
+      "medianDiff": -0.5,
+      "outcome": "contradicted",
+      "notes": []
+    },
+    {
+      "metric": "anchorRecycling",
+      "direction": "B<A",
+      "threshold": 0.2,
+      "diffs": [
+        {
+          "briefId": "afrobeats-sports-montage",
+          "a": null,
+          "b": null,
+          "diff": null
+        },
+        {
+          "briefId": "eighties-synth-teen-comedy",
+          "a": null,
+          "b": null,
+          "diff": null
+        },
+        {
+          "briefId": "late-90s-trip-hop",
+          "a": 0,
+          "b": 0,
+          "diff": 0
+        },
+        {
+          "briefId": "modern-noir-procedural",
+          "a": null,
+          "b": null,
+          "diff": null
+        },
+        {
+          "briefId": "nordic-noir-minimal-piano",
+          "a": 0,
+          "b": 0,
+          "diff": 0
+        },
+        {
+          "briefId": "seventies-soul-family-drama",
+          "a": 0,
+          "b": 0,
+          "diff": 0
+        }
+      ],
+      "agreeing": 0,
+      "scorable": 3,
+      "medianDiff": 0,
+      "outcome": "inconclusive",
+      "notes": [
+        "afrobeats-sports-montage excluded: metric unmeasurable for one or both arms",
+        "eighties-synth-teen-comedy excluded: metric unmeasurable for one or both arms",
+        "modern-noir-procedural excluded: metric unmeasurable for one or both arms"
+      ]
+    },
+    {
+      "metric": "distinctArtistRatio",
+      "direction": "B>A",
+      "threshold": 0.15,
+      "diffs": [
+        {
+          "briefId": "afrobeats-sports-montage",
+          "a": 1,
+          "b": 1,
+          "diff": 0
+        },
+        {
+          "briefId": "eighties-synth-teen-comedy",
+          "a": 1,
+          "b": 1,
+          "diff": 0
+        },
+        {
+          "briefId": "late-90s-trip-hop",
+          "a": 1,
+          "b": 1,
+          "diff": 0
+        },
+        {
+          "briefId": "modern-noir-procedural",
+          "a": 1,
+          "b": 1,
+          "diff": 0
+        },
+        {
+          "briefId": "nordic-noir-minimal-piano",
+          "a": 1,
+          "b": 1,
+          "diff": 0
+        },
+        {
+          "briefId": "seventies-soul-family-drama",
+          "a": 1,
+          "b": 1,
+          "diff": 0
+        }
+      ],
+      "agreeing": 0,
+      "scorable": 6,
+      "medianDiff": 0,
+      "outcome": "inconclusive",
+      "notes": []
+    },
+    {
+      "metric": "tagCoverage",
+      "direction": "B>A",
+      "threshold": 10,
+      "diffs": [
+        {
+          "briefId": "afrobeats-sports-montage",
+          "a": null,
+          "b": 35.41666666666667,
+          "diff": null
+        },
+        {
+          "briefId": "eighties-synth-teen-comedy",
+          "a": null,
+          "b": 67.21311475409836,
+          "diff": null
+        },
+        {
+          "briefId": "late-90s-trip-hop",
+          "a": null,
+          "b": 59.44055944055944,
+          "diff": null
+        },
+        {
+          "briefId": "modern-noir-procedural",
+          "a": null,
+          "b": 35.41666666666667,
+          "diff": null
+        },
+        {
+          "briefId": "nordic-noir-minimal-piano",
+          "a": null,
+          "b": 76.61290322580645,
+          "diff": null
+        },
+        {
+          "briefId": "seventies-soul-family-drama",
+          "a": 42.58064516129032,
+          "b": 67.74193548387096,
+          "diff": 25.16129032258064
+        }
+      ],
+      "agreeing": 1,
+      "scorable": 1,
+      "medianDiff": 25.16129032258064,
+      "outcome": "inconclusive",
+      "notes": [
+        "afrobeats-sports-montage excluded: metric unmeasurable for one or both arms",
+        "eighties-synth-teen-comedy excluded: metric unmeasurable for one or both arms",
+        "late-90s-trip-hop excluded: metric unmeasurable for one or both arms",
+        "modern-noir-procedural excluded: metric unmeasurable for one or both arms",
+        "nordic-noir-minimal-piano excluded: metric unmeasurable for one or both arms"
+      ]
+    }
+  ],
+  "sensitivity": [
+    {
+      "briefId": "afrobeats-sports-montage",
+      "relevanceWithWhy": {
+        "a": 0.5,
+        "b": 0
+      },
+      "relevanceArtistOnly": {
+        "a": 0,
+        "b": 0
+      }
+    },
+    {
+      "briefId": "eighties-synth-teen-comedy",
+      "relevanceWithWhy": {
+        "a": 0.75,
+        "b": 0.25
+      },
+      "relevanceArtistOnly": {
+        "a": 0.08333333333333333,
+        "b": 0.08333333333333333
+      }
+    },
+    {
+      "briefId": "late-90s-trip-hop",
+      "relevanceWithWhy": {
+        "a": 0.6666666666666666,
+        "b": 0
+      },
+      "relevanceArtistOnly": {
+        "a": 0.08333333333333333,
+        "b": 0
+      }
+    },
+    {
+      "briefId": "modern-noir-procedural",
+      "relevanceWithWhy": {
+        "a": 0.5,
+        "b": 0.08333333333333333
+      },
+      "relevanceArtistOnly": {
+        "a": 0,
+        "b": 0.08333333333333333
+      }
+    },
+    {
+      "briefId": "nordic-noir-minimal-piano",
+      "relevanceWithWhy": {
+        "a": 0.6666666666666666,
+        "b": 0
+      },
+      "relevanceArtistOnly": {
+        "a": 0,
+        "b": 0
+      }
+    },
+    {
+      "briefId": "seventies-soul-family-drama",
+      "relevanceWithWhy": {
+        "a": 0.5833333333333334,
+        "b": 0.08333333333333333
+      },
+      "relevanceArtistOnly": {
+        "a": 0,
+        "b": 0.08333333333333333
+      }
+    }
+  ],
+  "humanPreference": {
+    "available": false,
+    "reason": "1 review file(s) present but none contain ratings; human preference is NOT computed",
+    "reviews": []
+  },
+  "exploratoryFindings": [
+    {
+      "id": "E1-cross-brief-distinctiveness",
+      "status": "post-hoc",
+      "label": "Cross-brief distinctiveness",
+      "finding": "Arm B's slate varies less between briefs than Arm A's. On one pair of briefs with disjoint requested genres, Arm B returned an identical slate while Arm A did not.",
+      "measured": {
+        "armA": {
+          "meanPairwiseJaccard": 0.013333333333333334,
+          "identicalPairs": [],
+          "distinctArtistRatio": 0.9444444444444444
+        },
+        "armB": {
+          "meanPairwiseJaccard": 0.06666666666666667,
+          "identicalPairs": [
+            "afrobeats-sports-montage == modern-noir-procedural"
+          ],
+          "distinctArtistRatio": 0.8333333333333334
+        },
+        "genreDisjointPairs": [
+          {
+            "a": "afrobeats-sports-montage",
+            "b": "eighties-synth-teen-comedy",
+            "armAJaccard": 0,
+            "armBJaccard": 0
+          },
+          {
+            "a": "afrobeats-sports-montage",
+            "b": "late-90s-trip-hop",
+            "armAJaccard": 0,
+            "armBJaccard": 0
+          },
+          {
+            "a": "afrobeats-sports-montage",
+            "b": "modern-noir-procedural",
+            "armAJaccard": 0,
+            "armBJaccard": 1
+          },
+          {
+            "a": "afrobeats-sports-montage",
+            "b": "nordic-noir-minimal-piano",
+            "armAJaccard": 0,
+            "armBJaccard": 0
+          },
+          {
+            "a": "afrobeats-sports-montage",
+            "b": "seventies-soul-family-drama",
+            "armAJaccard": 0,
+            "armBJaccard": 0
+          },
+          {
+            "a": "eighties-synth-teen-comedy",
+            "b": "late-90s-trip-hop",
+            "armAJaccard": 0,
+            "armBJaccard": 0
+          },
+          {
+            "a": "eighties-synth-teen-comedy",
+            "b": "modern-noir-procedural",
+            "armAJaccard": 0,
+            "armBJaccard": 0
+          },
+          {
+            "a": "eighties-synth-teen-comedy",
+            "b": "nordic-noir-minimal-piano",
+            "armAJaccard": 0,
+            "armBJaccard": 0
+          },
+          {
+            "a": "eighties-synth-teen-comedy",
+            "b": "seventies-soul-family-drama",
+            "armAJaccard": 0,
+            "armBJaccard": 0
+          },
+          {
+            "a": "late-90s-trip-hop",
+            "b": "seventies-soul-family-drama",
+            "armAJaccard": 0,
+            "armBJaccard": 0
+          },
+          {
+            "a": "modern-noir-procedural",
+            "b": "seventies-soul-family-drama",
+            "armAJaccard": 0,
+            "armBJaccard": 0
+          },
+          {
+            "a": "nordic-noir-minimal-piano",
+            "b": "seventies-soul-family-drama",
+            "armAJaccard": 0,
+            "armBJaccard": 0
+          }
+        ]
+      },
+      "caveat": "This metric is NOT in the frozen protocol and was computed after it was committed. It is reported as an exploratory observation, not as a preregistered hypothesis, and no significance is claimed. n = 6 briefs, so a single identical pair is a lead to investigate, not a settled result. The repository already documents that tag-only briefs (no named reference) return a low-spread affinity; this finding is consistent with that and locates where it becomes visible in the comparison."
+    }
+  ],
+  "limitations": [
+    "Pool parity is not achievable: Arm A answers open-book and is never given the candidate pool, so pool-relative metrics cannot be compared like-for-like. See protocol.poolParity.",
+    "Brief relevance is a lexical word-overlap proxy, not a human judgement and not a measure of quality. It rewards restating the brief's vocabulary. It applies no stemming, so 'tense' does not match 'Tension'; this under-counts related word forms, conservatively and equally for both arms.",
+    "The two arms' rationale fields are not equivalent: Arm A's is written prose that tends to contain mood words, Arm B's is Qloo provenance boilerplate that cannot. M1 as specified is therefore structurally biased against Arm B, which is why the sensitivity block reports M1 over artist and track only.",
+    "Tag coverage is pool-relative and is not a measure of recommendation quality or of whether anyone likes the result.",
+    "No human-preference evaluation has been performed. No automated proxy is substituted for it.",
+    "n = 6 briefs. A one-sided sign test gives p = 0.0156 at 6/6 and p = 0.109 at 5/6, so a 5/6 result cannot be called significant at alpha = 0.05.",
+    "The five metrics are deliberately not combined into one score; no defensible weighting exists without human preference data.",
+    "Both arms come from one deployment on one day. A different model, prompt, or Qloo snapshot may produce different figures."
+  ]
+}

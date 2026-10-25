@@ -1,0 +1,221 @@
+{
+  "protocolVersion": "1.0.0",
+  "frozenAt": "2026-10-25",
+  "purpose": "Compare Cue's Qloo-grounded recommendation slate against an independent LLM-only baseline on identical briefs, with preregistered metrics, thresholds, and hypothesis outcomes.",
+  "status": "frozen-before-results",
+  "note": "This file was committed before the comparative metrics were computed. Its sha256 is recorded in benchmark/results.json so a reader can confirm the metrics were not redefined after seeing results.",
+  "arms": {
+    "A": {
+      "id": "llm-only",
+      "label": "LLM-only baseline",
+      "description": "The ungrounded answer produced by the model alone, with no Qloo data. Sourced from CueSheet.baseline, which the production pipeline already builds as its own control group.",
+      "inputWhitelist": ["brief.setting", "brief.mood", "brief.era"],
+      "forbiddenInputs": [
+        "Qloo entity ids",
+        "Qloo affinity scores",
+        "Qloo ranked candidates",
+        "Qloo tags or explainability",
+        "Cue's selected slate",
+        "any Qloo response body"
+      ],
+      "declaredOutputSize": 3,
+      "measuredOutputSize": "whatever the model returned; recorded, never padded"
+    },
+    "B": {
+      "id": "cue-qloo",
+      "label": "Cue (Qloo-powered)",
+      "description": "The production pipeline: Qloo resolves anchors and tags, ranks artists by measured affinity, and assembles the slate.",
+      "inputWhitelist": ["the same scene string as Arm A"],
+      "declaredOutputSize": "up to the pool size; recorded"
+    }
+  },
+  "slateSizeParity": {
+    "commonSlateSize": 3,
+    "rule": "Arm A returns exactly 3 cues by construction. All size-sensitive metrics are therefore computed at k = 3, truncating Arm B to its top 3 by measured affinity. Full-length Arm B figures are also reported but are explicitly labelled not size-matched.",
+    "justification": "Comparing a 3-item answer against a 6-8 item answer would confound slate size with every size-sensitive metric. k = 3 is the largest size both arms can supply, and it requires no change to production code because truncation happens in this harness.",
+    "affinityTiebreak": "affinity descending, then popularity descending, then entity_id ascending (deterministic)"
+  },
+  "poolParity": {
+    "achievable": false,
+    "statement": "Arm A is never given a candidate pool; it answers open-book from parametric knowledge. Arm B selects from the pool Qloo returned for the brief. Pool parity is therefore NOT achievable without changing the production prompt.",
+    "mitigation": "Both arms are scored against the SAME pool for the coverage metric. Arm A picks that do not appear in the pool are recorded as unmeasurable, never imputed as zero.",
+    "smallestSafeChangeProposed": "Add a benchmark-only closed-book variant that supplies the identical candidate list to the model, so both arms choose from one pool. This requires a new prompt and is deliberately NOT implemented here, because it would change what Arm A means and is a production-adjacent change beyond this task's scope."
+  },
+  "anchorTreatment": {
+    "definition": "An anchor is a named artist explicitly present in the brief's scene text and in the brief's resolved anchors[] field. Matching is case-insensitive after stripping punctuation, and matches on whole tokens only.",
+    "source": "Both arms share the identical brief object from the same response, so the anchor set is identical across arms by construction.",
+    "metric": "anchorRecycling = |{items naming an anchor}| / |items|, at the common slate size."
+  },
+  "briefs": [
+    {
+      "id": "late-90s-trip-hop",
+      "scene": "A late-night drive home through a rainy city. Melancholy and cinematic, late 90s trip hop. The character is alone with their thoughts after a funeral.",
+      "declaredAnchors": [],
+      "inclusionReason": "Baseline domain; era 1990s; melancholy mood; no named anchors."
+    },
+    {
+      "id": "modern-noir-procedural",
+      "scene": "A modern noir procedural cold open. Tense and brooding, a sparse electronic score under a city at night. The detective finds the file they were not supposed to see. 2020s.",
+      "declaredAnchors": [],
+      "inclusionReason": "Era 2020s; tension mood; electronic genre; no named anchors; different domain from brief 1."
+    },
+    {
+      "id": "seventies-soul-family-drama",
+      "scene": "A 1970s family drama. Warm and nostalgic, grounded in soul and funk. A Curtis Mayfield record plays on the kitchen radio while the family argues about money.",
+      "declaredAnchors": ["Curtis Mayfield"],
+      "inclusionReason": "Era 1970s; nostalgia mood; soul genre; names an anchor, so anchor recycling is measurable."
+    },
+    {
+      "id": "afrobeats-sports-montage",
+      "scene": "A contemporary sports montage. Euphoric and triumphant, high-energy afrobeats and hip hop. The underdog team trains at dawn before the final. 2020s.",
+      "declaredAnchors": [],
+      "inclusionReason": "Era 2020s; euphoria mood; afrobeats genre; non-Western genre emphasis; no named anchors."
+    },
+    {
+      "id": "nordic-noir-minimal-piano",
+      "scene": "A Nordic noir scene. Ominous and intimate, minimal classical piano and ambient texture. Snow, silence, a long corridor. In the spirit of Nils Frahm.",
+      "declaredAnchors": ["Nils Frahm"],
+      "inclusionReason": "Era 2010s; ominous mood; classical genre; names an anchor."
+    },
+    {
+      "id": "eighties-synth-teen-comedy",
+      "scene": "An 1980s teen comedy. Hopeful and euphoric, synthwave and pop. The protagonist rides a bike at sunset after finally fitting in. 1980s.",
+      "declaredAnchors": [],
+      "inclusionReason": "Era 1980s; hope mood; synthwave genre; no named anchors; completes the era spread."
+    }
+  ],
+  "briefInclusionCriteria": [
+    "The scene string is at least one full sentence and at least 20 characters, so the production route accepts it.",
+    "The set spans at least four distinct decades and at least five distinct moods.",
+    "At least two briefs name an explicit anchor, so anchor recycling is measurable.",
+    "At least two briefs name no anchor, so anchor recycling is not trivially zero for both arms.",
+    "No brief was selected on the basis of how well either arm performed on it. Briefs were fixed before any comparative result was computed."
+  ],
+  "metrics": {
+    "M1_briefRelevance": {
+      "label": "Brief relevance (lexical facet-match proxy)",
+      "kind": "lexical-proxy",
+      "warning": "This is a word-overlap proxy, NOT a human judgement of relevance and NOT a measure of quality. It rewards restating the brief's vocabulary and is reported per facet so a reader can audit it.",
+      "facets": ["mood", "genre", "era", "setting"],
+      "formula": "For each item, a facet is matched when any of the facet's tokens appears in the item's searchable text (artist + track + rationale, lowercased, punctuation stripped). itemRelevance = matchedFacets / 4. slateRelevance = mean(itemRelevance).",
+      "range": "0..1, higher means more brief vocabulary echoed",
+      "tieHandling": "Exact rational counts; no ties possible at the item level.",
+      "crossArmComparable": true
+    },
+    "M2_anchorRecycling": {
+      "label": "Anchor recycling",
+      "kind": "lexical",
+      "warning": "Measures repetition of names already in the brief. High is worse. It is not a quality measure on its own: naming a requested anchor can be correct.",
+      "formula": "anchorRecycling = |{items whose artist or track names an anchor}| / |items|",
+      "range": "0..1, higher means more recycling",
+      "tieHandling": "Exact integer counts.",
+      "crossArmComparable": true
+    },
+    "M3_diversity": {
+      "label": "Recommendation diversity",
+      "kind": "structural + lexical-proxy",
+      "warning": "distinctArtistRatio is structural. textJaccard is a lexical proxy for content variety and is labelled as such. tagRedundancy is Arm B only because Arm A has no tags.",
+      "formula": {
+        "distinctArtistRatio": "|unique artists| / |items|",
+        "textJaccard": "mean over unordered item pairs of |tokens(a) intersect tokens(b)| / |tokens(a) union tokens(b)|, tokens from artist + track + rationale",
+        "tagRedundancy": "reused from Cue's production coverage result (Arm B only)"
+      },
+      "range": "0..1",
+      "tieHandling": "Exact rational counts.",
+      "crossArmComparable": "distinctArtistRatio and textJaccard: yes. tagRedundancy: Arm B only."
+    },
+    "M4_tagCoverage": {
+      "label": "Tag Coverage Index",
+      "kind": "production-metric-reused-unchanged",
+      "warning": "Reused from src/lib/coverage.ts with NO formula change. Pool-relative: it is not a share of listeners and is NOT a measure of recommendation quality.",
+      "formula": "Unchanged production computeTasteGap(pool, slate, slateSize).original.index",
+      "range": "0..100",
+      "tieHandling": "Not applicable; deterministic given a pool and a slate.",
+      "crossArmComparable": "Conditionally. Arm A items that do not resolve into the pool are recorded as unmeasurable, never scored as zero.",
+      "unmeasurableRule": "If fewer than the common slate size of Arm A items resolve into the pool, coverage is reported as unavailable with a reason, and excluded from aggregate comparison."
+    },
+    "M5_humanPreference": {
+      "label": "Human preference (blinded review)",
+      "kind": "human",
+      "warning": "Only genuine blinded reviews may populate this. No automated score is ever substituted for it. It is not computed unless real reviewers submit reviews.",
+      "formula": "Mean of submitted 1-5 ratings per criterion, per arm, after unblinding. Criteria: relevance, variety, would-use.",
+      "blinding": "Arm labels are replaced by per-brief labels derived deterministically from the protocol hash, so reviewers cannot tell which is which and the mapping is reproducible.",
+      "availabilityRule": "If no review files are present, results must record available=false with a reason. Never synthesise ratings."
+    }
+  },
+  "aggregation": {
+    "primaryRule": "Per-metric per-brief differences (B minus A) at the common slate size.",
+    "signTest": "Count briefs agreeing with the predicted direction.",
+    "supportedStrong": "6 of 6 briefs agree AND median difference is at least the meaningful threshold.",
+    "supportedWeak": "5 of 6 briefs agree AND median difference is at least the meaningful threshold.",
+    "inconclusive": "Anything else.",
+    "powerDisclosure": "With n = 6 briefs, a one-sided sign test reaches p = 0.0156 at 6/6 and p = 0.109 at 5/6. A 5/6 result therefore CANNOT be called significant at alpha = 0.05 and is labelled weak. This is stated in advance so a weak result is not later presented as strong.",
+    "noCompositeScore": "The five metrics are deliberately NOT combined into one score. No defensible weighting scheme exists without human preference data, so no composite is reported."
+  },
+  "meaningfulThresholds": {
+    "M1_briefRelevance": {
+      "value": 0.10,
+      "justification": "One facet out of four is 0.25 at item level; 0.10 is a little under half a facet of mean movement, the smallest shift that would change how a reader describes the answer."
+    },
+    "M2_anchorRecycling": {
+      "value": 0.20,
+      "justification": "One extra recycled item is 0.33 of a 3-item slate. 0.20 is above half an item, so it cannot be produced by a single tie-break flip."
+    },
+    "M3_diversity": {
+      "value": 0.15,
+      "justification": "One extra distinct artist in a 3-item slate is 0.33; in a 6-item slate, 0.17. 0.15 is the smallest change that survives at the larger slate size."
+    },
+    "M4_tagCoverage": {
+      "value": 10.0,
+      "justification": "The repository's own revision gains are 8.1, 21.6 and 3.2 index points, so 10 points is above the smallest gain the project already treats as material, and below the largest."
+    }
+  },
+  "hypotheses": {
+    "H1_diversity": {
+      "claim": "Arm B has a higher distinctArtistRatio than Arm A.",
+      "predictedDirection": "B_minus_A > 0",
+      "note": "Arm A is prompted for 3 artists and often returns distinct names, so this may not hold."
+    },
+    "H2_anchorRecycling": {
+      "claim": "Arm B recycles brief anchors less than Arm A.",
+      "predictedDirection": "B_minus_A < 0",
+      "note": "Arm A is prompted from the brief text, so it is expected to name the famous anchor."
+    },
+    "H3_coverage": {
+      "claim": "Arm B's slate reaches a higher Tag Coverage Index than Arm A's picks where Arm A's picks are measurable in the pool.",
+      "predictedDirection": "B_minus_A > 0",
+      "preregisteredCaveat": "This is expected to be INCONCLUSIVE BY CONSTRUCTION. Arm A answers open-book, so many of its picks will not exist in Arm B's pool, and coverage will be unmeasurable for those. A low Arm A coverage figure is therefore evidence about the measurement's applicability, not evidence that Arm B recommends better music.",
+      "note": "If Arm A picks are unmeasurable, the outcome must be recorded as inconclusive, not as a win for Arm B."
+    },
+    "H4_briefRelevance": {
+      "claim": "Arm A matches brief vocabulary at least as well as Arm B.",
+      "predictedDirection": "B_minus_A <= 0",
+      "note": "Stated against the project's interest on purpose: a fluent model is expected to echo the brief's own words well. This hypothesis exists so that an unfavourable result is predicted rather than explained away."
+    }
+  },
+  "evidenceThatWouldSupport": "6 of 6 briefs agreeing in the predicted direction with median difference at or above the meaningful threshold, on live executions where both arms ran with their declared provenance.",
+  "evidenceThatWouldContradict": "5 or more of 6 briefs agreeing in the opposite direction, or a median difference in the opposite direction above the threshold.",
+  "evidenceThatWouldLeaveInconclusive": "Fewer than 5 of 6 briefs agreeing, a median difference below the threshold, any brief where either arm degraded to sample output, or any metric that is unmeasurable for either arm.",
+  "failureHandling": {
+    "armA_degraded": "If baseline.source is not 'llm', the arm degraded to a fixed sample. The brief is recorded as excluded with that reason and is NOT scored.",
+    "armB_degraded": "If the response mode is not 'live', the brief is recorded as excluded with that reason and is NOT scored.",
+    "qlooRequestFailures": "Recorded per brief from receipts with status != 200. A non-zero count is reported, never hidden.",
+    "missingMetric": "Recorded as null with a reason string. Never coerced to zero.",
+    "networkFailure": "The recording step aborts without overwriting existing evidence. Replay never needs the network."
+  },
+  "provenanceRequirements": [
+    "sourceCommit of the recorded evidence",
+    "sha256 of the protocol file",
+    "sha256 of each raw evidence file",
+    "model source, model id and provider reported by the deployment",
+    "Qloo base URL",
+    "HTTP status and latency per brief",
+    "a per-brief label separating live execution, recorded replay, and sample output"
+  ],
+  "determinism": {
+    "replay": "npm run benchmark recomputes every metric from committed raw evidence and the frozen protocol, then asserts the recomputed results equal the committed results artifact.",
+    "networkRequired": false,
+    "credentialsRequired": false,
+    "seed": "none; no sampling is performed"
+  }
+}
