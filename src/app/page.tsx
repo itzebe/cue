@@ -15,6 +15,11 @@ import { WorkflowBand } from "@/components/WorkflowBand";
 import { SectionNav } from "@/components/SectionNav";
 import { CrossDomainPanel } from "@/components/CrossDomainPanel";
 import { SubstitutePanel } from "@/components/SubstitutePanel";
+import {
+  CounterfactualPanel,
+  GroundingSwitch,
+  UngroundedResult,
+} from "@/components/CounterfactualPanel";
 import { SAMPLE_SCENES } from "@/data/fixtures";
 import type { CueSheet } from "@/lib/types";
 
@@ -48,6 +53,11 @@ export default function StudioPage() {
   const [stage, setStage] = useState(0);
   const [sheet, setSheet] = useState<CueSheet | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // The Qloo ON/OFF counterfactual. On by default: the grounded answer is the
+  // product, and the switch exists so a reader can take it away and see what
+  // remains. The off-state is not a blank page — it renders the model's own
+  // ungrounded answer from the same run, with the measured panels named as absent.
+  const [groundedOn, setGroundedOn] = useState<boolean>(true);
 
   // Advance the stage ticker while a request is in flight so the agent's work
   // is legible rather than an indeterminate spinner.
@@ -64,6 +74,9 @@ export default function StudioPage() {
     setStage(0);
     setError(null);
     setSheet(null);
+    // A fresh run resets the counterfactual to grounded, so the switch never
+    // shows an off-state left over from a previous scene.
+    setGroundedOn(true);
 
     try {
       const response = await fetch("/api/cue", {
@@ -483,6 +496,29 @@ export default function StudioPage() {
                 </ul>
               ) : null}
 
+              {/* The counterfactual control. It governs everything below it in this
+                  column, so it sits above the evidence rather than at the bottom.
+                  Shown only when the run produced a comparison to switch between. */}
+              {sheet.grounding ? (
+                <div className="panel flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-wider text-haze-500">
+                      Grounding
+                    </p>
+                    <p className="mt-1 text-xs leading-relaxed text-haze-300">
+                      {groundedOn
+                        ? "Qloo is on: every panel below is a measured ranking."
+                        : sheet.grounding.ungroundedSource === "llm"
+                          ? "Qloo is off: the measured panels are replaced by the model's own answer."
+                          : "Qloo is off: the measured panels are replaced by a fixed ungrounded sample."}
+                    </p>
+                  </div>
+                  <GroundingSwitch groundedOn={groundedOn} onChange={setGroundedOn} />
+                </div>
+              ) : null}
+
+              {groundedOn ? (
+                <>
               {/* Evidence before recommendation. The audience measurement is the
                   reason to trust everything below it, so it reads first. */}
               <AudienceBriefPanel sheet={sheet} />
@@ -491,6 +527,11 @@ export default function StudioPage() {
                   and above the full cue sheet. It is the clearest demonstration of
                   what Qloo changes, and it was previously six panels deep. */}
               <CompareStrip sheet={sheet} />
+
+              {/* The same comparison as a control the reader can operate, plus the
+                  table of measured fields Qloo supplies and an ungrounded answer
+                  cannot. It reads directly under the static side-by-side. */}
+              <CounterfactualPanel sheet={sheet} />
 
               <section id="cue-sheet" className="scroll-mt-20" aria-label="Cue sheet">
                 <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
@@ -562,6 +603,17 @@ export default function StudioPage() {
                 <RegionPanel sheet={sheet} />
               </div>
               <ReceiptsPanel sheet={sheet} />
+                </>
+              ) : (
+                <>
+                  {/* The Qloo-off state. Not a blank page: the model's own answer,
+                      rendered plainly, followed by the measured panels named as
+                      unavailable. This is the demonstration the switch exists for. */}
+                  <UngroundedResult sheet={sheet} />
+                  <CounterfactualPanel sheet={sheet} />
+                  <ReceiptsPanel sheet={sheet} />
+                </>
+              )}
             </>
           ) : null}
         </div>

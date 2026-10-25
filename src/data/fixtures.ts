@@ -1,4 +1,5 @@
 import type { CueSheet } from "@/lib/types";
+import { compareGrounding } from "@/lib/counterfactual";
 
 /**
  * Pre-computed cue sheet used when no Qloo key is configured.
@@ -206,6 +207,15 @@ export const FIXTURE_SHEET: CueSheet = {
     reasons: [],
   },
 };
+
+// The counterfactual is pure arithmetic over the fixture's own two slates, so the
+// cached example carries a real one rather than a hand-written placeholder. A live
+// sheet computes the same value from the same inputs in `buildCueSheet`.
+FIXTURE_SHEET.grounding = compareGrounding({
+  grounded: FIXTURE_SHEET.cues,
+  ungrounded: FIXTURE_SHEET.baseline.cues,
+  ungroundedSource: FIXTURE_SHEET.baseline.source === "llm" ? "llm" : "sample",
+});
 
 /** Ready-made scene briefs so a judge can try Cue in one click. */
 export const SAMPLE_SCENES: Array<{

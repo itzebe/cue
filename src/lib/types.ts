@@ -10,6 +10,7 @@ import type { AudienceBrief } from "./audience";
 import type { ComparablesResult } from "./comparables";
 import type { CastingResult } from "./casting";
 import type { CrossDomainResult } from "./crossdomain";
+import type { GroundingComparison } from "./counterfactual";
 import type { LocalisationResult } from "./localise";
 import type { LicenseQuote } from "./rights";
 import type { TasteGapResult } from "./coverage";
@@ -302,6 +303,13 @@ export interface CueSheet {
    * Absent when the pool was too small or too sparse to measure.
    */
   tasteGap?: TasteGapResult;
+  /**
+   * The Qloo ON/OFF counterfactual: the grounded slate measured against the
+   * model's ungrounded answer. Pure arithmetic over two lists the sheet already
+   * holds, so it costs no API calls. Present whenever the sheet carries cues,
+   * because the comparison is the answer to the hackathon's eligibility test.
+   */
+  grounding?: GroundingComparison;
 }
 
 export interface Receipt {

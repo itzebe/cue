@@ -5350,6 +5350,235 @@ await check("an empty genre filter still falls back with an explicit label", asy
   }
 });
 
+// ---------------------------------------------------------------------------
+// The Qloo ON/OFF counterfactual.
+//
+// The hackathon's eligibility test is "would this work the same without Qloo?".
+// The feature answers it with arithmetic over two slates the sheet already holds,
+// so the figures must be pinned exactly: if the comparison ever drifts, the claim
+// it supports becomes false while the UI keeps asserting it.
+// ---------------------------------------------------------------------------
+
+function counterfactualCue(overrides: Partial<Record<string, unknown>> = {}) {
+  return {
+    id: "cue-x",
+    artist: "Cliff Martinez",
+    track: "Kickstand",
+    affinity: 0.93,
+    momentum: 1,
+    clearance: "major_label",
+    audienceFit: { "25-34": 0.7 },
+    explainability: [{ entity_id: "urn:tag:x", name: "Neo-noir", score: 0.4 }],
+    why: ["Audiences who like Drive also like this."],
+    ...overrides,
+  };
+}
+
+await check("the counterfactual counts shared names rather than scoring them", async () => {
+  const { compareGrounding } = await import("../src/lib/counterfactual.ts");
+  const result = compareGrounding({
+    grounded: [counterfactualCue()] as never,
+    ungrounded: [
+      { artist: "Cliff Martinez", track: "Kickstand", why: "obvious pick" },
+      { artist: "Chromatics", track: "Tick of the Clock", why: "obvious pick" },
+    ],
+    ungroundedSource: "llm",
+  });
+
+  assert.deepEqual(result.sharedArtists, ["cliff martinez"]);
+  assert.deepEqual(result.groundedOnlyArtists, []);
+  assert.deepEqual(result.ungroundedOnlyArtists, ["chromatics"]);
+  assert.equal(result.overlapCount, 1);
+  assert.equal(result.overlapRatio, 0.5, "1 shared of 2 union names");
+  assert.equal(result.ungroundedSource, "llm");
+  assert.ok(
+    /share 1 of the 2 artists/i.test(result.verdict),
+    `the verdict must state the count it measured: ${result.verdict}`,
+  );
+  assert.ok(
+    !/better|worse|superior/i.test(result.verdict),
+    `the verdict must not pass a quality judgement: ${result.verdict}`,
+  );
+});
+
+await check("the counterfactual is deterministic for the same two slates", async () => {
+  const { compareGrounding } = await import("../src/lib/counterfactual.ts");
+  const input = {
+    grounded: [counterfactualCue(), counterfactualCue({ artist: "Sault", id: "cue-y" })] as never,
+    ungrounded: [{ artist: "Sault", track: "Wildfires", why: "known" }],
+    ungroundedSource: "llm" as const,
+  };
+  const a = compareGrounding(input);
+  const b = compareGrounding(input);
+  assert.deepEqual(a, b, "pure arithmetic must not vary between calls");
+});
+
+await check("a repeated artist is counted once, not once per row", async () => {
+  const { compareGrounding } = await import("../src/lib/counterfactual.ts");
+  const result = compareGrounding({
+    grounded: [
+      counterfactualCue({ id: "a" }),
+      counterfactualCue({ id: "b" }),
+    ] as never,
+    ungrounded: [{ artist: "Cliff Martinez", track: "x", why: "y" }],
+    ungroundedSource: "llm",
+  });
+  assert.equal(result.overlapCount, 1, "two rows, one artist, one shared name");
+  assert.equal(result.overlapRatio, 1, "the union is one artist");
+});
+
+await check("the counterfactual names the measured fields the other side cannot carry", async () => {
+  const { compareGrounding, GROUNDED_CAPABILITIES } = await import(
+    "../src/lib/counterfactual.ts"
+  );
+  const result = compareGrounding({
+    grounded: [counterfactualCue()] as never,
+    ungrounded: [{ artist: "Coldplay", track: "Fix You", why: "famous" }],
+    ungroundedSource: "llm",
+  });
+
+  const known = new Set(GROUNDED_CAPABILITIES.map((c) => c.key));
+  for (const key of result.capabilitiesLost) {
+    assert.ok(known.has(key), `capability ${key} must be a declared one`);
+  }
+  assert.ok(result.capabilitiesLost.includes("affinity"), "the grounded cue has an affinity");
+  assert.ok(result.capabilitiesLost.includes("momentum"), "the grounded cue has momentum");
+  assert.ok(
+    result.capabilitiesLost.length > 0,
+    "a measured slate must report at least one field the other cannot carry",
+  );
+  assert.ok(
+    /measurement, not an opinion/i.test(result.verdict),
+    `the verdict must attribute the absence to missing data: ${result.verdict}`,
+  );
+});
+
+await check("a sample ungrounded answer is never presented as a live model answer", async () => {
+  const { compareGrounding } = await import("../src/lib/counterfactual.ts");
+  const result = compareGrounding({
+    grounded: [counterfactualCue()] as never,
+    ungrounded: [{ artist: "Coldplay", track: "Fix You", why: "famous" }],
+    ungroundedSource: "sample",
+  });
+  assert.equal(result.ungroundedSource, "sample");
+  assert.ok(
+    /fixed sample, not a live model answer/i.test(result.verdict),
+    `a sample must be labelled as one: ${result.verdict}`,
+  );
+});
+
+await check("an empty side yields no overlap claim and no division by zero", async () => {
+  const { compareGrounding } = await import("../src/lib/counterfactual.ts");
+  const result = compareGrounding({
+    grounded: [counterfactualCue()] as never,
+    ungrounded: [],
+    ungroundedSource: "llm",
+  });
+  assert.equal(result.overlapRatio, 0);
+  assert.equal(result.overlapCount, 0);
+  assert.ok(
+    /nothing to compare/i.test(result.verdict),
+    `an absent side must be stated, not silently scored: ${result.verdict}`,
+  );
+});
+
+await check("a live sheet carries the counterfactual of its own two slates", async () => {
+  // The feature is only real if the pipeline attaches it. A sheet with cues but no
+  // grounding would leave the switch with nothing to switch between.
+  const { buildCueSheet } = await import("../src/lib/planner.ts");
+  const original = globalThis.fetch;
+  const saved = { ...process.env };
+  try {
+    delete process.env.LLM_API_KEY;
+    delete process.env.OPENAI_API_KEY;
+    delete process.env.OPENROUTER_API_KEY;
+
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input.toString();
+      const parsed = new URL(url);
+      if (parsed.pathname === "/v2/search") return jsonResponse(QLOO_SEARCH);
+      if (parsed.pathname === "/v2/insights") return jsonResponse(QLOO_INSIGHTS);
+      if (parsed.pathname === "/v2/trending") return jsonResponse(QLOO_TRENDING);
+      if (parsed.pathname === "/v2/analysis/compare") return jsonResponse(QLOO_COMPARE);
+      return jsonResponse({ error: "unexpected path" }, 404);
+    }) as typeof fetch;
+
+    const sheet = await buildCueSheet({
+      scene: 'A 90s noir thriller referencing "Drive". Los Angeles, audience 25-34.',
+    });
+    assert.ok(sheet.cues.length > 0, "the fixture scene must ground at least one cue");
+    assert.ok(sheet.grounding, "a grounded sheet must carry its counterfactual");
+    assert.equal(
+      sheet.grounding!.grounded.count,
+      sheet.cues.length,
+      "the comparison must measure the sheet's own cue list",
+    );
+    assert.equal(
+      sheet.grounding!.ungrounded.count,
+      sheet.baseline.cues.length,
+      "the comparison must measure the sheet's own baseline list",
+    );
+    assert.equal(
+      sheet.grounding!.ungroundedSource,
+      sheet.baseline.source === "llm" ? "llm" : "sample",
+      "the comparison must inherit the baseline's real provenance",
+    );
+  } finally {
+    process.env = saved;
+    globalThis.fetch = original;
+  }
+});
+
+await check("a sheet with no cues makes no counterfactual claim", async () => {
+  // With no grounded rows there is no difference to show. Attaching a comparison
+  // that claims one would be the exact overclaim the panel exists to avoid.
+  const { buildCueSheet } = await import("../src/lib/planner.ts");
+  const original = globalThis.fetch;
+  const saved = { ...process.env };
+  try {
+    delete process.env.LLM_API_KEY;
+    delete process.env.OPENAI_API_KEY;
+    delete process.env.OPENROUTER_API_KEY;
+
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input.toString();
+      const parsed = new URL(url);
+      if (parsed.pathname === "/v2/search") return jsonResponse(QLOO_SEARCH);
+      if (parsed.pathname === "/v2/insights") {
+        return jsonResponse({ results: { entities: [] } });
+      }
+      if (parsed.pathname === "/v2/trending") return jsonResponse(QLOO_TRENDING);
+      if (parsed.pathname === "/v2/analysis/compare") return jsonResponse(QLOO_COMPARE);
+      return jsonResponse({ error: "unexpected path" }, 404);
+    }) as typeof fetch;
+
+    const sheet = await buildCueSheet({
+      scene: 'A 90s noir thriller referencing "Drive". Los Angeles, audience 25-34.',
+    });
+    assert.equal(sheet.cues.length, 0, "this fixture returns no ranked artists");
+    assert.equal(sheet.grounding, undefined, "no cues means no counterfactual");
+  } finally {
+    process.env = saved;
+    globalThis.fetch = original;
+  }
+});
+
+await check("the fixture carries a real counterfactual, not a placeholder", async () => {
+  const { FIXTURE_SHEET } = await import("../src/data/fixtures.ts");
+  const { compareGrounding } = await import("../src/lib/counterfactual.ts");
+  assert.ok(FIXTURE_SHEET.grounding, "the cached example must render the switch");
+  const recomputed = compareGrounding({
+    grounded: FIXTURE_SHEET.cues,
+    ungrounded: FIXTURE_SHEET.baseline.cues,
+    ungroundedSource: "sample",
+  });
+  assert.deepEqual(
+    FIXTURE_SHEET.grounding,
+    recomputed,
+    "the fixture value must be the arithmetic over its own slates",
+  );
+});
+
 console.log(`\n${passed} passed, ${failures.length} failed.\n`);
 if (failures.length > 0) {
   for (const failure of failures) console.error(`  - ${failure}`);
