@@ -3832,6 +3832,189 @@ await check("12. A failed track-naming call degrades a sheet that still ranked",
   }
 });
 
+// ---------------------------------------------------------------------------
+// The Taste Gap. These assert the measurement's actual contract: it is built
+// only from tags Qloo returned, it is reproducible, it never reports a number
+// the evidence cannot support, and it never claims an improvement it did not
+// measure. The Qloo responses below are shaped like real ones (a pool of
+// entities each carrying `tags: [{id, name}]`).
+// ---------------------------------------------------------------------------
+
+const { computeTasteGap, measureSlate, sharedVocabulary, MIN_TAG_SUPPORT } = await import(
+  "../src/lib/coverage.ts"
+);
+
+function qlooEntity(name: string, tags: string[], affinity?: number) {
+  return {
+    entity_id: `id-${name}`,
+    name,
+    type: "urn:entity:artist",
+    tags: tags.map((tag) => ({ tag_id: `urn:tag:qloo:${tag}`, name: tag })),
+    query: affinity === undefined ? {} : { affinity },
+    popularity: 0.5,
+  };
+}
+
+// A pool with a deliberate structure: Alpha and Beta carry the *same* four
+// tags (a concentrated pair), while Gamma and Delta share two different tags
+// with each other. `unique_alpha` / `unique_gamma` appear once each, so they are
+// excluded from the shared vocabulary — which is the point of the threshold.
+//
+// Shared vocabulary is therefore {base, warmth, texture, drive, shimmer, air}.
+// The concentrated pair reaches 4 of those 6; a spread pair reaches all 6.
+const TASTE_POOL = [
+  qlooEntity("Alpha", ["base", "warmth", "texture", "drive", "unique_alpha"], 0.9),
+  qlooEntity("Beta", ["base", "warmth", "texture", "drive"], 0.8),
+  qlooEntity("Gamma", ["shimmer", "air", "unique_gamma"], 0.7),
+  qlooEntity("Delta", ["shimmer", "air"], 0.6),
+];
+
+const VOCAB = [
+  "urn:tag:qloo:base",
+  "urn:tag:qloo:warmth",
+  "urn:tag:qloo:texture",
+  "urn:tag:qloo:drive",
+  "urn:tag:qloo:shimmer",
+  "urn:tag:qloo:air",
+];
+
+await check("Taste Gap: the vocabulary is restricted to tags shared by 2+ entities", async () => {
+  const { toCoverageEntities } = await import("../src/lib/coverage.ts");
+  const vocab = sharedVocabulary(toCoverageEntities(TASTE_POOL as never));
+  assert.equal(vocab.size, 6, "only tags on 2+ entities may count toward the vocabulary");
+  for (const tag of VOCAB) assert.ok(vocab.has(tag), `${tag} should be in the vocabulary`);
+  assert.ok(
+    !vocab.has("urn:tag:qloo:unique_alpha"),
+    "a tag on one entity is metadata, not common ground",
+  );
+  assert.ok(!vocab.has("urn:tag:qloo:unique_gamma"));
+  assert.equal(MIN_TAG_SUPPORT, 2);
+});
+
+await check("Taste Gap: a concentrated slate scores lower than a spread one", async () => {
+  const { toCoverageEntities } = await import("../src/lib/coverage.ts");
+  const entities = toCoverageEntities(TASTE_POOL as never);
+  const concentrated = measureSlate(entities, [0, 1]);
+  const spread = measureSlate(entities, [0, 2]);
+  assert.ok(
+    spread.index > concentrated.index,
+    `spread ${spread.index} should beat concentrated ${concentrated.index}`,
+  );
+  assert.equal(concentrated.coveredTags, 4, "the duplicated pair reaches 4 of 6 shared tags");
+  assert.equal(spread.coveredTags, 6, "the spread pair reaches all 6");
+  assert.equal(concentrated.redundancy, 1, "identical tag sets are fully redundant");
+  assert.ok(spread.redundancy < concentrated.redundancy);
+});
+
+await check("Taste Gap: identical inputs produce identical measurements", async () => {
+  const { toCoverageEntities } = await import("../src/lib/coverage.ts");
+  const entities = toCoverageEntities(TASTE_POOL as never);
+  const a = computeTasteGap(TASTE_POOL as never, [0, 1], 2);
+  const b = computeTasteGap(TASTE_POOL as never, [0, 1], 2);
+  assert.equal(a.original.index, b.original.index);
+  assert.equal(a.original.vocabularySize, b.original.vocabularySize);
+  assert.deepEqual(
+    a.revised.entities.map((e) => e.entityId),
+    b.revised.entities.map((e) => e.entityId),
+    "the revision must be deterministic",
+  );
+  assert.equal(entities.length, 4);
+});
+
+await check("Taste Gap: the revision improves the index and preserves the top pick", async () => {
+  const gap = computeTasteGap(TASTE_POOL as never, [0, 1], 2);
+  assert.equal(gap.revised.improves, true, "a duplicated slate has room to spread");
+  assert.ok(gap.revised.indexDelta > 0);
+  assert.equal(
+    gap.revised.entities[0].entityId,
+    "id-Alpha",
+    "the brief's strongest pick must not be discarded by the revision",
+  );
+  assert.equal(gap.revised.entities.length, 2, "the revision holds the slate size fixed");
+});
+
+await check("Taste Gap: no improvement is claimed when the slate already covers the pool", async () => {
+  // One entity is the whole pool: nothing can improve on it.
+  const single = [qlooEntity("Solo", ["jazz", "soul"], 0.9), qlooEntity("Duo", ["jazz", "soul"], 0.8)];
+  const gap = computeTasteGap(single as never, [0, 1], 2);
+  assert.equal(gap.revised.indexDelta, 0, "an already-complete slate cannot gain");
+  assert.equal(gap.revised.improves, false, "improves must be false when the metric did not rise");
+  assert.match(gap.revised.rationale, /stands|no better arrangement/i);
+});
+
+await check("Taste Gap: missing evidence yields an explicit unavailable state, not a zero", async () => {
+  // Entities with no tags at all: nothing to measure.
+  const bare = [qlooEntity("One", []), qlooEntity("Two", [])];
+  const gap = computeTasteGap(bare as never, [0, 1], 2);
+  assert.ok(gap.unavailableReason, "an unmeasurable pool must say so");
+  assert.match(gap.unavailableReason!, /cannot be computed|not a score of zero/i);
+  assert.equal(gap.original.vocabularySize, 0);
+  assert.equal(gap.revised.improves, false, "an unavailable measurement is never an improvement");
+});
+
+await check("Taste Gap: a single-candidate pool is reported as unmeasurable", async () => {
+  const one = [qlooEntity("Only", ["jazz", "soul"])];
+  const gap = computeTasteGap(one as never, [0], 1);
+  assert.ok(gap.unavailableReason, "coverage needs a pool to measure against");
+  assert.match(gap.unavailableReason!, /fewer than two candidates/i);
+});
+
+await check("Taste Gap: entities with no id or name are excluded from the evidence", async () => {
+  const { toCoverageEntities } = await import("../src/lib/coverage.ts");
+  const messy = [
+    {
+      entity_id: "x",
+      name: "Has Tags",
+      type: "urn:entity:artist",
+      // A bare tag with no id/name, exactly as the live API returns for
+      // voice_type tags. It must not become a nameless evidence row.
+      tags: [{ type: "urn:tag:voice_type:qloo" }, { id: "urn:tag:qloo:real", name: "Real" }],
+    },
+  ];
+  const entities = toCoverageEntities(messy as never);
+  assert.deepEqual(entities[0].tags, ["urn:tag:qloo:real"]);
+  assert.deepEqual(entities[0].tagNames, { "urn:tag:qloo:real": "Real" });
+});
+
+await check("Taste Gap: duplicate tags on one entity are counted once", async () => {
+  const { toCoverageEntities } = await import("../src/lib/coverage.ts");
+  const dup = [
+    qlooEntity("Dup", ["jazz", "jazz", "jazz", "soul"], 0.5),
+    qlooEntity("Other", ["jazz", "soul"], 0.4),
+  ];
+  const entities = toCoverageEntities(dup as never);
+  const vocab = sharedVocabulary(entities);
+  assert.equal(vocab.size, 2, "a repeated tag is still one tag");
+  const measured = measureSlate(entities, [0, 1]);
+  assert.equal(measured.coveredTags, 2);
+});
+
+await check("Taste Gap: the index is never presented as an audience share", async () => {
+  const { COVERAGE_LABEL } = await import("../src/lib/coverage.ts");
+  assert.equal(COVERAGE_LABEL, "Tag Coverage Index");
+  assert.doesNotMatch(COVERAGE_LABEL, /audience|listener|population|share|reach/i);
+  const gap = computeTasteGap(TASTE_POOL as never, [0, 1], 2);
+  // The denominator is the pool's own tag union, so the index cannot exceed 100.
+  assert.ok(gap.original.index <= 100 && gap.original.index >= 0);
+  assert.equal(gap.original.vocabularySize, 6);
+  assert.ok(gap.original.coveredTags <= gap.original.vocabularySize);
+});
+
+await check("Taste Gap: a slate covering the whole pool reports no gaps", async () => {
+  const gap = computeTasteGap(TASTE_POOL as never, [0, 2, 3], 3);
+  assert.equal(gap.original.index, 100, "three picks span every shared tag in this pool");
+  assert.equal(gap.original.gaps.length, 0);
+});
+
+await check("Taste Gap: backfill provenance survives into the measured entities", async () => {
+  const withBackfill = [
+    qlooEntity("Primary", ["jazz", "soul"], 0.9),
+    { ...qlooEntity("Discovered", ["jazz", "soul", "live"], 0.5), backfill: true },
+  ];
+  const gap = computeTasteGap(withBackfill as never, [0, 1], 2);
+  assert.equal(gap.revised.entities[1].backfill, true, "a discovery pick must stay labelled");
+});
+
 console.log(`\n${passed} passed, ${failures.length} failed.\n`);
 if (failures.length > 0) {
   for (const failure of failures) console.error(`  - ${failure}`);

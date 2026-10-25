@@ -12,6 +12,7 @@ import type { CastingResult } from "./casting";
 import type { CrossDomainResult } from "./crossdomain";
 import type { LocalisationResult } from "./localise";
 import type { LicenseQuote } from "./rights";
+import type { TasteGapResult } from "./coverage";
 
 export type EntityType =
   | "urn:entity:artist"
@@ -287,6 +288,13 @@ export interface CueSheet {
   tasteMap?: CrossDomainResult;
   /** Marketplace quotes, keyed by cue id, generated on demand from the sheet. */
   quotes?: LicenseQuote[];
+  /**
+   * The Taste Gap: how much of the brief's candidate pool taste space the slate
+   * reaches, and a revision that reaches more of it. Computed entirely from the
+   * tags Qloo already returned on the affinity call, so it costs no extra calls.
+   * Absent when the pool was too small or too sparse to measure.
+   */
+  tasteGap?: TasteGapResult;
 }
 
 export interface Receipt {

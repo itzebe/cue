@@ -30,6 +30,7 @@ import type { ComparablesResult } from "./comparables";
 import type { CrossDomainResult } from "./crossdomain";
 import { localiseBrief, type LocalisationResult } from "./localise";
 import { computeSheetStatus } from "./status";
+import { computeTasteGap } from "./coverage";
 import { FIXTURE_SHEET } from "@/data/fixtures";
 
 /**
@@ -621,14 +622,25 @@ export async function buildCueSheet(
   // discovery picks. Taking a flat slice of `combined` would silently discard
   // every backfill result, because the primary call already returns more rows
   // than the sheet holds.
-  const primary = combined.filter((entity) => !entity.backfill);
-  const discovery = combined.filter((entity) => entity.backfill);
+  //
+  // The selection is held as indices into `combined` rather than as entity
+  // objects, so the same array can be handed to the Taste Gap measurement: it
+  // needs the whole candidate pool *and* which of its members made the slate,
+  // and deriving that from names afterwards would be guesswork.
+  const primaryIdx = combined.map((_, index) => index).filter((index) => !combined[index].backfill);
+  const discoveryIdx = combined.map((_, index) => index).filter((index) => combined[index].backfill);
   const DISCOVERY_SLOTS = 2;
   const SHEET_SIZE = 8;
-  const selected = [
-    ...primary.slice(0, SHEET_SIZE - DISCOVERY_SLOTS),
-    ...discovery.slice(0, DISCOVERY_SLOTS),
+  const selectedIdx = [
+    ...primaryIdx.slice(0, SHEET_SIZE - DISCOVERY_SLOTS),
+    ...discoveryIdx.slice(0, DISCOVERY_SLOTS),
   ].slice(0, SHEET_SIZE);
+  const selected = selectedIdx.map((index) => combined[index]);
+
+  // The Taste Gap. Pure computation over the tags Qloo already returned on the
+  // affinity call — it adds no API calls and no latency. Measured over every
+  // candidate the pipeline retrieved for this brief, not just the eight shown.
+  const tasteGap = computeTasteGap(combined, selectedIdx, selectedIdx.length);
 
   // Stages 4 and 5 are independent of each other and of the cross-domain work
   // below, and the LLM track call is the slowest step in the pipeline. Running
@@ -750,6 +762,10 @@ export async function buildCueSheet(
     // prevent. A brief with no anchors is still dropped — there the panel has
     // nothing truthful to say.
     tasteMap: tasteMap.anchors.length > 0 ? tasteMap : undefined,
+    // Always present, even when unmeasurable: the panel shows `unavailableReason`
+    // in that case. Dropping the field would make "Qloo returned no measurable
+    // pool" indistinguishable from "this feature does not exist".
+    tasteGap,
   };
 
   // Computed last, from the assembled sheet, so the status is derived from what
