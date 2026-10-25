@@ -23,5 +23,9 @@ jobs:
         run: npm run reproduce
       - name: Reproduce the exhaustive null distribution
         run: npm run reproduce:benchmark
+      - name: Benchmark — replay metrics and assert they match the committed artifact
+        run: npm run benchmark
+      - name: Benchmark — verification suite
+        run: npm run benchmark:verify
       - name: Production build
         run: npm run build

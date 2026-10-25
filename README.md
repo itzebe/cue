@@ -402,12 +402,102 @@ when the model answered, and `sample` when a labelled fixed example is used inst
 says which). The Qloo column carries affinity, provenance and receipts the baseline cannot have.
 
 This is a side-by-side demonstration, not a measured evaluation: it shows what each answer contains
-on one brief. It does not establish that Cue outperforms an LLM, and the Taste Gap figures above are
-a separate measurement that makes no such claim either.
+on one brief. It does not establish that Cue outperforms an LLM.
 
 Every claim in the sheet is traceable:
 
 ![Receipts: every Qloo endpoint called, with status, latency and row count](docs/screenshots/05-evidence-receipts.jpg)
+
+## The benchmark: Qloo against an LLM-only baseline
+
+To find out whether the grounding actually changes the answer, there is a preregistered benchmark in
+[`benchmark/`](benchmark/). It compares two arms on six identical briefs:
+
+- **Arm A — LLM-only.** The model answers from parametric knowledge alone, with no Qloo data.
+- **Arm B — Cue.** The production pipeline, ranked by Qloo.
+
+Both arms come from **one response** of the deployed app. Cue already builds its own ungrounded
+control group (`CueSheet.baseline`), so Arm A is the shipped code path rather than a
+reimplementation, and its own `source` field says whether the model ran or a labelled sample was
+substituted.
+
+**The protocol was committed before the metrics were computed** ([`benchmark/protocol.json`](benchmark/protocol.json),
+committed at `6d38c7d`). It freezes the arms, the briefs, the metric formulas, the tie handling, the
+meaningful thresholds, and the criteria for support, contradiction and inconclusive — plus the
+sha256 of the file, which is recorded in the results so the metric definitions cannot be quietly
+changed after seeing the numbers.
+
+### What the benchmark found
+
+It did not find that Cue wins. All four preregistered hypotheses were inconclusive or contradicted,
+and [`benchmark/results.json`](benchmark/results.json) reports exactly that:
+
+| Metric | Result | Outcome |
+|---|---|---|
+| Brief relevance | Arm A matched brief vocabulary better, 6/6, median −0.50 | Contradicted — but see the sensitivity check |
+| Anchor recycling | Neither arm recycled the named anchor | Inconclusive (no discrimination) |
+| Recommendation diversity | Identical, both 1.0 distinct-artist ratio | Inconclusive (no discrimination) |
+| Tag Coverage Index | Arm B +25 points on the one brief where Arm A was measurable at all | Inconclusive by construction |
+| Human preference | Not performed | Not available — and no automated score is substituted for it |
+
+Two of those results are worth more than the headline.
+
+**The relevance result is a measurement artifact, and the benchmark says so.** Arm A's rationale is
+written prose that tends to contain mood words; Arm B's is Qloo provenance boilerplate that cannot.
+A lexical proxy therefore rewards Arm A for something other than relevance. A sensitivity block
+recomputes the metric over artist and track only — dropping the rationale entirely — and there the
+difference **disappears completely** (median diff 0.0000). Both bounds are published. A benchmark
+that reported only the first number would be reporting the metric's bias as a finding.
+
+**The coverage result is inconclusive because the measurement barely applies.** Coverage is
+pool-relative, and Arm A answers open-book, so most of its picks do not exist in Arm B's pool at all.
+Only one brief had any measurable Arm A pick. The protocol preregistered this as expected to be
+inconclusive *before* the data existed, precisely so that a low Arm A figure could not later be
+presented as a Cue win. An unmeasurable pick is recorded as unmeasurable, never scored as zero.
+
+### What this does and does not establish
+
+It establishes that the comparison is reproducible and that its own weaknesses are reported. It does
+**not** establish that Cue recommends better music than an LLM: that requires human listeners, and
+the metric for it is present but empty rather than filled with a proxy.
+
+The limits are stated in the artifact rather than left to be discovered:
+
+- **Pool parity is not achievable.** Arm A is never given a candidate pool, so pool-relative metrics
+  cannot be compared like-for-like. The smallest safe fix — a closed-book variant that hands both
+  arms the same list — would change what Arm A means, so it is named in the protocol and
+  deliberately not implemented.
+- **Relevance is a lexical proxy**, not a judgement, and applies no stemming.
+- **n = 6.** A one-sided sign test gives p = 0.0156 at 6/6 and p = 0.109 at 5/6, so a 5/6 result
+  cannot be called significant at α = 0.05. This is stated up front so a weak result cannot later be
+  presented as strong.
+- **No composite score.** The metrics are not combined into one number, because no defensible
+  weighting exists without human preference data.
+
+### Reproduce it
+
+```bash
+npm run benchmark          # recompute every metric and assert it matches the committed artifact
+npm run benchmark:verify   # the benchmark's own test suite (48 checks)
+npm run benchmark:report   # the tables above
+```
+
+Replay needs **no network and no credentials** — it reads the committed raw responses and
+recomputes. Recording new evidence is the only step that touches the network:
+
+```bash
+npm run benchmark:record   # call the deployed app once per brief, write raw evidence
+npm run benchmark:pool     # rebuild each candidate pool and verify it against the recorded fingerprint
+```
+
+The candidate pool is not in the app's response and coverage is pool-relative, so the pool has to be
+rebuilt before the metric can be recomputed offline. `benchmark:pool` calls the same production
+functions the planner calls, then checks the result against a fingerprint the deployment itself
+recorded — pool size, vocabulary size, covered tags and redundancy. All six match exactly, including
+the index to full precision, so the frozen pools are the pools that produced the published figures.
+A mismatch writes nothing, and coverage becomes unavailable rather than being measured on the wrong
+pool.
+
 
 ## Mobile
 
@@ -485,6 +575,8 @@ React and Next — the pipeline is plain TypeScript in `src/lib/`.
 npm run verify               # 167 checks
 npm run reproduce            # 3 checks: rebuilds the README's Taste Gap table offline
 npm run reproduce:benchmark  # 20 checks: exhaustive null distribution for the same briefs
+npm run benchmark            # replay the Qloo-vs-LLM-only metrics and assert they match the artifact
+npm run benchmark:verify     # 48 checks: the benchmark's own verification suite
 npm run typecheck            # tsc --noEmit
 npm run build                # production build
 ```
