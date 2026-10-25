@@ -18,6 +18,7 @@ const SECTIONS = [
   { id: "audit", label: "Audit" },
   { id: "audience", label: "Audience" },
   { id: "comparison", label: "Comparison" },
+  { id: "counterfactual", label: "Qloo on/off" },
   { id: "cue-sheet", label: "Cue sheet" },
   { id: "budget", label: "Budget" },
   { id: "marketplace", label: "Marketplace" },

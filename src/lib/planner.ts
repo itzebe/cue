@@ -31,6 +31,7 @@ import type { CrossDomainResult } from "./crossdomain";
 import { localiseBrief, type LocalisationResult } from "./localise";
 import { computeSheetStatus } from "./status";
 import { computeTasteGap } from "./coverage";
+import { compareGrounding } from "./counterfactual";
 import { FIXTURE_SHEET } from "@/data/fixtures";
 
 /**
@@ -766,6 +767,18 @@ export async function buildCueSheet(
     // in that case. Dropping the field would make "Qloo returned no measurable
     // pool" indistinguishable from "this feature does not exist".
     tasteGap,
+    // The counterfactual is computed from the two slates the sheet already holds,
+    // so it is pure arithmetic and costs no API calls. It is only meaningful when
+    // the grounded slate has rows to compare; with no cues there is no difference
+    // to show, and claiming one would be the very overclaim this panel refutes.
+    grounding:
+      cues.length > 0
+        ? compareGrounding({
+            grounded: cues,
+            ungrounded: baseline.cues,
+            ungroundedSource: baseline.source === "llm" ? "llm" : "sample",
+          })
+        : undefined,
   };
 
   // Computed last, from the assembled sheet, so the status is derived from what
