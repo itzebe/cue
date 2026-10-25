@@ -133,37 +133,103 @@ A cue sheet can rank eight individually defensible picks and still circle one co
 audience. Every other panel here measures picks one at a time; none measures what the slate as a
 whole covers. The Taste Gap asks that question and answers it with Qloo data.
 
-![The Taste Gap: tag coverage index, both slates side by side, and the taste tags the pool reaches that the slate does not](docs/screenshots/07-taste-gap.jpg)
+It is the first thing the page shows once a sheet exists — the audit headline opens the results
+column, and the full evidence panel sits below the cue sheet. The headline is the thirty-second
+read: the brief, the baseline, the result, and the number of previously unreached taste tags the
+revision now covers.
 
-- **What it measures:** how much of a brief's *shared* taste vocabulary the slate reaches, as a
-  **Tag Coverage Index**. Each candidate entity Qloo returns carries its own tags; the index is the
-  share of the pool's shared tags the slate's entities collectively carry.
-- **What it is not:** a share of listeners, a share of any population, a probability, or a count of
-  taste clusters. The denominator is the union of tags across the candidates Qloo returned *for this
-  brief*. The panel says so in as many words, because a coverage number is easy to overstate.
-- **Why the vocabulary is restricted to tags shared by 2+ candidates.** Raw tag counts track how
-  richly Qloo has catalogued an artist, not how broad their cultural reach is — measured range was
-  44 to 100 tags *within a single pool*. Ranking on the raw universe made the optimiser simply pick
-  the most-documented entities and call it coverage. The threshold removes that bias.
-- **The revised slate.** It seeds the brief's top-ranked pick and never discards it — the affinity
-  ranking is the brief's strongest answer, and a "revision" that dropped it would be answering a
-  different brief. Remaining slots take whichever candidate adds the most uncovered tags, holding
-  slate size fixed. Improvement is only ever reported when the index actually rose.
-- **No extra API calls.** The metric is computed from the `tags[]` Qloo already returns on the
-  affinity call (`feature.explainability=true`). Live probing confirmed those tags are a superset of
-  what `/v2/analysis/compare` reports for the same entity, so no second request is needed. The
-  feature adds no latency.
-- **Unmeasurable is reported as unmeasurable.** A pool too small or too sparse to measure shows the
-  limitation, never a zero. A zero would read as "this slate reaches nothing", which is a different
-  and false claim.
+![The audit headline: baseline index, revised index, and the gain](docs/screenshots/08-audit-headline.png)
 
-Measured on live Qloo:
+### The measurement, exactly
 
-| Brief | Index | After revision | Concentration |
-|---|---|---|---|
-| Massive Attack + Portishead | 84.6% | 95.3% (+10.7) | 27.3% → 23.9% |
-| Sault | 69.1% | 97.1% (+28.1) | 17.8% → 14.6% |
-| Nils Frahm | 89.5% | 96.8% (+7.3) | 28.5% → 24.2% |
+The index is one division, with the numerator and denominator both displayed in the product so a
+reader can check the arithmetic rather than trust the headline:
+
+```
+                     distinct shared taste tags the slate's entities carry
+Tag Coverage Index = ──────────────────────────────────────────────────────── × 100
+                     distinct shared taste tags across the whole candidate pool
+```
+
+- **A dimension is covered** when at least one selected entity carries it.
+- **The vocabulary** is every tag carried by at least two *distinct* candidates in the pool. A
+  tag on a single candidate is that entity's own metadata, not common cultural ground.
+- **Dimensions are weighted equally.** There is no defensible reason to prefer one taste tag over
+  another without evidence, so equal weighting is the default and the only setting the product
+  uses. The engine accepts explicit weights and reports which were used, but Cue does not pass any.
+- **Duplicates never inflate a count.** A repeated tag on one entity counts once, and the same
+  entity returned twice in a pool counts as one piece of evidence — two copies are not two
+  independent observations.
+- **Both sides of the comparison use the same denominator.** The original slate and the revision
+  are measured by the identical function against the identical pool union, which is what makes the
+  delta meaningful rather than two different calculations sharing a name.
+
+### What it is not
+
+- **Not a share of listeners or of any population**, and not a probability. The denominator is the
+  union of tags across the candidates Qloo returned *for this brief*, and it does not generalise
+  beyond that pool. The panel states this in as many words, because a coverage number is easy to
+  overstate.
+- **Not a count of taste clusters.** Grouping entities into clusters would need a documented
+  clustering method and a defensible *k*; tag overlap supplies neither. Cue reports overlap.
+- **Not proof of audience reach, satisfaction, purchase intent or commercial success.** A higher
+  index means the slate covers more of the taste tags present in this candidate pool — wider spread
+  across what Qloo measured, nothing more.
+
+### Why the vocabulary is restricted to tags shared by 2+ candidates
+
+Raw tag counts track how richly Qloo has catalogued an artist, not how broad their cultural reach
+is — the measured range was 44 to 100 tags *within a single pool*. Ranking on the raw universe made
+the optimiser simply pick the most-documented entities (Bonobo 100, GusGus 95, Yppah 86) and call it
+coverage. The threshold removes that bias, and the tests assert it directly.
+
+### The revision
+
+It seeds the brief's top-ranked pick and never discards it — the affinity ranking is the brief's
+strongest answer, and a "revision" that dropped it would be answering a different brief. Remaining
+slots take whichever candidate adds the most uncovered tags, holding slate size fixed. Ties break on
+pool order, so the result is deterministic for identical input; affinity is deliberately not a
+tiebreaker, because a cross-domain discovery pick's affinity comes from a different Qloo call and is
+not on the same scale.
+
+Improvement is only ever reported when the index actually rose. When no reordering helps, the panel
+says the original slate stands rather than manufacturing a gain.
+
+### No extra API calls
+
+The metric is computed from the `tags[]` Qloo already returns on the affinity call
+(`feature.explainability=true`). Live probing confirmed those tags are a superset of what
+`/v2/analysis/compare` reports for the same entity, so no second request is needed. The feature adds
+no latency and no cost.
+
+### Unmeasurable is reported as unmeasurable
+
+A pool too small or too sparse to measure shows the limitation, never a zero. A zero would read as
+"this slate reaches nothing", which is a different and false claim. The result also carries
+evidence warnings — a selection index outside the pool, for instance — and the panel renders them
+rather than presenting a flagged measurement as clean.
+
+### Measured on live Qloo
+
+Reproduced end to end against the hackathon API. The index is pool-dependent by construction — the
+denominator is the tag union of the candidates *that brief* returned — so every row below is one run
+of one brief, and the numerator and denominator are shown because they change between runs:
+
+| Brief | Index | After revision | Gain | Tags not reached |
+|---|---|---|---|---|
+| Massive Attack + Portishead | 84.6% (126/149) | 95.3% (142/149) | +10.7 | 23 |
+| Sault | 69.1% (96/139) | 97.1% (135/139) | +28.1 | 43 |
+| Nils Frahm | 89.5% (111/124) | 96.8% (120/124) | +7.3 | 13 |
+
+The first row was recomputed independently from the raw Qloo response and the documented selection
+rule, without calling the coverage module's arithmetic, and matched to nine decimal places. That is
+the check that the formula above is the whole calculation and not an approximation of it.
+
+The same brief run through the application's own tag extraction measures 85.2% (132/155) → 95.5%
+(148/155), +10.3, because the app derives its mood and instrumentation tags from the brief text
+rather than from the hand-picked tag list used in the reproduction above. The formula is identical;
+the pool is not. That sensitivity is inherent to a pool-relative index, which is why the denominator
+is printed alongside every figure rather than hidden behind a single percentage.
 
 **What it contributes to the central use case:** it is the difference between a ranking and a
 judgement. A supervisor is not only asking "what is the best track"; they are asking whether the
@@ -260,7 +326,8 @@ React and Next — the pipeline is plain TypeScript in `src/lib/`.
 | `src/lib/localise.ts` | Market touchpoints (opt-in endpoint) |
 | `src/lib/rights.ts` | Transparent fee and clearance model |
 | `src/lib/substitute.ts` | Budget-aware substitution via audience overlap |
-| `src/lib/coverage.ts` | The Taste Gap: tag coverage index and the rebalanced slate. Pure computation, no API calls |
+| `src/lib/audit.ts` | The domain-agnostic coverage engine: measurable dimensions, selection scoring, greedy revision. Equal weighting by default, explicit weights supported |
+| `src/lib/coverage.ts` | The music adapter over the engine: Qloo tags to dimensions, and the music-facing result the panel renders. Pure computation, no API calls |
 | `src/lib/llm.ts` | Provider resolution, fallback chain, tool-calling |
 
 ### Endpoints
@@ -276,19 +343,21 @@ React and Next — the pipeline is plain TypeScript in `src/lib/`.
 ## Verification
 
 ```bash
-npm run verify      # 132 checks
+npm run verify      # 152 checks
 npm run typecheck   # tsc --noEmit
 npm run build       # production build
 ```
 
 `npm run verify` prints a `passed`/`failed` line and exits non-zero on any failure. It currently
-reports **132 passed, 0 failed**. The only thing stubbed is `fetch` — the real HTTP boundary. Every
+reports **152 passed, 0 failed**. The only thing stubbed is `fetch` — the real HTTP boundary. Every
 layer under test is the production code path, exercised with response bodies shaped like real Qloo
 payloads. Coverage includes normalisation, affinity extraction, explainability parsing, momentum
 derivation, failure degradation, cue assembly, concurrency limits, request-budget accounting,
 place-based localisation, casting, cross-domain comparables, the cross-domain taste map, the
-audience brief, licence pricing, and the Taste Gap measurement (vocabulary thresholding,
-determinism, the revision's seed invariant, and the unmeasurable-pool state).
+audience brief, licence pricing, and the coverage audit (vocabulary thresholding, duplicate
+handling, malformed evidence, determinism, the revision's seed invariant, the unmeasurable-pool
+state, equal versus explicit weighting, and the separation of a failed measurement from a
+legitimate empty one).
 
 ## Known limitations
 

@@ -29,6 +29,14 @@
  */
 
 import type { QlooEntity } from "./types";
+import {
+  auditCoverage,
+  auditSelection,
+  measurableDimensions,
+  reviseSelection,
+  type AuditEntity,
+  type AuditSelectionResult,
+} from "./audit";
 
 /**
  * How many candidates the affinity call returns. The same value
@@ -109,6 +117,13 @@ export interface TasteCoverage {
   poolSize: number;
   /** Slate entities that contributed at least one vocabulary tag. */
   entitiesMeasured: number;
+  /**
+   * The full structured measurement from the generic audit engine. The fields
+   * above are the music-facing names for the same numbers; this carries the
+   * domain-agnostic shape (numerator, denominator, covered/uncovered dimensions,
+   * warnings, validity) so a caller can inspect the evidence directly.
+   */
+  audit: AuditSelectionResult;
 }
 
 export interface RevisedSlate {
@@ -124,6 +139,8 @@ export interface RevisedSlate {
   redundancyDelta: number;
   /** True only when the index strictly improved. */
   improves: boolean;
+  /** Vocabulary tags the revision reaches that the original slate did not. */
+  newlyCovered: string[];
   /** One line naming what the revision traded, for the UI. */
   rationale: string;
 }
@@ -138,6 +155,13 @@ export interface TasteGapResult {
    * this instead of a number.
    */
   unavailableReason?: string;
+  /**
+   * Evidence-integrity warnings raised while measuring: indices outside the
+   * pool, a pool with no shared vocabulary, and so on. A non-empty list does not
+   * by itself mean the measurement is wrong, but the UI must not present a
+   * measurement with warnings as unqualified.
+   */
+  warnings: string[];
 }
 
 function tagIdOf(tag: { tag_id?: string; id?: string }): string {
@@ -149,13 +173,17 @@ function tagIdOf(tag: { tag_id?: string; id?: string }): string {
  *
  * Tags without an id are dropped. The live API does return some (a bare
  * `{type: "urn:tag:voice_type:qloo"}` with no id or name), and carrying them
- * would put nameless entries into the evidence list.
+ * would put nameless entries into the evidence list. Null and non-object entries
+ * are dropped for the same reason: the array comes off the wire, and one null
+ * must not take the whole measurement down.
  */
 export function toCoverageEntities(pool: QlooEntity[]): CoverageEntity[] {
-  return pool.map((entity) => {
+  return (pool ?? []).map((entity) => {
     const tags: string[] = [];
     const tagNames: Record<string, string> = {};
-    for (const tag of entity.tags ?? []) {
+    const rawTags = Array.isArray(entity?.tags) ? entity.tags : [];
+    for (const tag of rawTags) {
+      if (!tag || typeof tag !== "object") continue;
       const id = tagIdOf(tag);
       if (!id) continue;
       if (!tags.includes(id)) tags.push(id);
@@ -173,70 +201,100 @@ export function toCoverageEntities(pool: QlooEntity[]): CoverageEntity[] {
   });
 }
 
+/** The generic-engine view of a measured entity: tags become dimensions. */
+function toAuditEntity(entity: CoverageEntity): AuditEntity {
+  return {
+    entityId: entity.entityId,
+    name: entity.name,
+    dimensions: entity.tags,
+  };
+}
+
 /**
  * Tags carried by at least `MIN_TAG_SUPPORT` entities in the pool.
+ *
+ * Delegates to the engine so the support rule has one implementation. The
+ * engine counts distinct entities, so the same entity appearing twice in the
+ * pool cannot promote a one-off tag into the vocabulary.
  *
  * Exported because the threshold is the metric's main judgement call and the
  * tests assert on it directly rather than trusting the aggregate.
  */
 export function sharedVocabulary(entities: CoverageEntity[]): Set<string> {
-  const support = new Map<string, number>();
-  for (const entity of entities) {
-    for (const tag of new Set(entity.tags)) {
-      support.set(tag, (support.get(tag) ?? 0) + 1);
-    }
-  }
-  const vocabulary = new Set<string>();
-  for (const [tag, count] of support) {
-    if (count >= MIN_TAG_SUPPORT) vocabulary.add(tag);
-  }
-  return vocabulary;
+  return measurableDimensions(entities.map(toAuditEntity), MIN_TAG_SUPPORT);
 }
 
-/** The tag sets restricted to the shared vocabulary, one per entity. */
-function restrictedSets(
+/** Project an engine result into the music-facing shape the UI consumes. */
+function toTasteCoverage(
+  result: AuditSelectionResult,
   entities: CoverageEntity[],
-  vocabulary: Set<string>,
-): Set<string>[] {
-  return entities.map((entity) => {
-    const set = new Set<string>();
-    for (const tag of entity.tags) if (vocabulary.has(tag)) set.add(tag);
-    return set;
-  });
-}
-
-function union(sets: Set<string>[]): Set<string> {
-  const out = new Set<string>();
-  for (const set of sets) for (const tag of set) out.add(tag);
-  return out;
-}
-
-function jaccard(a: Set<string>, b: Set<string>): number {
-  if (a.size === 0 && b.size === 0) return 0;
-  let intersection = 0;
-  const [small, large] = a.size <= b.size ? [a, b] : [b, a];
-  for (const tag of small) if (large.has(tag)) intersection += 1;
-  const unionSize = a.size + b.size - intersection;
-  return unionSize === 0 ? 0 : intersection / unionSize;
-}
-
-function meanPairwiseOverlap(sets: Set<string>[]): {
-  mean: number;
-  pair?: { i: number; j: number; overlap: number };
-} {
-  if (sets.length < 2) return { mean: 0 };
-  let total = 0;
-  let count = 0;
-  let worst: { i: number; j: number; overlap: number } | undefined;
-  for (let i = 0; i < sets.length; i += 1) {
-    for (let j = i + 1; j < sets.length; j += 1) {
-      const overlap = jaccard(sets[i], sets[j]);
-      total += overlap;
-      count += 1;
-      if (!worst || overlap > worst.overlap) worst = { i, j, overlap };
+  slate: number[],
+): TasteCoverage {
+  // Gap tags are reported as display names where one is known, because the panel
+  // shows them to a reader. The engine deals in ids only.
+  const tagNameFor = new Map<string, string>();
+  for (const entity of entities) {
+    for (const [id, name] of Object.entries(entity.tagNames)) {
+      if (!tagNameFor.has(id)) tagNameFor.set(id, name);
     }
   }
-  return { mean: count === 0 ? 0 : total / count, pair: worst };
+
+  const gaps: CoverageGap[] = result.uncoveredDimensions.map((tag) => ({
+    tag: tagNameFor.get(tag) ?? tag,
+    reachableBy: entities
+      .filter((entity) => entity.tags.includes(tag))
+      .map((entity) => entity.name),
+  }));
+  // Rarest first: a tag few picks could reach is the more actionable gap. Ties
+  // fall back to the tag name so the order is stable across runs.
+  gaps.sort((a, b) => a.reachableBy.length - b.reachableBy.length || a.tag.localeCompare(b.tag));
+
+  return {
+    index: result.score,
+    coveredTags: result.numerator,
+    vocabularySize: result.denominator,
+    redundancy: result.redundancy,
+    mostSimilarPair: result.mostSimilarPair,
+    gaps,
+    poolSize: result.poolSize,
+    entitiesMeasured: result.entitiesMeasured,
+    audit: result,
+  };
+}
+
+/**
+ * The sentence explaining what the revision did, shared by both entry points so
+ * the wording has one implementation and cannot drift between them.
+ *
+ * `slateSize` is the size the revision was held to, which the caller knows and
+ * the coverage result does not.
+ */
+function buildRationale(
+  entities: CoverageEntity[],
+  original: TasteCoverage,
+  coverage: TasteCoverage,
+  chosen: number[],
+  effective: number[],
+  slateSize: number,
+  improves: boolean,
+): string {
+  if (!improves) {
+    return "No alternative ordering of this pool reaches more of its shared taste tags, so the original slate stands.";
+  }
+  const added = chosen.filter((index) => !effective.includes(index));
+  const dropped = effective.filter((index) => !chosen.includes(index));
+  const swap =
+    added.length > 0
+      ? ` Brings in ${added.map((index) => entities[index].name).join(", ")}${
+          dropped.length > 0
+            ? `, in place of ${dropped.map((index) => entities[index].name).join(", ")}`
+            : ""
+        }.`
+      : "";
+  return (
+    `Reaches ${coverage.coveredTags} of ${coverage.vocabularySize} shared taste tags against ` +
+    `${original.coveredTags}, holding the slate at ${slateSize}.${swap}`
+  );
 }
 
 /**
@@ -250,56 +308,10 @@ export function measureSlate(
   entities: CoverageEntity[],
   slate: number[],
 ): TasteCoverage {
-  const vocabulary = sharedVocabulary(entities);
-  const sets = restrictedSets(entities, vocabulary);
-  const poolUnion = union(sets);
-  const slateSets = slate.map((index) => sets[index]).filter(Boolean);
-  const slateUnion = union(slateSets);
-
-  const { mean, pair } = meanPairwiseOverlap(slateSets);
-
-  const gaps: CoverageGap[] = [];
-  for (const tag of poolUnion) {
-    if (slateUnion.has(tag)) continue;
-    const reachableBy = entities
-      .filter((entity, index) => sets[index].has(tag))
-      .map((entity) => entity.name);
-    gaps.push({ tag, reachableBy });
-  }
-  gaps.sort((a, b) => a.reachableBy.length - b.reachableBy.length || a.tag.localeCompare(b.tag));
-
-  const tagNameFor = new Map<string, string>();
-  for (const entity of entities) {
-    for (const [id, name] of Object.entries(entity.tagNames)) {
-      if (!tagNameFor.has(id)) tagNameFor.set(id, name);
-    }
-  }
-  for (const gap of gaps) {
-    const name = tagNameFor.get(gap.tag);
-    if (name) gap.tag = name;
-  }
-
-  const coveredTags = slateUnion.size;
-  const vocabularySize = poolUnion.size;
-  const index = vocabularySize === 0 ? 0 : (coveredTags / vocabularySize) * 100;
-
-  return {
-    index,
-    coveredTags,
-    vocabularySize,
-    redundancy: mean,
-    mostSimilarPair:
-      pair && entities[pair.i] && entities[pair.j]
-        ? {
-            a: entities[pair.i].name,
-            b: entities[pair.j].name,
-            overlap: pair.overlap,
-          }
-        : undefined,
-    gaps,
-    poolSize: entities.length,
-    entitiesMeasured: slateSets.filter((set) => set.size > 0).length,
-  };
+  const audit = auditSelection(entities.map(toAuditEntity), slate, {
+    minSupport: MIN_TAG_SUPPORT,
+  });
+  return toTasteCoverage(audit, entities, slate);
 }
 
 /**
@@ -310,56 +322,30 @@ export function measureSlate(
  * is the brief's strongest answer, and a "revision" that discarded it would be
  * answering a different brief. Each further slot takes whichever remaining
  * entity adds the most vocabulary tags the slate does not already carry. Ties
- * break on affinity, then on pool order, so the result is deterministic for
- * identical input — a claim the tests pin down.
+ * break on pool order, so the result is deterministic for identical input — a
+ * claim the tests pin down. Affinity is deliberately not a tiebreaker: a
+ * backfill entity's affinity comes from a different Qloo call and is not on the
+ * same scale, so ranking on it would silently favour one query over the other.
  */
 export function reviseSlate(
   entities: CoverageEntity[],
   slate: number[],
   slateSize: number = slate.length,
 ): RevisedSlate {
-  const vocabulary = sharedVocabulary(entities);
-  const sets = restrictedSets(entities, vocabulary);
+  const auditEntities = entities.map(toAuditEntity);
   const original = measureSlate(entities, slate);
 
+  const effective = slate.filter((index) => index >= 0 && index < entities.length);
   const size = Math.max(1, Math.min(slateSize, entities.length));
-  const chosen: number[] = [slate[0] ?? 0];
-  const used = new Set<number>(chosen);
+  const revision = reviseSelection(auditEntities, effective, {
+    minSupport: MIN_TAG_SUPPORT,
+  }, size);
 
-  while (chosen.length < size) {
-    const covered = union(chosen.map((index) => sets[index]));
-    let best: { index: number; gain: number } | undefined;
-    for (let index = 0; index < entities.length; index += 1) {
-      if (used.has(index)) continue;
-      let gain = 0;
-      for (const tag of sets[index]) if (!covered.has(tag)) gain += 1;
-      // Deterministic tiebreak: more gain wins. Equal gain prefers the earlier
-      // pool position. Affinity is deliberately NOT a tiebreaker here — a
-      // backfill entity's affinity comes from a different Qloo call and is not
-      // on the same scale, so ranking on it would silently favour one query's
-      // numbers over the other's.
-      if (!best || gain > best.gain || (gain === best.gain && index < best.index)) {
-        best = { index, gain };
-      }
-    }
-    if (!best) break;
-    chosen.push(best.index);
-    used.add(best.index);
-  }
-
-  const coverage = measureSlate(entities, chosen);
+  const chosen = revision.selection;
+  const coverage = toTasteCoverage(revision.result, entities, chosen);
   const indexDelta = coverage.index - original.index;
   const redundancyDelta = coverage.redundancy - original.redundancy;
   const improves = indexDelta > 0;
-
-  const added = chosen.filter((index) => !slate.includes(index));
-  const dropped = slate.filter((index) => !chosen.includes(index));
-  const rationale = improves
-    ? `Reaches ${coverage.coveredTags} of ${coverage.vocabularySize} shared taste tags against ${original.coveredTags}, holding the slate at ${size}.` +
-      (added.length > 0
-        ? ` Brings in ${added.map((index) => entities[index].name).join(", ")}${dropped.length > 0 ? `, in place of ${dropped.map((index) => entities[index].name).join(", ")}` : ""}.`
-        : "")
-    : "No alternative ordering of this pool reaches more of its shared taste tags, so the original slate stands.";
 
   return {
     entities: chosen.map((index) => entities[index]),
@@ -367,7 +353,8 @@ export function reviseSlate(
     indexDelta,
     redundancyDelta,
     improves,
-    rationale,
+    newlyCovered: revision.newlyCovered,
+    rationale: buildRationale(entities, original, coverage, chosen, effective, size, improves),
   };
 }
 
@@ -385,59 +372,48 @@ export function computeTasteGap(
   slateSize: number = slate.length,
 ): TasteGapResult {
   const entities = toCoverageEntities(pool);
-  const measured = entities.filter((entity) => entity.tags.length > 0);
-  const vocabulary = sharedVocabulary(entities);
 
-  const empty: TasteCoverage = {
-    index: 0,
-    coveredTags: 0,
-    vocabularySize: 0,
-    redundancy: 0,
-    gaps: [],
-    poolSize: entities.length,
-    entitiesMeasured: 0,
-  };
+  const result = auditCoverage({
+    entities: entities.map(toAuditEntity),
+    selection: slate,
+    options: { minSupport: MIN_TAG_SUPPORT },
+    reviseTo: Math.min(slateSize, entities.length),
+  });
 
-  if (entities.length < 2) {
-    return {
-      original: empty,
-      revised: {
-        entities: [],
-        coverage: empty,
-        indexDelta: 0,
-        redundancyDelta: 0,
-        improves: false,
-        rationale: "",
-      },
-      originalEntities: entities,
-      unavailableReason:
-        "Qloo returned fewer than two candidates for this brief, so there is no pool to measure coverage against.",
-    };
-  }
+  const original = toTasteCoverage(result.original, entities, slate);
+  const effective = slate.filter((index) => index >= 0 && index < entities.length);
+  const revisedCoverage = toTasteCoverage(result.revised.result, entities, result.revised.selection);
 
-  if (measured.length < 2 || vocabulary.size === 0) {
-    return {
-      original: empty,
-      revised: {
-        entities: [],
-        coverage: empty,
-        indexDelta: 0,
-        redundancyDelta: 0,
-        improves: false,
-        rationale: "",
-      },
-      originalEntities: entities,
-      unavailableReason:
-        "The candidates Qloo returned share no common taste tags, so a coverage index cannot be computed for this brief. This is a limit of the returned evidence, not a score of zero.",
-    };
-  }
-
-  const effectiveSlate = slate.filter((index) => index >= 0 && index < entities.length);
-  const size = Math.min(slateSize, entities.length);
+  const indexDelta = revisedCoverage.index - original.index;
+  const redundancyDelta = revisedCoverage.redundancy - original.redundancy;
+  const improves = indexDelta > 0;
 
   return {
-    original: measureSlate(entities, effectiveSlate),
-    revised: reviseSlate(entities, effectiveSlate, size),
-    originalEntities: effectiveSlate.map((index) => entities[index]),
+    original,
+    revised: {
+      entities: result.revised.selection.map((index) => entities[index]),
+      coverage: revisedCoverage,
+      indexDelta,
+      redundancyDelta,
+      improves,
+      newlyCovered: result.revised.newlyCovered,
+      rationale: result.valid
+        ? buildRationale(
+            entities,
+            original,
+            revisedCoverage,
+            result.revised.selection,
+            effective,
+            result.revised.selection.length,
+            improves,
+          )
+        : "",
+    },
+    originalEntities: effective.map((index) => entities[index]),
+    unavailableReason: result.unavailableReason,
+    // Warnings from both measurements, de-duplicated: the engine raises the
+    // out-of-range and no-vocabulary notices, and the panel must be able to show
+    // them rather than presenting a flagged measurement as clean.
+    warnings: [...new Set([...original.audit.warnings, ...revisedCoverage.audit.warnings])],
   };
 }

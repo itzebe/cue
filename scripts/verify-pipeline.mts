@@ -4015,6 +4015,336 @@ await check("Taste Gap: backfill provenance survives into the measured entities"
   assert.equal(gap.revised.entities[1].backfill, true, "a discovery pick must stay labelled");
 });
 
+// ---------------------------------------------------------------------------
+// The coverage audit engine. These assert the measurement contract the panel
+// and the README both rely on: the numerator and denominator are what they say
+// they are, duplicates never inflate a count, malformed evidence is refused
+// rather than guessed at, and a revision that does not improve is reported as
+// not improving. `auditCoverage` is the generic engine; `coverage.ts` is the
+// music adapter over it, so the same guarantees hold in the product.
+// ---------------------------------------------------------------------------
+
+const { auditCoverage, auditSelection, measurableDimensions } = await import(
+  "../src/lib/audit.ts"
+);
+
+/** A generic-engine entity: dimensions are plain ids, not Qloo tags. */
+function auditEntity(name: string, dimensions: string[], id?: string) {
+  return { entityId: id ?? name, name, dimensions };
+}
+
+await check("Audit: an empty selection measures zero and names every dimension as a gap", async () => {
+  const pool = [auditEntity("A", ["x", "y"]), auditEntity("B", ["x", "z"])];
+  const result = auditSelection(pool, []);
+  assert.equal(result.numerator, 0);
+  assert.equal(result.denominator, 1, "only x is shared by 2+ entities");
+  assert.equal(result.score, 0);
+  assert.deepEqual(result.uncoveredDimensions, ["x"]);
+  assert.ok(result.valid, "an empty selection is still a valid measurement of zero");
+});
+
+await check("Audit: an empty dimension set is unmeasurable, not a zero score", async () => {
+  const pool = [auditEntity("A", []), auditEntity("B", [])];
+  const result = auditCoverage({ entities: pool, selection: [0, 1] });
+  assert.equal(result.valid, false);
+  assert.ok(result.unavailableReason, "a pool with no measurable dimensions must say so");
+  assert.match(result.unavailableReason!, /no common measured dimensions|not a score of zero/i);
+  assert.equal(result.revised.improves, false);
+});
+
+await check("Audit: a selection covering every measured dimension scores 100", async () => {
+  const pool = [auditEntity("A", ["x", "y"]), auditEntity("B", ["x", "y"])];
+  const result = auditSelection(pool, [0, 1]);
+  assert.equal(result.denominator, 2);
+  assert.equal(result.numerator, 2);
+  assert.equal(result.score, 100);
+  assert.deepEqual(result.uncoveredDimensions, []);
+});
+
+await check("Audit: a selection covering none of the measured dimensions scores 0", async () => {
+  // x and y are each shared by two entities, so both are measurable. F carries
+  // only `unique`, which appears once and is therefore not measurable: selecting
+  // F reaches nothing in the vocabulary, and that is a real measured zero.
+  const pool = [
+    auditEntity("A", ["x"]),
+    auditEntity("B", ["x"]),
+    auditEntity("C", ["y"]),
+    auditEntity("D", ["y"]),
+    auditEntity("E", ["x", "y"]),
+    auditEntity("F", ["unique"]),
+  ];
+  const result = auditSelection(pool, [5]);
+  assert.equal(result.denominator, 2);
+  assert.equal(result.numerator, 0);
+  assert.equal(result.score, 0);
+  assert.equal(result.uncoveredDimensions.length, 2);
+});
+
+await check("Audit: partial coverage reports the fraction it actually reached", async () => {
+  const pool = [
+    auditEntity("A", ["x"]),
+    auditEntity("B", ["x", "y"]),
+    auditEntity("C", ["y"]),
+    auditEntity("D", ["y"]),
+  ];
+  // Measurable: x (A,B) and y (B,C,D). Selecting A reaches x only => 1/2.
+  const result = auditSelection(pool, [0]);
+  assert.equal(result.denominator, 2);
+  assert.equal(result.numerator, 1);
+  assert.equal(result.score, 50);
+  assert.deepEqual(result.uncoveredDimensions, ["y"]);
+});
+
+await check("Audit: the same entity twice does not promote a one-off dimension", async () => {
+  // `rare` appears on one distinct entity. Listing that entity twice must not
+  // make it look shared: two copies are not two independent pieces of evidence.
+  const pool = [
+    auditEntity("A", ["common", "rare"], "dup"),
+    auditEntity("A", ["common", "rare"], "dup"),
+    auditEntity("B", ["common"]),
+  ];
+  const measurable = measurableDimensions(pool);
+  assert.ok(measurable.has("common"), "common is genuinely shared");
+  assert.ok(!measurable.has("rare"), "a duplicated entity must not create shared ground");
+  assert.equal(measurable.size, 1);
+});
+
+await check("Audit: a repeated dimension on one entity counts once", async () => {
+  const pool = [auditEntity("A", ["x", "x", "x", "y"]), auditEntity("B", ["x", "y"])];
+  const measurable = measurableDimensions(pool);
+  assert.equal(measurable.size, 2);
+  const result = auditSelection(pool, [0]);
+  assert.equal(result.numerator, 2, "three copies of x are still one dimension");
+});
+
+await check("Audit: malformed evidence is refused, not crashed on", async () => {
+  const pool = [
+    auditEntity("A", ["x"]),
+    auditEntity("B", ["x"]),
+    auditEntity("C", ["y"]),
+    auditEntity("D", ["y"]),
+  ];
+  // Dimensions that are not strings must not enter the vocabulary.
+  const malformed = [
+    { entityId: "M", name: "M", dimensions: [null, undefined, 42, "", "x"] as never },
+    auditEntity("B", ["x"]),
+    auditEntity("C", ["y"]),
+    auditEntity("D", ["y"]),
+  ];
+  const measurable = measurableDimensions(malformed as never);
+  assert.ok(measurable.has("x"), "the one valid string dimension is still measured");
+  assert.ok(!measurable.has(""), "an empty id is not a dimension");
+  assert.ok(!measurable.has("42" as never), "a non-string dimension is not a dimension");
+  // And the measurement over the clean pool is unaffected by the messy row.
+  const result = auditSelection(pool, [0, 2]);
+  assert.equal(result.score, 100);
+});
+
+await check("Audit: a null tag entry from the wire does not take the measurement down", async () => {
+  const { toCoverageEntities } = await import("../src/lib/coverage.ts");
+  // A null element inside `tags` is the shape that previously threw inside the
+  // measurement and would have failed the whole /api/cue route.
+  const messy = [
+    { entity_id: "m", name: "Messy", tags: [null, undefined, { name: "NoId" }] },
+    qlooEntity("Clean", ["jazz", "soul"]),
+    qlooEntity("Other", ["jazz", "soul"]),
+  ];
+  const entities = toCoverageEntities(messy as never);
+  assert.deepEqual(entities[0].tags, [], "unusable tag entries are dropped, not thrown on");
+  const gap = computeTasteGap(messy as never, [1, 2], 2);
+  assert.equal(gap.original.index, 100, "the measurable part is still measured");
+});
+
+await check("Audit: a revision that improves coverage reports the gain and the new dimensions", async () => {
+  // A is the top pick (x). B and C both carry y, so swapping either in covers y.
+  const pool = [
+    auditEntity("A", ["x"]),
+    auditEntity("B", ["x", "y"]),
+    auditEntity("C", ["x", "y"]),
+  ];
+  const result = auditCoverage({ entities: pool, selection: [0], reviseTo: 2 });
+  assert.equal(result.valid, true);
+  assert.equal(result.original.score, 50, "A alone reaches x of {x,y}");
+  assert.equal(result.revised.result.score, 100, "A+B reaches both");
+  assert.equal(result.revised.improves, true);
+  assert.ok(result.revised.delta > 0);
+  assert.deepEqual(result.revised.newlyCovered, ["y"]);
+  assert.equal(result.revised.selection[0], 0, "the top pick is never dropped");
+});
+
+await check("Audit: a revision that adds entities but covers nothing new is not an improvement", async () => {
+  // Every entity carries the same dimensions, so no ordering can reach more.
+  const pool = [
+    auditEntity("A", ["x", "y"]),
+    auditEntity("B", ["x", "y"]),
+    auditEntity("C", ["x", "y"]),
+  ];
+  const result = auditCoverage({ entities: pool, selection: [0], reviseTo: 2 });
+  assert.equal(result.original.score, 100);
+  assert.equal(result.revised.result.score, 100);
+  assert.equal(result.revised.improves, false, "more entities is not more coverage");
+  assert.equal(result.revised.delta, 0);
+  assert.deepEqual(result.revised.newlyCovered, []);
+});
+
+await check("Audit: a revision is never reported as decreasing coverage", async () => {
+  // The greedy revision seeds the top pick and only adds, so its score is
+  // monotonic. This pins that property rather than assuming it.
+  const pool = [
+    auditEntity("A", ["x", "y", "z"]),
+    auditEntity("B", ["x"]),
+    auditEntity("C", ["y"]),
+    auditEntity("D", ["z"]),
+    auditEntity("E", ["x", "y"]),
+  ];
+  for (const selection of [[0], [1], [0, 1], [3, 4]]) {
+    const result = auditCoverage({ entities: pool, selection, reviseTo: selection.length });
+    assert.ok(
+      result.revised.delta >= 0,
+      `revision must not lose coverage (selection ${selection.join(",")})`,
+    );
+  }
+});
+
+await check("Audit: numerator and denominator are unchanged between original and revision", async () => {
+  // The before/after comparison is only like-for-like if both sides measure
+  // against the same denominator. This is the property that makes the delta
+  // meaningful, so it is asserted rather than assumed.
+  const pool = [
+    auditEntity("A", ["x"]),
+    auditEntity("B", ["x", "y"]),
+    auditEntity("C", ["y", "z"]),
+    auditEntity("D", ["z"]),
+  ];
+  const result = auditCoverage({ entities: pool, selection: [0], reviseTo: 2 });
+  assert.equal(
+    result.original.denominator,
+    result.revised.result.denominator,
+    "the denominator must be the same pool union on both sides",
+  );
+  assert.deepEqual(result.original.weightsUsed, "equal");
+  assert.deepEqual(result.revised.result.weightsUsed, "equal");
+});
+
+await check("Audit: the score is the numerator over the denominator, to rounding", async () => {
+  // 3 shared dimensions, a selection reaching 1 of them: 33.333...%
+  const pool = [
+    auditEntity("A", ["x"]),
+    auditEntity("B", ["x", "y"]),
+    auditEntity("C", ["y", "z"]),
+    auditEntity("D", ["z"]),
+  ];
+  const result = auditSelection(pool, [0]);
+  assert.equal(result.denominator, 3);
+  assert.equal(result.numerator, 1);
+  assert.ok(Math.abs(result.score - 100 / 3) < 1e-9);
+  assert.equal(result.score.toFixed(1), "33.3");
+});
+
+await check("Audit: mostSimilarPair names entities from the selection, not the pool", async () => {
+  // The selection is deliberately NOT a 0-based prefix. Indexing the pool with
+  // the pair indices reported the wrong artists entirely — a false, checkable
+  // claim about named entities, which is the exact failure this product exists
+  // to catch.
+  const pool = [
+    auditEntity("Alpha", ["a", "b"]),
+    auditEntity("Beta", ["a", "b"]),
+    auditEntity("Gamma", ["x", "y", "z"]),
+    auditEntity("Delta", ["x", "y", "z"]),
+  ];
+  const result = auditSelection(pool, [2, 3]);
+  assert.ok(result.mostSimilarPair, "a pair must be reported");
+  assert.equal(result.mostSimilarPair!.a, "Gamma");
+  assert.equal(result.mostSimilarPair!.b, "Delta");
+  assert.equal(result.mostSimilarPair!.overlap, 1);
+});
+
+await check("Audit: out-of-range selection indices are warned about and ignored", async () => {
+  const pool = [auditEntity("A", ["x"]), auditEntity("B", ["x", "y"]), auditEntity("C", ["y"])];
+  const result = auditSelection(pool, [0, 99]);
+  assert.equal(result.numerator, 1, "index 99 is ignored, not treated as an entity");
+  assert.ok(
+    result.warnings.some((warning) => /outside the pool/i.test(warning)),
+    "a dropped index must be reported, not silently swallowed",
+  );
+});
+
+await check("Audit: a selection of one entity reports no redundancy", async () => {
+  // Redundancy is a pairwise statistic; with fewer than two picks there is no
+  // pair to compare, so it must be zero rather than undefined or NaN.
+  const pool = [auditEntity("A", ["x"]), auditEntity("B", ["x"])];
+  const result = auditSelection(pool, [0]);
+  assert.equal(result.redundancy, 0);
+  assert.equal(result.mostSimilarPair, undefined);
+});
+
+await check("Audit: the result distinguishes a failed measurement from a legitimate empty one", async () => {
+  // Empty pool: no measurement attempted, invalid, with a reason.
+  const emptyPool = auditCoverage({ entities: [], selection: [] });
+  assert.equal(emptyPool.valid, false);
+  assert.ok(emptyPool.unavailableReason);
+  assert.match(emptyPool.unavailableReason!, /fewer than two candidates/i);
+
+  // Real pool, selection legitimately reaching nothing: valid, score 0.
+  // G carries only `unique`, which is on one entity and so is not measurable.
+  const pool = [
+    auditEntity("A", ["x"]),
+    auditEntity("B", ["x"]),
+    auditEntity("C", ["y"]),
+    auditEntity("D", ["y"]),
+    auditEntity("E", ["z"]),
+    auditEntity("F", ["z"]),
+    auditEntity("G", ["unique"]),
+  ];
+  const reachesNothing = auditCoverage({ entities: pool, selection: [6] });
+  assert.equal(reachesNothing.valid, true, "this is a real measurement, not a failure");
+  assert.equal(reachesNothing.original.score, 0);
+  assert.equal(reachesNothing.original.denominator, 3);
+});
+
+await check("Audit: explicit weights change the score and are reported as used", async () => {
+  // Equal weighting is the default. When a caller passes weights, the result
+  // must say so rather than leaving a reader to assume equal weighting.
+  const pool = [
+    auditEntity("A", ["x"]),
+    auditEntity("B", ["x", "y"]),
+    auditEntity("C", ["y"]),
+    auditEntity("D", ["y"]),
+  ];
+  const equal = auditSelection(pool, [0]);
+  assert.equal(equal.score, 50, "x of {x,y} at equal weight");
+
+  const weighted = auditSelection(pool, [0], { weights: { x: 3, y: 1 } });
+  assert.equal(weighted.score, 75, "x weighted 3 against y weighted 1");
+  assert.deepEqual(weighted.weightsUsed, { x: 3, y: 1 });
+});
+
+await check("Audit: the music adapter and the generic engine agree on the same input", async () => {
+  // The adapter must not drift from the engine it delegates to. Same pool, same
+  // selection, same numbers — otherwise the panel and the engine disagree.
+  const { toCoverageEntities } = await import("../src/lib/coverage.ts");
+  const { auditSelection } = await import("../src/lib/audit.ts");
+  const pool = [
+    qlooEntity("Alpha", ["a", "b"], 0.9),
+    qlooEntity("Beta", ["a", "b"], 0.8),
+    qlooEntity("Gamma", ["x", "y"], 0.7),
+    qlooEntity("Delta", ["x", "y"], 0.6),
+  ];
+  const music = measureSlate(toCoverageEntities(pool as never), [0, 2]);
+  const generic = auditSelection(
+    toCoverageEntities(pool as never).map((entity) => ({
+      entityId: entity.entityId,
+      name: entity.name,
+      dimensions: entity.tags,
+    })),
+    [0, 2],
+  );
+  assert.equal(music.index, generic.score);
+  assert.equal(music.coveredTags, generic.numerator);
+  assert.equal(music.vocabularySize, generic.denominator);
+  assert.deepEqual(music.gaps.map((gap) => gap.tag).sort(), generic.uncoveredDimensions.map((d) => d.replace("urn:tag:qloo:", "")).sort());
+});
+
 console.log(`\n${passed} passed, ${failures.length} failed.\n`);
 if (failures.length > 0) {
   for (const failure of failures) console.error(`  - ${failure}`);
