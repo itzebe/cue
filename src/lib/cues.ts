@@ -41,6 +41,45 @@ function toTagSignals(tags: TagResult[]): TagSignal[] | undefined {
   return tags.map((tag) => ({ tag: tag.tag_id, weight: 1 }));
 }
 
+/**
+ * Qloo classifies each tag with its own `type`. The `urn:tag:genre:*` and
+ * `urn:tag:subgenre:*` families name what a work *is*, which is the only kind
+ * of tag that can safely restrict a candidate pool. Everything else — `plot`,
+ * `character`, `style`, `ambience`, `keyword`, and off-domain families such as
+ * `specialty_dish` or `category` — describes an aspect rather than a genre.
+ */
+const GENRE_TAG_TYPE_PREFIXES = ["urn:tag:genre:", "urn:tag:subgenre:"];
+
+/** The Qloo classification for a tag, whichever spelling the endpoint used. */
+function tagTypeOf(tag: TagResult): string {
+  return tag.type ?? tag.subtype ?? tag.types?.[0] ?? "";
+}
+
+function isGenreTag(tag: TagResult): boolean {
+  const type = tagTypeOf(tag);
+  return GENRE_TAG_TYPE_PREFIXES.some((prefix) => type.startsWith(prefix));
+}
+
+/**
+ * Choose which resolved tags may restrict the candidate pool.
+ *
+ * `filter.tags` is a union, not an intersection: every tag added to it *widens*
+ * the set. A broad style tag sitting beside a genre tag therefore neutralises
+ * it — Qloo's own `urn:tag:style:qloo:energetic` matches Coldplay and The
+ * Beatles, so a "polka" brief filtered by `polka + folk + joyful + frantic +
+ * energetic` was served the generic pool while its slate still carried a
+ * genre-scoped label. Restricting the filter to genre-style tags keeps the
+ * candidate set specific to the brief.
+ *
+ * The predicate reads Qloo's tag `type` metadata rather than matching words, so
+ * no genre or mood name is hard-coded. Mood, style, plot and off-domain tags
+ * are not discarded — they stay in `signal.interests.tags`, where they still
+ * shape affinity scoring without loosening the candidate set.
+ */
+export function selectFilterTags(tags: TagResult[]): TagResult[] {
+  return tags.filter(isGenreTag);
+}
+
 /** Map a free-text era hint onto a release-year floor for signal anchoring. */
 export function eraToYearFloor(era: string): number | undefined {
   const text = era.toLowerCase();
@@ -167,10 +206,13 @@ export async function groundArtistCues(
   // anchored path is left exactly as it was.
   //
   // `filter.tags` is a union, not an intersection — every tag widens the set —
-  // so the resolved genre and mood tags together act as a superset filter. A set
-  // that matched nothing would empty the sheet, so the unscoped call is kept as
-  // a labelled fallback rather than removed.
-  const tagFilter = signalEntities.length === 0 ? tags.map((tag) => tag.tag_id) : undefined;
+  // so only genre tags are allowed to scope it. Adding a broad mood tag (Qloo's
+  // `urn:tag:style:qloo:energetic`, say) pulled the generic pool back in, which
+  // is why the filter is built from `selectFilterTags` rather than every tag.
+  // Mood and style tags still travel in `signal.interests.tags` for scoring.
+  const scopedTags = signalEntities.length === 0 ? selectFilterTags(tags) : [];
+  const tagFilter =
+    scopedTags.length > 0 ? scopedTags.map((tag) => tag.tag_id) : undefined;
 
   const request = (filterTags: string[] | undefined) =>
     insights({
@@ -189,23 +231,42 @@ export async function groundArtistCues(
       take: 14,
     });
 
-  const tagScoped = tagFilter !== undefined && tagFilter.length > 0;
+  const tagScoped = tagFilter !== undefined;
   let call = await request(tagFilter);
 
   if (tagScoped && call.ok && call.data.length === 0) {
-    // The brief's own tags matched no artist. Record the empty scoped attempt so
-    // the evidence shows what was tried, then fall back to the unscoped ranking
-    // and say plainly that the slate is not filtered to the brief.
+    // The brief's own genre tags matched no artist. Record the empty scoped
+    // attempt so the evidence shows what was tried, then fall back to the
+    // unscoped ranking and say plainly that the slate is not filtered.
     receipts.push(
       receiptFrom(call, "GET /v2/insights", "Artist affinity (tag filter, no match)"),
     );
     call = await request(undefined);
     warnings.push(
-      "Qloo matched no artists for this brief's genre and mood tags, so the slate fell back to an unscoped ranking. It is not filtered to the brief.",
+      "Qloo matched no artists for this brief's genre tags, so the slate fell back to an unscoped ranking. It is not filtered to the brief.",
+    );
+  } else if (signalEntities.length === 0 && !tagScoped) {
+    // No anchor and no genre tag to scope by: the slate is a popularity ranking
+    // over the whole catalogue. Say so rather than implying it is brief-specific.
+    warnings.push(
+      "This brief resolved no genre tag, so the slate could not be filtered to it and is not brief-specific — add a film, show or artist to give the ranking an anchor.",
     );
   }
 
-  receipts.push(receiptFrom(call, "GET /v2/insights", "Artist affinity (explainability on)"));
+  let filterNote: string | undefined;
+  if (scopedTags.length > 0) {
+    const names = scopedTags.map((tag) => tag.name).join(", ");
+    filterNote =
+      `Candidate pool scoped by genre tag${scopedTags.length === 1 ? "" : "s"} ${names}. ` +
+      "Mood and style tags informed affinity only, because filter.tags is a union and a broad mood tag would widen the pool.";
+  } else if (signalEntities.length === 0) {
+    filterNote =
+      "No genre tag was available to scope the candidate pool, so this ranking is not brief-specific.";
+  }
+
+  receipts.push(
+    receiptFrom(call, "GET /v2/insights", "Artist affinity (explainability on)", filterNote),
+  );
 
   if (!call.ok) {
     warnings.push(
@@ -342,10 +403,12 @@ export async function discoveryBackfill(
   // Same reason as the primary call: tag *signals* do not scope the candidate
   // set, so without a filter two different briefs were handed the same discovery
   // picks. Applied only when the brief resolved no anchor, matching the primary
-  // call, and a filter that matches nothing simply yields no discovery rows —
-  // the sheet keeps its primary picks.
+  // call, and limited to genre tags for the same union reason — a broad mood tag
+  // would widen the pool and hand back the generic set. A filter that matches
+  // nothing simply yields no discovery rows; the sheet keeps its primary picks.
   const signalEntities = anchorEntities.map((entity) => entity.entity_id);
-  const tagFilter = signalEntities.length === 0 ? tags.map((tag) => tag.tag_id) : undefined;
+  const scopedTags = signalEntities.length === 0 ? selectFilterTags(tags) : [];
+  const tagFilter = scopedTags.length > 0 ? scopedTags.map((tag) => tag.tag_id) : undefined;
 
   const call = await insights({
     filterType: "urn:entity:artist",

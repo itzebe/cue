@@ -4998,6 +4998,358 @@ await check("Localisation: the existing overlap behaviour is unchanged alongside
   }
 });
 
+/* ------------------------------------------------------------------ */
+/* Broad-tag leakage: only genre tags may scope the candidate pool      */
+/*                                                                     */
+/* `filter.tags` is a union, so every tag added to it widens the set.  */
+/* PR #21 scoped anchor-less briefs with *every* resolved tag, so a    */
+/* broad style tag such as Qloo's `urn:tag:style:qloo:energetic`       */
+/* (which matches Coldplay and The Beatles) re-admitted the generic    */
+/* pool while the slate still looked genre-scoped. These guard the     */
+/* specificity fix.                                                    */
+/* ------------------------------------------------------------------ */
+
+/** Every artist-affinity request URL the current run issued. */
+function affinityCalls(all: { url: string }[]): string[] {
+  return all
+    .filter(
+      (call) =>
+        call.url.includes("/v2/insights") &&
+        call.url.includes("filter.type=urn%3Aentity%3Aartist") &&
+        !call.url.includes("backfill.cross_domain.take"),
+    )
+    .map((call) => call.url);
+}
+
+/** The decoded `filter.tags` of a URL, or null when the parameter is absent. */
+function filterTagsOf(url: string): string[] | null {
+  const match = url.match(/[?&]filter\.tags=([^&]*)/);
+  if (!match) return null;
+  const value = decodeURIComponent(match[1]);
+  return value.length === 0 ? null : value.split(",");
+}
+
+/**
+ * A stub whose `/v2/tags` response carries Qloo's real `type` classification,
+ * so tag eligibility is exercised against the same metadata the live API
+ * returns.
+ */
+function tagMetadataResponse(query: string): Response {
+  const table: Record<string, { tag_id: string; name: string; type: string }> = {
+    polka: { tag_id: "urn:tag:genre:music:polka", name: "Polka", type: "urn:tag:genre:music" },
+    folk: { tag_id: "urn:tag:genre:music:folk", name: "Folk", type: "urn:tag:genre:music" },
+    energetic: {
+      tag_id: "urn:tag:style:qloo:energetic",
+      name: "Energetic",
+      type: "urn:tag:style:qloo",
+    },
+    joyful: {
+      tag_id: "urn:tag:ambience:qloo:joyful",
+      name: "Joyful",
+      type: "urn:tag:ambience:qloo",
+    },
+    frantic: { tag_id: "urn:tag:style:qloo:frantic", name: "Frantic", type: "urn:tag:style:qloo" },
+    triumphant: {
+      tag_id: "urn:tag:category:place:triumph_motorcycle_dealer",
+      name: "Triumph Motorcycle Dealer",
+      type: "urn:tag:category:place",
+    },
+  };
+  const hit = table[query];
+  return jsonResponse({ results: { tags: hit ? [hit] : [] } });
+}
+
+/** A minimal anchor-less brief; the grounding call only reads era and audience. */
+function anchorlessBrief(): never {
+  return {
+    title: "test",
+    raw: "test",
+    mood: [],
+    genre: [],
+    era: "2020s",
+    setting: "",
+    arc: "",
+    audience: {},
+    anchors: [],
+    diegetic: false,
+  } as never;
+}
+
+/**
+ * Run the production grounding call with a fixed set of resolved tags, using
+ * the given `/v2/tags`-backed stub. Returns the request URLs and the warnings.
+ */
+async function groundWith(
+  tags: { tag_id: string; name: string; type: string }[],
+  fetchImpl: typeof fetch,
+  withDiscovery = false,
+) {
+  const original = globalThis.fetch;
+  globalThis.fetch = fetchImpl;
+  const receipts: { label: string; note?: string }[] = [];
+  const warnings: string[] = [];
+  try {
+    const { groundArtistCues, discoveryBackfill } = await import("../src/lib/cues.ts");
+    const context = { brief: anchorlessBrief(), anchorEntities: [], tags, receipts, warnings };
+    await groundArtistCues(context as never);
+    if (withDiscovery) await discoveryBackfill(context as never, []);
+    return { receipts, warnings };
+  } finally {
+    globalThis.fetch = original;
+  }
+}
+
+/** The stub used by the eligibility tests below. */
+function tagEligibilityStub(): typeof fetch {
+  return (async (input: RequestInfo | URL) => {
+    const url = typeof input === "string" ? input : input.toString();
+    calls.push({ url, headers: {} });
+    const parsed = new URL(url);
+    if (parsed.pathname === "/v2/tags") {
+      return tagMetadataResponse(parsed.searchParams.get("filter.query") ?? "");
+    }
+    if (parsed.pathname === "/v2/insights") return jsonResponse(QLOO_INSIGHTS);
+    if (parsed.pathname === "/v2/trending") return jsonResponse(QLOO_TRENDING);
+    if (parsed.pathname === "/v2/analysis/compare") return jsonResponse(QLOO_COMPARE);
+    return jsonResponse({ error: "unexpected path" }, 404);
+  }) as typeof fetch;
+}
+
+/**
+ * The same routing as the module-level stub, exposed as a factory so a test can
+ * install it explicitly instead of depending on whatever a previous test left
+ * on `globalThis.fetch`.
+ */
+function defaultStub(): typeof fetch {
+  return (async (input: RequestInfo | URL) => {
+    const url = typeof input === "string" ? input : input.toString();
+    calls.push({ url, headers: {} });
+    const parsed = new URL(url);
+    if (parsed.pathname === "/v2/search") return jsonResponse(QLOO_SEARCH);
+    if (parsed.pathname === "/v2/tags") {
+      return tagMetadataResponse(parsed.searchParams.get("filter.query") ?? "");
+    }
+    if (parsed.pathname === "/v2/insights") return jsonResponse(QLOO_INSIGHTS);
+    if (parsed.pathname === "/v2/trending") return jsonResponse(QLOO_TRENDING);
+    if (parsed.pathname === "/v2/analysis/compare") return jsonResponse(QLOO_COMPARE);
+    return jsonResponse({ error: "unexpected path" }, 404);
+  }) as typeof fetch;
+}
+
+/** The tags a broad polka brief resolves to, with Qloo's real classifications. */
+const POLKA_TAGS = [
+  { tag_id: "urn:tag:genre:music:polka", name: "Polka", type: "urn:tag:genre:music" },
+  { tag_id: "urn:tag:genre:music:folk", name: "Folk", type: "urn:tag:genre:music" },
+  { tag_id: "urn:tag:ambience:qloo:joyful", name: "Joyful", type: "urn:tag:ambience:qloo" },
+  { tag_id: "urn:tag:style:qloo:frantic", name: "Frantic", type: "urn:tag:style:qloo" },
+  { tag_id: "urn:tag:style:qloo:energetic", name: "Energetic", type: "urn:tag:style:qloo" },
+];
+
+await check("a broad style tag does not join the candidate filter", async () => {
+  calls.length = 0;
+  await groundWith(POLKA_TAGS, tagEligibilityStub());
+  const [affinityUrl] = affinityCalls(calls);
+  assert.ok(affinityUrl, "an anchor-less brief must still scope the candidate set");
+  const sent = filterTagsOf(affinityUrl) ?? [];
+  assert.ok(
+    sent.includes("urn:tag:genre:music:polka") && sent.includes("urn:tag:genre:music:folk"),
+    `the genre tags must scope the pool, got: ${sent.join(",")}`,
+  );
+  for (const tag of sent) {
+    assert.ok(
+      tag.startsWith("urn:tag:genre:") || tag.startsWith("urn:tag:subgenre:"),
+      `a non-genre tag leaked into the candidate filter: ${tag}`,
+    );
+  }
+  // The exact regression: these are the tags that re-admitted the generic pool.
+  assert.ok(
+    !sent.includes("urn:tag:style:qloo:energetic") &&
+      !sent.includes("urn:tag:style:qloo:frantic") &&
+      !sent.includes("urn:tag:ambience:qloo:joyful"),
+    `a broad mood/style tag neutralised the genre filter: ${sent.join(",")}`,
+  );
+});
+
+await check("a broad style tag is still sent as an affinity signal", async () => {
+  calls.length = 0;
+  await groundWith(POLKA_TAGS, tagEligibilityStub());
+  const [affinityUrl] = affinityCalls(calls);
+  assert.ok(affinityUrl, "expected an affinity request");
+  const signal = decodeURIComponent(affinityUrl.split("signal.interests.tags=")[1].split("&")[0]);
+  // The point of the fix is that mood still *scores*; it just cannot scope.
+  for (const tag of ["urn:tag:style:qloo:energetic", "urn:tag:ambience:qloo:joyful"]) {
+    assert.ok(signal.includes(tag), `${tag} must keep contributing to affinity scoring`);
+  }
+});
+
+await check("a tag that resolves outside the genre families never scopes the pool", async () => {
+  calls.length = 0;
+  // "triumphant" resolves to a *place* tag (a motorcycle dealer) in the live tag
+  // graph. It must never restrict an artist candidate set.
+  await groundWith(
+    [
+      { tag_id: "urn:tag:genre:music:polka", name: "Polka", type: "urn:tag:genre:music" },
+      {
+        tag_id: "urn:tag:category:place:triumph_motorcycle_dealer",
+        name: "Triumph Motorcycle Dealer",
+        type: "urn:tag:category:place",
+      },
+    ],
+    tagEligibilityStub(),
+  );
+  const [affinityUrl] = affinityCalls(calls);
+  assert.ok(affinityUrl, "expected an affinity request");
+  const sent = filterTagsOf(affinityUrl) ?? [];
+  assert.ok(
+    !sent.some((tag) => tag.includes("triumph_motorcycle_dealer")),
+    `an unrelated place tag leaked into the candidate filter: ${sent.join(",")}`,
+  );
+  assert.ok(
+    sent.includes("urn:tag:genre:music:polka"),
+    `the genre tag must still scope the pool, got: ${sent.join(",")}`,
+  );
+});
+
+await check("a brief with no genre tag is labelled unscoped, not silently generic", async () => {
+  calls.length = 0;
+  const { warnings } = await groundWith(
+    [
+      { tag_id: "urn:tag:ambience:qloo:joyful", name: "Joyful", type: "urn:tag:ambience:qloo" },
+      { tag_id: "urn:tag:style:qloo:energetic", name: "Energetic", type: "urn:tag:style:qloo" },
+    ],
+    tagEligibilityStub(),
+  );
+  const [affinityUrl] = affinityCalls(calls);
+  assert.ok(affinityUrl, "expected an affinity request");
+  assert.equal(
+    filterTagsOf(affinityUrl),
+    null,
+    "a broad mood tag must not be used as a candidate filter",
+  );
+  assert.ok(
+    warnings.some((w) => /not brief-specific/i.test(w)),
+    "an unscoped slate must say so rather than imply genre scoping",
+  );
+});
+
+await check("the affinity receipt states how the pool was scoped", async () => {
+  const { receipts } = await groundWith(POLKA_TAGS, tagEligibilityStub());
+  const receipt = receipts.find((r) => r.label === "Artist affinity (explainability on)");
+  assert.ok(receipt, "expected the affinity receipt");
+  assert.ok(
+    /scoped by genre tag/i.test(receipt.note ?? ""),
+    `the receipt must record the scoping, got: ${receipt.note ?? "(no note)"}`,
+  );
+  assert.ok(
+    /union/i.test(receipt.note ?? ""),
+    "the receipt must explain why mood tags did not scope the pool",
+  );
+});
+
+await check("an anchored brief is unaffected: no filter, no unscoped warning", async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = defaultStub();
+  try {
+    calls.length = 0;
+    const sheet = await buildCueSheet({ scene: 'A noir scene referencing "Drive".' });
+    const [affinityUrl] = affinityCalls(calls);
+    assert.ok(affinityUrl, "expected an affinity request");
+    assert.equal(filterTagsOf(affinityUrl), null, "an anchored brief must not gain a tag filter");
+    assert.ok(
+      !sheet.warnings.some((w) => /not brief-specific/i.test(w)),
+      "an anchored slate must not be labelled unscoped",
+    );
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("discovery is scoped by genre tags only", async () => {
+  calls.length = 0;
+  await groundWith(POLKA_TAGS, tagEligibilityStub(), true);
+  const backfill = calls
+    .map((call) => call.url)
+    .filter((url) => url.includes("backfill.cross_domain.take") && url.includes("filter.tags="));
+  assert.ok(backfill.length > 0, "discovery must be tag-scoped for an anchor-less brief");
+  for (const url of backfill) {
+    for (const tag of filterTagsOf(url) ?? []) {
+      assert.ok(
+        tag.startsWith("urn:tag:genre:") || tag.startsWith("urn:tag:subgenre:"),
+        `a non-genre tag leaked into the discovery filter: ${tag}`,
+      );
+    }
+  }
+});
+
+await check("selectFilterTags keys off Qloo's tag type, not the id string", async () => {
+  const { selectFilterTags } = await import("../src/lib/cues.ts");
+  // An id that *looks* like a genre but is classified as a plot tag must be
+  // rejected, and an id that looks like a style but is classified as a genre
+  // must be accepted: the policy trusts Qloo's metadata.
+  const tags = [
+    { tag_id: "urn:tag:genre:music:polka", name: "Polka", type: "urn:tag:plot:qloo" },
+    { tag_id: "urn:tag:style:qloo:energetic", name: "Energetic", type: "urn:tag:genre:music" },
+  ];
+  const selected = selectFilterTags(tags as never).map((tag) => tag.tag_id);
+  assert.deepEqual(
+    selected,
+    ["urn:tag:style:qloo:energetic"],
+    "eligibility must follow Qloo's type metadata, not the tag id",
+  );
+  // A tag with no classification at all is never allowed to scope the pool.
+  const unclassified = selectFilterTags([
+    { tag_id: "urn:tag:genre:music:polka", name: "Polka" },
+  ] as never);
+  assert.deepEqual(unclassified, [], "an unclassified tag must not scope the pool");
+});
+
+await check("an empty genre filter still falls back with an explicit label", async () => {
+  const original = globalThis.fetch;
+  let scopedAttempts = 0;
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = typeof input === "string" ? input : input.toString();
+    calls.push({ url, headers: {} });
+    const parsed = new URL(url);
+    if (parsed.pathname === "/v2/tags") {
+      return tagMetadataResponse(parsed.searchParams.get("filter.query") ?? "");
+    }
+    if (parsed.pathname === "/v2/insights") {
+      if (parsed.searchParams.get("filter.tags") !== null) {
+        scopedAttempts += 1;
+        return jsonResponse({ results: { entities: [] } });
+      }
+      return jsonResponse(QLOO_INSIGHTS);
+    }
+    if (parsed.pathname === "/v2/trending") return jsonResponse(QLOO_TRENDING);
+    if (parsed.pathname === "/v2/analysis/compare") return jsonResponse(QLOO_COMPARE);
+    return jsonResponse({ error: "unexpected path" }, 404);
+  }) as typeof fetch;
+
+  try {
+    const { groundArtistCues } = await import("../src/lib/cues.ts");
+    const receipts: { label: string }[] = [];
+    const warnings: string[] = [];
+    await groundArtistCues({
+      brief: anchorlessBrief(),
+      anchorEntities: [],
+      tags: POLKA_TAGS,
+      receipts,
+      warnings,
+    } as never);
+    assert.ok(scopedAttempts > 0, "the genre-scoped attempt must have been made");
+    assert.ok(
+      warnings.some((w) => /fell back to an unscoped ranking/i.test(w)),
+      "the fallback must be labelled, not silent",
+    );
+    assert.ok(
+      receipts.some((r) => r.label === "Artist affinity (tag filter, no match)"),
+      "the empty scoped attempt must leave a receipt as evidence",
+    );
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
 console.log(`\n${passed} passed, ${failures.length} failed.\n`);
 if (failures.length > 0) {
   for (const failure of failures) console.error(`  - ${failure}`);

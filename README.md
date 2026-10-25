@@ -624,15 +624,20 @@ one.
   `population_percentile` are constant across every artist tested. The field is parsed, ranked and
   rendered; it simply reports "steady" rather than fabricating a trend. The unit tests cover the
   rising and cooling branches with a varying series.
-- **Tag-only briefs are scoped by tags, then ordered by popularity.** When a brief names no film,
-  director or artist, `/v2/insights` does not restrict its candidates on tag *signals* — the
+- **Tag-only briefs are scoped by *genre* tags, then ordered by popularity.** When a brief names no
+  film, director or artist, `/v2/insights` does not restrict its candidates on tag *signals* — the
   hackathon key returns the same entities for death metal as for polka. Cue therefore applies the
-  brief's resolved genre and mood tags as a `filter.tags` candidate filter, which is what makes the
-  pool brief-specific. Within that pool the affinity is still uniform, so Cue detects the zero
-  spread and orders by popularity as a deterministic tiebreak, saying so in the warnings rather than
-  presenting an arbitrary order as a ranking. Naming an anchor restores true affinity ranking.
-  `filter.tags` is a union, so a brief whose tags match nothing falls back to the unscoped ranking
-  with a warning that says the slate is not filtered to the brief.
+  brief's resolved genre tags as a `filter.tags` candidate filter, which is what makes the pool
+  brief-specific. Only tags Qloo classifies under `urn:tag:genre:*` or `urn:tag:subgenre:*` are
+  allowed into that filter, because `filter.tags` is a **union**: a broad mood tag widens the pool
+  instead of narrowing it, so `urn:tag:style:qloo:energetic` beside `polka` re-admitted Coldplay and
+  The Beatles. Mood and style tags still travel in `signal.interests.tags`, where they shape affinity
+  without loosening the candidate set. Within the scoped pool the affinity is still uniform, so Cue
+  detects the zero spread and orders by popularity as a deterministic tiebreak, saying so in the
+  warnings rather than presenting an arbitrary order as a ranking. Naming an anchor restores true
+  affinity ranking. A brief that resolves no genre tag is labelled as unscoped rather than presented
+  as brief-specific, and a genre filter that matches nothing falls back to the unscoped ranking with a
+  warning that says the slate is not filtered to the brief.
 - **No "song" entity type exists in Qloo.** Cue grounds the *artist* and *vibe* with Qloo, then
   proposes specific tracks from those artists. This is stated openly rather than papered over.
 - **Clearance is a model, not a quote.** Fee bands, splits and timelines are Cue's own transparent

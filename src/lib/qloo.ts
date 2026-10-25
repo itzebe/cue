@@ -587,6 +587,10 @@ export function searchTags(
           return {
             tag_id: id,
             name: str(record.name),
+            // `/v2/tags` classifies a tag with `type`; `subtype` is the
+            // `/v2/search` spelling. Reading only `types` (an array that this
+            // endpoint never returns) silently discarded the classification.
+            type: str(record.type) || str(record.subtype) || undefined,
             subtype: str(record.subtype) || undefined,
             types: asArray(record.types).map((type) => String(type)),
           };
