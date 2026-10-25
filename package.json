@@ -11,7 +11,8 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "verify": "tsx scripts/verify-pipeline.mts",
-    "reproduce": "tsx scripts/reproduce-taste-gap.mts"
+    "reproduce": "tsx scripts/reproduce-taste-gap.mts",
+    "reproduce:benchmark": "tsx scripts/reproduce-taste-gap-null.mts"
   },
   "dependencies": {
     "next": "^14.2.35",
