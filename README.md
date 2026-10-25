@@ -40,7 +40,7 @@ Everything the submission needs, in one place:
 | **Live demo** | [cue-nine-iota.vercel.app](https://cue-nine-iota.vercel.app/) — hosted on Vercel, no signup, no key |
 | **Source** | [github.com/itzebe/cue](https://github.com/itzebe/cue) — public, MIT |
 | **Run it locally** | `npm install && npm run dev` → [localhost:12000](http://localhost:12000). Works with no keys at all (see [Run it](#run-it)) |
-| **Verify it** | `npm run verify` (167 checks) · `npm run reproduce` (rebuilds the Taste Gap figures offline) |
+| **Verify it** | `npm run verify` (167 checks) · `npm run reproduce` (rebuilds the Taste Gap figures offline) · `npm run reproduce:benchmark` (exhaustive null distribution) |
 | **The Qloo difference** | [The Taste Gap](#the-taste-gap) — a measurement no LLM can produce, on a feature that would not exist without the taste graph |
 
 **The sixty-second read.** A brief goes in; Qloo ranks artists by measured audience affinity and
@@ -305,6 +305,70 @@ eight tracks they have chosen reach the audience they promised the client. This 
 that answers that, and an LLM cannot: it knows two artists sound alike, not which taste tags each
 one carries or how many of them the other picks already cover.
 
+### Where the index sits in its own distribution
+
+A raw index is not interpretable on its own. 90.6% sounds strong until you learn that a random
+eight-entity draw from the same pool averages 92.7%. A pool of 14 candidates admits exactly
+`C(14, 8) = 3003` distinct eight-entity slates, which is small enough to enumerate **completely**
+rather than sample, so the null distribution below is exact and has no random seed:
+
+```bash
+npm run reproduce:benchmark   # 20 checks, no API key, no network
+```
+
+| Brief | Index | Slates | Null mean | Null p05–p95 | Coverage pct | Volume pct |
+|---|---|---|---|---|---|---|
+| Massive Attack + Portishead | 90.6% (135/149) | 3003 | 92.7% | 85.9–97.3 | 24.5 | 44.0 |
+| Sault | 78.4% (109/139) | 3003 | 90.5% | 82.0–97.1 | 1.2 | 59.3 |
+| Nils Frahm | 96.8% (120/124) | 3003 | 92.9% | 83.9–98.4 | 85.7 | 84.6 |
+
+**The definition.** The index is `|covered(slate)| / |vocabulary| × 100`, where the vocabulary is
+the set of tags carried by at least `MIN_TAG_SUPPORT` (2) distinct entities in that pool, and
+`covered` is the union of the slate's eligible tags. It is computed from the `tags[]` Qloo already
+returns on the affinity call, so it adds no request. It is **pool-relative**: the denominator is the
+tag union of the candidates *that brief* returned, not a share of listeners, of the market, or of
+any population.
+
+**The null.** Every eligible slate is enumerated with the production `measureSlate`, and the 3003
+count is derived from the pool and slate sizes by a binomial coefficient, not hardcoded — it is a
+consequence of this pool, not a constant. The gate recomputes the whole distribution on every run
+and asserts the recorded summary against it, so the recorded null cannot drift from the code.
+
+**The percentile.** The share of enumerated slates the arm's score beats, computed here as a
+midrank: ties count as half. The null is a discrete score with heavy ties, so the convention is
+stated in the artifact rather than assumed — "fraction strictly below" would push a slate sitting
+on a plateau to the bottom of that plateau, and the choice moves a percentile by a few points at
+most. Percentiles are **recomputed during replay from the reproduced score and the recomputed null**;
+they are never read from the artifact, so a stale rank cannot survive a rerun.
+
+**Why a high index does not establish ranking quality.** The index measures how many distinct tags a
+slate reaches, not whether the picks are good ones. It is monotone in tag count, so a slate can
+raise it by including richly catalogued entities. The `Volume pct` column exists to show that
+directly: the affinity slate sits at the 44th percentile by tag count alone but the 24.5th by
+coverage, and on the Sault brief 59.3rd by volume against 1.2nd by coverage. The two columns differ
+by 20–58 points, which is the evidence that the index is not merely a proxy for catalogue
+completeness — but the residual correlation is real and is why the raw figure should never be quoted
+without its percentile.
+
+**Why coverage and affinity are different objectives.** They are close to statistically independent
+across these slates (correlation of affinity-sum against coverage: 0.005, −0.19, 0.36). A slate
+chosen to maximise affinity is therefore **not expected** to top a coverage distribution. The
+affinity slate ranking at the 1st–24th coverage percentile is the expected outcome of a different
+objective, not evidence that the ranking is wrong. The same gate shows the metric is not degenerate:
+the greedy revision sits at the 99.5th, 99.9th and 99.9th percentile.
+
+**What these measurements cannot support.** Three briefs from one recorded API snapshot cannot
+generalise beyond those briefs. No human-preference evaluation has been performed — nothing here
+measures whether anyone likes the result, and the index must not be described as quality,
+satisfaction, or audience approval. **No LLM-only baseline was evaluated**, so no claim is made that
+Cue beats one. The gate also prints a `Volume pct` for the affinity ranking, which is a tag-count
+statistic, not an LLM evaluation and not a substitute for one.
+
+The same four honesty rules the rest of the panel follows apply here: the null is enumerated rather
+than sampled, the percentile is derived rather than stored, the volume comparison is reported
+alongside the coverage figure rather than instead of it, and every figure is a count of tags against
+a committed pool.
+
 ## What Qloo contributes
 
 The hackathon's test is whether a project would work the same without Qloo. Here it plainly would
@@ -336,6 +400,10 @@ by Qloo. The difference is shown side by side rather than claimed.
 The baseline column is produced by a real model call on the same brief (`baseline.source` is `llm`
 when the model answered, and `sample` when a labelled fixed example is used instead — the panel
 says which). The Qloo column carries affinity, provenance and receipts the baseline cannot have.
+
+This is a side-by-side demonstration, not a measured evaluation: it shows what each answer contains
+on one brief. It does not establish that Cue outperforms an LLM, and the Taste Gap figures above are
+a separate measurement that makes no such claim either.
 
 Every claim in the sheet is traceable:
 
@@ -414,10 +482,11 @@ React and Next — the pipeline is plain TypeScript in `src/lib/`.
 ## Verification
 
 ```bash
-npm run verify      # 167 checks
-npm run reproduce   # 3 checks: rebuilds the README's Taste Gap table offline
-npm run typecheck   # tsc --noEmit
-npm run build       # production build
+npm run verify               # 167 checks
+npm run reproduce            # 3 checks: rebuilds the README's Taste Gap table offline
+npm run reproduce:benchmark  # 20 checks: exhaustive null distribution for the same briefs
+npm run typecheck            # tsc --noEmit
+npm run build                # production build
 ```
 
 `npm run verify` prints a `passed`/`failed` line and exits non-zero on any failure. It currently

@@ -1,5 +1,5 @@
 {
- "note": "Real Qloo responses recorded from the hackathon API. No credentials are stored. Rebuild and assert every figure quoted in the README with: npm run reproduce",
+ "note": "Real Qloo responses recorded from the hackathon API. No credentials are stored. Every figure here is pool-relative: the denominator is the tag union of the candidates in that brief's own pool, not a share of listeners or of any population. Each brief carries `expected` (the figures quoted in the README) and `nullStats` (an exhaustive null distribution over every eligible slate in that brief's pool). Rebuild and assert both with: npm run reproduce && npm run reproduce:benchmark",
  "recordedAt": "2026-10-25",
  "baseUrl": "https://hackathon.api.qloo.com",
  "poolSize": 14,
@@ -992,6 +992,24 @@
     "revisedIndex": 98.65771812080537,
     "revisedCoveredTags": 147,
     "tagsNotReached": 14
+   },
+   "nullStats": {
+    "slateSize": 8,
+    "eligibleSlates": 3003,
+    "exhaustive": true,
+    "coverage": {
+     "mean": 92.73254709496226,
+     "p05": 85.90604026845638,
+     "p95": 97.31543624161074,
+     "min": 77.85234899328859,
+     "max": 99.32885906040269
+    },
+    "tagVolume": {
+     "mean": 363.42857142857144,
+     "p05": 338,
+     "p95": 387
+    },
+    "percentileConvention": "midrank over the exhaustive null: (count(s < value) + count(s == value) / 2) / n * 100"
    }
   },
   "sault": {
@@ -1949,6 +1967,24 @@
     "revisedIndex": 100,
     "revisedCoveredTags": 139,
     "tagsNotReached": 30
+   },
+   "nullStats": {
+    "slateSize": 8,
+    "eligibleSlates": 3003,
+    "exhaustive": true,
+    "coverage": {
+     "mean": 90.45942067524504,
+     "p05": 82.01438848920863,
+     "p95": 97.12230215827337,
+     "min": 71.94244604316546,
+     "max": 100
+    },
+    "tagVolume": {
+     "mean": 265.14285714285717,
+     "p05": 233,
+     "p95": 296.9000000000001
+    },
+    "percentileConvention": "midrank over the exhaustive null: (count(s < value) + count(s == value) / 2) / n * 100"
    }
   },
   "nils-frahm": {
@@ -2816,6 +2852,24 @@
     "revisedIndex": 100,
     "revisedCoveredTags": 124,
     "tagsNotReached": 4
+   },
+   "nullStats": {
+    "slateSize": 8,
+    "eligibleSlates": 3003,
+    "exhaustive": true,
+    "coverage": {
+     "mean": 92.92374292374194,
+     "p05": 83.87096774193549,
+     "p95": 98.38709677419355,
+     "min": 77.41935483870968,
+     "max": 100
+    },
+    "tagVolume": {
+     "mean": 331.42857142857144,
+     "p05": 298,
+     "p95": 361
+    },
+    "percentileConvention": "midrank over the exhaustive null: (count(s < value) + count(s == value) / 2) / n * 100"
    }
   }
  },
