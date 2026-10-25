@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 900" width="1180" height="900" role="img" aria-labelledby="archTitle archDesc" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 1040" width="1180" height="1040" role="img" aria-labelledby="archTitle archDesc" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
   <title id="archTitle">Cue architecture: the LLM reads the scene, Qloo decides the ranking</title>
-  <desc id="archDesc">A creative brief is parsed by an LLM into a structured scene brief with anchors. Anchors and tags are resolved to Qloo entity and tag IDs. Qloo's Insights API then ranks candidate artists by measured affinity, with explainability. Parallel stages enrich the sheet with momentum, cross-domain people and brands, comparables, and a cross-domain taste map. The LLM separately proposes track titles, and a control baseline is produced by the LLM alone with no Qloo data. Everything is assembled into a cue sheet with a full receipt ledger.</desc>
+  <desc id="archDesc">A creative brief is parsed by an LLM into a structured scene brief with anchors. Anchors and tags are resolved to Qloo entity and tag IDs. Qloo's Insights API then ranks candidate artists by measured affinity, with explainability. The selected slate is audited against the whole candidate pool — the Taste Gap — to measure how much of the pool's shared taste it reaches and what a better arrangement would reach. Parallel stages enrich the sheet with momentum, cross-domain people and brands, comparables, and a cross-domain taste map. The LLM separately proposes track titles, and a control baseline is produced by the LLM alone with no Qloo data. Everything is assembled into a cue sheet with a full receipt ledger.</desc>
 
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -156,8 +156,20 @@
   <!-- optional -> qloo boundary -->
   <path class="edge" d="M 988 592 L 988 528"/>
 
+  <!-- ============ STAGE 6: THE TASTE GAP (PURE COMPUTATION) ============ -->
+  <rect class="panelQ" x="40" y="800" width="330" height="124" rx="10"/>
+  <text class="lbl" x="60" y="822">The Taste Gap · pure computation</text>
+  <text class="t" x="60" y="844">Audit the slate against the pool</text>
+  <text class="s" x="60" y="864">How much of the candidate pool's shared</text>
+  <text class="s" x="60" y="880">taste the eight picks reach, and what a</text>
+  <text class="s" x="60" y="896">better arrangement would reach. No extra</text>
+  <text class="s" x="60" y="912">API call — it reads Stage 3's response.</text>
+
+  <!-- rank -> taste gap audit (routed down the left margin, clear of Stage 4) -->
+  <path class="edgeQ" d="M 40 536 L 20 536 L 20 862 L 36 862"/>
+
   <!-- ============ FOOTER NOTE ============ -->
-  <text class="m" x="40" y="826">Division of labour: the LLM reads the scene and names the cut. Qloo decides what ranks.</text>
-  <text class="m" x="40" y="846">No affinity, popularity, momentum or audience figure is ever produced by a language model.</text>
-  <text class="m" x="40" y="866">Module map: src/lib/planner.ts orchestrates · qloo.ts · cues.ts · crossdomain.ts · llm.ts · rights.ts</text>
+  <text class="m" x="40" y="962">Division of labour: the LLM reads the scene and names the cut. Qloo decides what ranks.</text>
+  <text class="m" x="40" y="982">No affinity, popularity, momentum or audience figure is ever produced by a language model.</text>
+  <text class="m" x="40" y="1002">Module map: src/lib/planner.ts orchestrates · qloo.ts · cues.ts · crossdomain.ts · audit.ts · llm.ts · rights.ts</text>
 </svg>
