@@ -728,6 +728,223 @@ await check("empty signal arrays are omitted, not sent as empty parameters", asy
   }
 });
 
+/* ------------------------------------------------------------------ */
+/* Tag-scoped candidates for briefs with no named reference            */
+/*                                                                     */
+/* `signal.interests.tags` scores candidates but does not scope them.  */
+/* On the hackathon key it returns the same 14 entities for death      */
+/* metal as for polka, so an anchor-less brief was ranked from an      */
+/* identical candidate set whatever its genre, and two unrelated       */
+/* briefs produced the same slate. These guard the scoping fix.        */
+/* ------------------------------------------------------------------ */
+
+/** The artist-affinity call's `filter.tags` value, or null when absent. */
+function affinityFilterTags(all: { url: string }[]): string | null {
+  const call = all.find(
+    (candidate) =>
+      candidate.url.includes("/v2/insights") &&
+      candidate.url.includes("filter.type=urn%3Aentity%3Aartist") &&
+      !candidate.url.includes("backfill.cross_domain.take"),
+  );
+  if (!call) return null;
+  const match = call.url.match(/[?&]filter\.tags=([^&]*)/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+await check("an anchor-less brief scopes the candidate set by its own tags", async () => {
+  calls.length = 0;
+  await buildCueSheet({ scene: "A quiet scene with no named references at all here." });
+  const scoped = calls.filter(
+    (call) => call.url.includes("/v2/insights") && call.url.includes("filter.tags="),
+  );
+  assert.ok(
+    scoped.length > 0,
+    "an anchor-less brief must send filter.tags, or its candidates are not brief-specific",
+  );
+});
+
+await check("the tag filter carries the resolved brief tags, not a fixed list", async () => {
+  calls.length = 0;
+  await buildCueSheet({ scene: "A quiet scene with no named references at all here." });
+  const filterTags = affinityFilterTags(calls);
+  assert.ok(filterTags, "expected a tag-scoped affinity request");
+  const sent = filterTags.split(",");
+  // The stub resolves "Thriller" from the tag search, so the brief's own tag
+  // must appear. A hard-coded or empty filter would fail this.
+  assert.ok(
+    sent.some((tag) => tag.startsWith("urn:tag:")),
+    `filter.tags must contain resolved tag ids, got: ${filterTags}`,
+  );
+});
+
+await check("two different anchor-less briefs send different tag filters", async () => {
+  const original = globalThis.fetch;
+  // The shared stub resolves the same tag for every query, which would mask the
+  // bug. This stub resolves per-query, so a fixed filter cannot pass.
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = typeof input === "string" ? input : input.toString();
+    calls.push({ url, headers: {} });
+    const parsed = new URL(url);
+    if (parsed.pathname === "/v2/tags") {
+      const query = parsed.searchParams.get("filter.query") ?? "unknown";
+      return jsonResponse({
+        results: {
+          tags: [
+            {
+              tag_id: `urn:tag:genre:music:${query.replace(/\s+/g, "_")}`,
+              name: query,
+              subtype: "urn:tag:genre:music",
+            },
+          ],
+        },
+      });
+    }
+    if (parsed.pathname === "/v2/insights") return jsonResponse(QLOO_INSIGHTS);
+    if (parsed.pathname === "/v2/trending") return jsonResponse(QLOO_TRENDING);
+    if (parsed.pathname === "/v2/analysis/compare") return jsonResponse(QLOO_COMPARE);
+    return jsonResponse({ error: "unexpected path" }, 404);
+  }) as typeof fetch;
+
+  try {
+    // Both scenes carry no named reference, so both take the tag-scoped path,
+    // but they resolve to different genre and mood tags.
+    calls.length = 0;
+    await buildCueSheet({ scene: "A slow electronic noir scene in the rain." });
+    const first = affinityFilterTags(calls);
+
+    calls.length = 0;
+    await buildCueSheet({ scene: "A brooding ambient piece." });
+    const second = affinityFilterTags(calls);
+
+    assert.ok(first && second, "both briefs must be tag-scoped");
+    assert.notEqual(
+      first,
+      second,
+      "materially different briefs must not send the same candidate filter",
+    );
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("an anchored brief is not tag-scoped, so its ranking is unchanged", async () => {
+  calls.length = 0;
+  await buildCueSheet({
+    scene: 'A noir scene referencing "Drive". Los Angeles, audience 25-34.',
+  });
+  const scoped = calls.filter(
+    (call) => call.url.includes("/v2/insights") && call.url.includes("filter.tags="),
+  );
+  assert.equal(
+    scoped.length,
+    0,
+    "a resolved anchor already differentiates the result; filter.tags must not be added",
+  );
+});
+
+await check("an empty tag filter falls back and labels the slate as unscoped", async () => {
+  const original = globalThis.fetch;
+  let scopedAttempts = 0;
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = typeof input === "string" ? input : input.toString();
+    const parsed = new URL(url);
+    if (parsed.pathname === "/v2/tags") return jsonResponse(QLOO_TAGS);
+    if (parsed.pathname === "/v2/insights") {
+      // The brief's own tags match nothing; the unscoped retry returns rows.
+      if (parsed.searchParams.get("filter.tags") !== null) {
+        scopedAttempts += 1;
+        return jsonResponse({ results: { entities: [] } });
+      }
+      return jsonResponse(QLOO_INSIGHTS);
+    }
+    if (parsed.pathname === "/v2/trending") return jsonResponse(QLOO_TRENDING);
+    if (parsed.pathname === "/v2/analysis/compare") return jsonResponse(QLOO_COMPARE);
+    return jsonResponse({ error: "unexpected path" }, 404);
+  }) as typeof fetch;
+
+  try {
+    const sheet = await buildCueSheet({
+      scene: "A quiet scene with no named references at all here.",
+    });
+    assert.ok(scopedAttempts > 0, "the scoped attempt must have been made");
+    assert.ok(sheet.cues.length > 0, "the fallback must still produce a sheet");
+    assert.ok(
+      sheet.warnings.some((w) => /fell back to an unscoped ranking/i.test(w)),
+      "the fallback must be labelled, not silent",
+    );
+    assert.ok(
+      sheet.receipts.some((r) => r.label === "Artist affinity (tag filter, no match)"),
+      "the empty scoped attempt must leave a receipt as evidence",
+    );
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("the discovery call is tag-scoped for an anchor-less brief too", async () => {
+  calls.length = 0;
+  await buildCueSheet({ scene: "A quiet scene with no named references at all here." });
+  const backfill = calls.filter(
+    (call) =>
+      call.url.includes("/v2/insights") &&
+      call.url.includes("backfill.cross_domain.take") &&
+      call.url.includes("filter.tags="),
+  );
+  assert.ok(
+    backfill.length > 0,
+    "discovery picks were the same for every brief without a tag filter",
+  );
+});
+
+await check("uniform affinity on an anchor-less brief is reported, not hidden", async () => {
+  const original = globalThis.fetch;
+  const uniform = {
+    results: {
+      entities: [
+        {
+          entity_id: "bbbbbbbb-0000-0000-0000-000000000001",
+          name: "Artist One",
+          subtype: "urn:entity:artist",
+          popularity: 0.9,
+          properties: {},
+          tags: [],
+          query: { affinity: 0.5 },
+        },
+        {
+          entity_id: "bbbbbbbb-0000-0000-0000-000000000002",
+          name: "Artist Two",
+          subtype: "urn:entity:artist",
+          popularity: 0.4,
+          properties: {},
+          tags: [],
+          query: { affinity: 0.5 },
+        },
+      ],
+    },
+  };
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = typeof input === "string" ? input : input.toString();
+    const parsed = new URL(url);
+    if (parsed.pathname === "/v2/tags") return jsonResponse(QLOO_TAGS);
+    if (parsed.pathname === "/v2/insights") return jsonResponse(uniform);
+    if (parsed.pathname === "/v2/trending") return jsonResponse(QLOO_TRENDING);
+    if (parsed.pathname === "/v2/analysis/compare") return jsonResponse(QLOO_COMPARE);
+    return jsonResponse({ error: "unexpected path" }, 404);
+  }) as typeof fetch;
+
+  try {
+    const sheet = await buildCueSheet({
+      scene: "A quiet scene with no named references at all here.",
+    });
+    assert.ok(
+      sheet.warnings.some((w) => /ordered by popularity rather than affinity/i.test(w)),
+      "a uniform affinity must be disclosed as popularity ordering",
+    );
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
 await check("signal entities are sent as bare IDs, not urn-prefixed", async () => {
   calls.length = 0;
   await buildCueSheet({

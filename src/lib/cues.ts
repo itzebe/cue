@@ -157,20 +157,54 @@ export async function groundArtistCues(
   const signalEntities = anchorEntities.map((entity) => entity.entity_id);
   const eraFloor = eraToYearFloor(brief.era);
 
-  const call = await insights({
-    filterType: "urn:entity:artist",
-    signalEntities,
-    signalTags: toTagSignals(tags),
-    demographics: {
-      age: brief.audience.age,
-      gender: brief.audience.gender,
-      audiences: brief.audience.audiences,
-    },
-    biasTrends: brief.era.match(/contemporary|modern|now|today/i) ? "high" : "medium",
-    releaseYearMin: eraFloor,
-    explainability: true,
-    take: 14,
-  });
+  // `signal.interests.tags` scores candidates but does not restrict them. On the
+  // hackathon key it returns the same 14 entities for death metal as for polka,
+  // so a brief with no named reference was served an identical candidate set
+  // whatever its genre — the ranking then fell back to popularity, and two
+  // unrelated briefs produced the same slate. `filter.tags` is the parameter
+  // that actually scopes the candidate set, and it is applied only when there is
+  // no anchor: a resolved anchor already differentiates the result, so the
+  // anchored path is left exactly as it was.
+  //
+  // `filter.tags` is a union, not an intersection — every tag widens the set —
+  // so the resolved genre and mood tags together act as a superset filter. A set
+  // that matched nothing would empty the sheet, so the unscoped call is kept as
+  // a labelled fallback rather than removed.
+  const tagFilter = signalEntities.length === 0 ? tags.map((tag) => tag.tag_id) : undefined;
+
+  const request = (filterTags: string[] | undefined) =>
+    insights({
+      filterType: "urn:entity:artist",
+      signalEntities,
+      signalTags: toTagSignals(tags),
+      filterTags,
+      demographics: {
+        age: brief.audience.age,
+        gender: brief.audience.gender,
+        audiences: brief.audience.audiences,
+      },
+      biasTrends: brief.era.match(/contemporary|modern|now|today/i) ? "high" : "medium",
+      releaseYearMin: eraFloor,
+      explainability: true,
+      take: 14,
+    });
+
+  const tagScoped = tagFilter !== undefined && tagFilter.length > 0;
+  let call = await request(tagFilter);
+
+  if (tagScoped && call.ok && call.data.length === 0) {
+    // The brief's own tags matched no artist. Record the empty scoped attempt so
+    // the evidence shows what was tried, then fall back to the unscoped ranking
+    // and say plainly that the slate is not filtered to the brief.
+    receipts.push(
+      receiptFrom(call, "GET /v2/insights", "Artist affinity (tag filter, no match)"),
+    );
+    call = await request(undefined);
+    warnings.push(
+      "Qloo matched no artists for this brief's genre and mood tags, so the slate fell back to an unscoped ranking. It is not filtered to the brief.",
+    );
+  }
+
   receipts.push(receiptFrom(call, "GET /v2/insights", "Artist affinity (explainability on)"));
 
   if (!call.ok) {
@@ -196,7 +230,7 @@ export async function groundArtistCues(
   const spread = (ranked[0].affinity ?? 0) - (ranked[ranked.length - 1].affinity ?? 0);
   if (signalEntities.length === 0 && Math.abs(spread) < 0.001) {
     warnings.push(
-      "No named references in the brief, so Qloo returned a uniform affinity for tag matches. Cues are ordered by popularity instead of affinity — add a film, director or artist to get true affinity ranking.",
+      "No named references in the brief and no affinity spread across the candidates, so cues are ordered by popularity rather than affinity — add a film, director or artist to get true affinity ranking.",
     );
   }
 
@@ -305,10 +339,19 @@ export async function discoveryBackfill(
   excludeIds: string[],
 ): Promise<QlooEntity[]> {
   const { brief, anchorEntities, tags, receipts } = context;
+  // Same reason as the primary call: tag *signals* do not scope the candidate
+  // set, so without a filter two different briefs were handed the same discovery
+  // picks. Applied only when the brief resolved no anchor, matching the primary
+  // call, and a filter that matches nothing simply yields no discovery rows —
+  // the sheet keeps its primary picks.
+  const signalEntities = anchorEntities.map((entity) => entity.entity_id);
+  const tagFilter = signalEntities.length === 0 ? tags.map((tag) => tag.tag_id) : undefined;
+
   const call = await insights({
     filterType: "urn:entity:artist",
-    signalEntities: anchorEntities.map((entity) => entity.entity_id),
+    signalEntities,
     signalTags: toTagSignals(tags),
+    filterTags: tagFilter,
     excludeEntities: excludeIds,
     // Hold discovery picks to the same brief constraints as the primary picks,
     // otherwise a "late-90s" brief can surface contemporary artists in the
