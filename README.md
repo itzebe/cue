@@ -408,6 +408,46 @@ Every claim in the sheet is traceable:
 
 ![Receipts: every Qloo endpoint called, with status, latency and row count](docs/screenshots/05-evidence-receipts.jpg)
 
+## The same comparison, as a switch you can flip
+
+The side-by-side above is static: it answers the eligibility question once, whether or not you look
+at it. Cue also makes it **operable**. A Qloo on/off control sits above the evidence column, and
+flipping it swaps the grounded sheet for the model's own ungrounded answer from the *same run*.
+
+![The counterfactual: a Qloo on/off switch above the evidence column, and the measured fields an ungrounded answer cannot carry](docs/screenshots/10-qloo-counterfactual-on.png)
+
+Two things make this a demonstration rather than a second claim:
+
+- **Same brief, same run, no second request.** The comparison is computed from the two slates the
+  pipeline already returned (`CueSheet.cues` and `CueSheet.baseline.cues`). Flipping the switch is
+  client-side state: it issues **no API call** and adds no latency, and the two answers are
+  guaranteed to describe the same scene because they came from one request.
+- **The comparison is arithmetic, not a verdict.** `src/lib/counterfactual.ts` counts shared artist
+  names (case-folded, de-duplicated) and reports which measured fields the ungrounded answer
+  structurally cannot carry. It never scores, weights or ranks the two answers against each other.
+
+![Qloo off: the model's own answer, with the measured panels named as unavailable](docs/screenshots/11-qloo-counterfactual-off.png)
+
+With Qloo off, Cue does not blank the page or grey out the grounded sheet. It renders the ungrounded
+answer with the same care, then names what is no longer available — cue sheet, audience fit,
+momentum, cross-domain taste map, comparables, casting, clearance — and says each is a Qloo
+measurement with nothing behind it. The off-state is a real, usable answer that is simply
+worse-informed, and saying so is the demonstration.
+
+Three rules the panel holds to:
+
+- A **sample is never presented as a live model answer.** When the model call fails, the panel labels
+  the fixed example as a sample in its heading, badge and prose, and `ungroundedSource` carries the
+  fact rather than guessing.
+- **Missing data is named as missing, never fabricated.** No invented affinity, no placeholder score,
+  no unexplained dash: an absent field is reported as absent and attributed to the missing instrument.
+- **No claim that either answer is creatively superior.** The panel states that the two answers
+  differ and that one arrives with measurements the other cannot carry — and explicitly disclaims a
+  quality judgement.
+
+The control is keyboard-operable (`aria-pressed` on both buttons, focusable, Enter/Space to
+activate) and fits a 390px viewport without horizontal overflow.
+
 ## The benchmark: Qloo against an LLM-only baseline
 
 To find out whether the grounding actually changes the answer, there is a preregistered benchmark in
@@ -526,6 +566,11 @@ and any file with no numeric ratings, so an unfilled review cannot masquerade as
 The primary action is reachable without scrolling on common phone viewports.
 
 ![Cue on a phone: the brief composer and the primary action on the first screen](docs/screenshots/06-mobile-first-run.jpg)
+
+The Qloo on/off control fits the same narrow viewport without horizontal overflow, so the
+counterfactual can be demonstrated on a phone as well as a desktop.
+
+![The Qloo on/off switch on a 390px viewport, with Qloo off](docs/screenshots/12-qloo-counterfactual-mobile.png)
 
 ## What is honest and what is not
 

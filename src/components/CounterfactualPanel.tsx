@@ -108,17 +108,29 @@ export function UngroundedResult({ sheet }: { sheet: CueSheet }) {
           Qloo is switched off
         </p>
         <p className="mt-1.5 text-xs leading-relaxed text-haze-300">
-          This is the model&rsquo;s answer from general knowledge alone. It reads well and it
-          names real songs — but it carries no affinity, no audience measurement, no
-          momentum and no clearance read, because those are measurements and the model has
-          no instrument for them. Turn Qloo back on to see the grounded sheet.
+          {ungroundedIsModel ? (
+            <>
+              This is the model&rsquo;s answer from general knowledge alone. It reads well and it
+              names real songs — but it carries no affinity, no audience measurement, no
+              momentum and no clearance read, because those are measurements and the model has
+              no instrument for them. Turn Qloo back on to see the grounded sheet.
+            </>
+          ) : (
+            <>
+              The model did not return an answer for this scene, so what follows is a fixed
+              sample of the ungrounded answer rather than this run&rsquo;s model output. It stands
+              in for the same thing: an answer with no affinity, no audience measurement, no
+              momentum and no clearance read, because those are measurements and no text-only
+              answer has an instrument for them. Turn Qloo back on to see the grounded sheet.
+            </>
+          )}
         </p>
       </div>
 
       <section className="panel p-5" aria-label="Ungrounded answer">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <h2 className="font-display text-xl text-haze-100">
-            The model&rsquo;s answer
+            {ungroundedIsModel ? "The model\u2019s answer" : "A fixed ungrounded sample"}
             <span className="ml-2 font-mono text-sm text-haze-500">
               {baseline.cues.length} options
             </span>
@@ -130,8 +142,8 @@ export function UngroundedResult({ sheet }: { sheet: CueSheet }) {
 
         {baseline.cues.length === 0 ? (
           <p className="text-sm text-haze-500">
-            The model returned no picks for this scene, so there is no ungrounded answer to
-            show.
+            No ungrounded answer is available for this scene, so there is nothing to show in
+            this column.
           </p>
         ) : (
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
@@ -210,8 +222,8 @@ export function CounterfactualPanel({ sheet }: { sheet: CueSheet }) {
           <h2 className="font-display text-xl text-haze-100">What Qloo changes</h2>
           <p className="mt-1 max-w-2xl text-xs leading-relaxed text-haze-500">
             The hackathon asks whether a project works the same without the taste graph.
-            Use the switch above to take it away and watch the same scene degrade to the
-            model&rsquo;s best guess. Both answers come from this one run.
+            Use the switch above to take it away and watch the same scene fall back to an
+            ungrounded guess. Both answers come from this one run.
           </p>
         </header>
 

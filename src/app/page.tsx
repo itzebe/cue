@@ -508,7 +508,9 @@ export default function StudioPage() {
                     <p className="mt-1 text-xs leading-relaxed text-haze-300">
                       {groundedOn
                         ? "Qloo is on: every panel below is a measured ranking."
-                        : "Qloo is off: the measured panels are replaced by the model's own answer."}
+                        : sheet.grounding.ungroundedSource === "llm"
+                          ? "Qloo is off: the measured panels are replaced by the model's own answer."
+                          : "Qloo is off: the measured panels are replaced by a fixed ungrounded sample."}
                     </p>
                   </div>
                   <GroundingSwitch groundedOn={groundedOn} onChange={setGroundedOn} />
