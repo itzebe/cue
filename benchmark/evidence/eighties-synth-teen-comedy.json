@@ -1,0 +1,2548 @@
+{
+  "evidenceVersion": "1.0.0",
+  "briefId": "eighties-synth-teen-comedy",
+  "scene": "An 1980s teen comedy. Hopeful and euphoric, synthwave and pop. The protagonist rides a bike at sunset after finally fitting in. 1980s.",
+  "recordedAt": "2026-10-25T09:26:38.226Z",
+  "sourceUrl": "https://cue-nine-iota.vercel.app/api/cue",
+  "sourceCommit": "6d38c7d971afb47a54bd7f4e8b0eda565971f55d",
+  "protocolVersion": "1.0.0",
+  "protocolHash": "c079c8f74dc182d42a7d7c51bee44b4afdcb3baba4950bad6b835aef7ad7d556",
+  "httpStatus": 200,
+  "latencyMs": 9884,
+  "deployment": {
+    "mode": "live",
+    "sceneParse": {
+      "source": "deterministic",
+      "provider": null
+    },
+    "baselineSource": "llm",
+    "qlooEndpoints": [
+      "GET /v2/tags",
+      "GET /v2/insights",
+      "GET /v2/insights (backfill)",
+      "GET /v2/trending",
+      "GET /v2/insights (cast)",
+      "GET /v2/insights (brand)"
+    ]
+  },
+  "raw": {
+    "brief": {
+      "title": "An 1980s teen comedy",
+      "raw": "An 1980s teen comedy. Hopeful and euphoric, synthwave and pop. The protagonist rides a bike at sunset after finally fitting in. 1980s.",
+      "mood": [
+        "hope",
+        "euphoria"
+      ],
+      "genre": [
+        "synthwave",
+        "pop"
+      ],
+      "era": "contemporary",
+      "setting": "An 1980s teen comedy",
+      "arc": "Establish the emotional register, then hold it without resolving.",
+      "audience": {
+        "age": "24_and_younger"
+      },
+      "anchors": [],
+      "diegetic": false
+    },
+    "cues": [
+      {
+        "id": "F0A1E4B1-292B-4672-A9B0-2733049C61A9",
+        "artist": "Specimen",
+        "artistId": "F0A1E4B1-292B-4672-A9B0-2733049C61A9",
+        "track": "Track TBD — pick from this artist's catalogue",
+        "affinity": 0.7134200177415654,
+        "popularity": 0.949891538708557,
+        "momentum": 0,
+        "image": "https://images.qloo.com/i/F0A1E4B1-292B-4672-A9B0-2733049C61A9-420x-auto.jpg",
+        "why": [
+          "Over-indexes with the 24 and younger audience the brief targets."
+        ],
+        "explainability": [],
+        "audienceFit": {
+          "24_and_younger": 0.7134200177415654
+        },
+        "placement": "needle_drop",
+        "clearance": "major_label",
+        "risk": "High-profile catalogue; expect a competitive sync fee and a slower clearance.",
+        "confidence": 0.7353680070966262,
+        "discovery": false,
+        "trackUnverified": true
+      },
+      {
+        "id": "F00C71B5-D787-496F-9FAD-8042556D7BE1",
+        "artist": "death's dynamic shroud",
+        "artistId": "F00C71B5-D787-496F-9FAD-8042556D7BE1",
+        "track": "Track TBD — pick from this artist's catalogue",
+        "affinity": 0.7134200177415654,
+        "popularity": 0.9473225461861602,
+        "momentum": 0,
+        "image": "https://images.qloo.com/i/F00C71B5-D787-496F-9FAD-8042556D7BE1-420x-auto.jpg",
+        "why": [
+          "Over-indexes with the 24 and younger audience the brief targets."
+        ],
+        "explainability": [],
+        "audienceFit": {
+          "24_and_younger": 0.7134200177415654
+        },
+        "placement": "score_bed",
+        "clearance": "major_label",
+        "risk": "High-profile catalogue; expect a competitive sync fee and a slower clearance.",
+        "confidence": 0.7353680070966262,
+        "discovery": false,
+        "trackUnverified": true
+      },
+      {
+        "id": "178BFAB6-30AF-4D11-AF60-A9966CC8757F",
+        "artist": "Manos de Topo",
+        "artistId": "178BFAB6-30AF-4D11-AF60-A9966CC8757F",
+        "track": "Track TBD — pick from this artist's catalogue",
+        "affinity": 0.7134200177415654,
+        "popularity": 0.9404675304248667,
+        "momentum": 0,
+        "image": "https://images.qloo.com/i/178BFAB6-30AF-4D11-AF60-A9966CC8757F-420x-auto.jpg",
+        "why": [
+          "Over-indexes with the 24 and younger audience the brief targets."
+        ],
+        "explainability": [],
+        "audienceFit": {
+          "24_and_younger": 0.7134200177415654
+        },
+        "placement": "transition",
+        "clearance": "major_label",
+        "risk": "High-profile catalogue; expect a competitive sync fee and a slower clearance.",
+        "confidence": 0.7353680070966262,
+        "discovery": false,
+        "trackUnverified": true
+      },
+      {
+        "id": "EFF8352C-DA96-44F7-9843-444A5152F335",
+        "artist": "Shag",
+        "artistId": "EFF8352C-DA96-44F7-9843-444A5152F335",
+        "track": "Track TBD — pick from this artist's catalogue",
+        "affinity": 0.7134200177415654,
+        "popularity": 0.8697481469830721,
+        "momentum": 0,
+        "image": "https://images.qloo.com/i/EFF8352C-DA96-44F7-9843-444A5152F335-420x-auto.jpg",
+        "why": [
+          "Over-indexes with the 24 and younger audience the brief targets."
+        ],
+        "explainability": [],
+        "audienceFit": {
+          "24_and_younger": 0.7134200177415654
+        },
+        "placement": "title_card",
+        "clearance": "major_label",
+        "risk": "High-profile catalogue; expect a competitive sync fee and a slower clearance.",
+        "confidence": 0.7353680070966262,
+        "discovery": false,
+        "trackUnverified": true
+      },
+      {
+        "id": "4786114C-73C5-4C6E-8B41-788CEE8A72B8",
+        "artist": "All the Young",
+        "artistId": "4786114C-73C5-4C6E-8B41-788CEE8A72B8",
+        "track": "Track TBD — pick from this artist's catalogue",
+        "affinity": 0.7134200177415654,
+        "popularity": 0.826989494655578,
+        "momentum": 0,
+        "image": "https://images.qloo.com/i/4786114C-73C5-4C6E-8B41-788CEE8A72B8-420x-auto.jpg",
+        "why": [
+          "Over-indexes with the 24 and younger audience the brief targets."
+        ],
+        "explainability": [],
+        "audienceFit": {
+          "24_and_younger": 0.7134200177415654
+        },
+        "placement": "title_card",
+        "clearance": "major_label",
+        "risk": "Standard clearance path for this profile.",
+        "confidence": 0.7353680070966262,
+        "discovery": false,
+        "trackUnverified": true
+      },
+      {
+        "id": "F061EC52-469E-4856-A1D5-3A43B7EB339B",
+        "artist": "Kasper Lindmark",
+        "artistId": "F061EC52-469E-4856-A1D5-3A43B7EB339B",
+        "track": "Track TBD — pick from this artist's catalogue",
+        "affinity": 0.7134200177415654,
+        "popularity": 0.7626270569962448,
+        "momentum": 0,
+        "image": "https://images.qloo.com/i/F061EC52-469E-4856-A1D5-3A43B7EB339B-420x-auto.jpg",
+        "why": [
+          "Over-indexes with the 24 and younger audience the brief targets."
+        ],
+        "explainability": [],
+        "audienceFit": {
+          "24_and_younger": 0.7134200177415654
+        },
+        "placement": "title_card",
+        "clearance": "unknown",
+        "risk": "Standard clearance path for this profile.",
+        "confidence": 0.7353680070966262,
+        "discovery": false,
+        "trackUnverified": true
+      }
+    ],
+    "sceneParse": {
+      "source": "deterministic",
+      "provider": null,
+      "failureReason": "rate_limited",
+      "failureStatus": 429,
+      "failureProviderCode": "rate_limit_exceeded",
+      "failureMessage": "the provider rate-limited the request"
+    },
+    "baseline": {
+      "cues": [
+        {
+          "artist": "The Weeknd",
+          "track": "Blinding Lights",
+          "why": "Synth‑driven production, bright major chords, and an upbeat tempo capture 80s pop optimism while feeling fresh for modern audiences, perfect for a hopeful, euphoric teen moment."
+        },
+        {
+          "artist": "Walk The Moon",
+          "track": "Shut Up and Dance",
+          "why": "Glittering synth hooks, driving drum beat, and an anthemic chorus evoke the exuberance of 80s dance‑pop, delivering a feel‑good surge that matches teenage euphoria."
+        },
+        {
+          "artist": "CHVRCHES",
+          "track": "Never Ending Circles",
+          "why": "Bright, layered synths and soaring vocal melodies create an uplifting, hopeful atmosphere reminiscent of 80s new wave, while retaining a contemporary production polish."
+        }
+      ],
+      "note": "Generated by the LLM with no cultural data. Plausible on the surface, but unverifiable: no affinity, no audience measurement, no momentum.",
+      "source": "llm"
+    },
+    "receipts": [
+      {
+        "endpoint": "GET /v2/tags",
+        "label": "Tag \"synthwave\"",
+        "params": {
+          "filter.query": "synthwave",
+          "feature.typo_tolerance": "false",
+          "take": "3"
+        },
+        "status": 200,
+        "ms": 44,
+        "resultCount": 3
+      },
+      {
+        "endpoint": "GET /v2/tags",
+        "label": "Tag \"pop\"",
+        "params": {
+          "filter.query": "pop",
+          "feature.typo_tolerance": "false",
+          "take": "3"
+        },
+        "status": 200,
+        "ms": 63,
+        "resultCount": 3
+      },
+      {
+        "endpoint": "GET /v2/tags",
+        "label": "Tag \"hope\"",
+        "params": {
+          "filter.query": "hope",
+          "feature.typo_tolerance": "false",
+          "take": "3"
+        },
+        "status": 200,
+        "ms": 45,
+        "resultCount": 3
+      },
+      {
+        "endpoint": "GET /v2/tags",
+        "label": "Tag \"euphoria\"",
+        "params": {
+          "filter.query": "euphoria",
+          "feature.typo_tolerance": "false",
+          "take": "3"
+        },
+        "status": 200,
+        "ms": 37,
+        "resultCount": 3
+      },
+      {
+        "endpoint": "GET /v2/insights",
+        "label": "Artist affinity (explainability on)",
+        "params": {
+          "filter.type": "urn:entity:artist",
+          "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:synthwave\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:pop\",\"weight\":1},{\"tag\":\"urn:tag:theme:qloo:hope\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:euphoria\",\"weight\":1}]",
+          "signal.demographics.age": "24_and_younger",
+          "bias.trends": "high",
+          "filter.release_year.min": "2020",
+          "feature.explainability": "true",
+          "take": "14"
+        },
+        "status": 200,
+        "ms": 4301,
+        "resultCount": 14
+      },
+      {
+        "endpoint": "GET /v2/insights (backfill)",
+        "label": "Cross-domain discovery",
+        "params": {
+          "filter.type": "urn:entity:artist",
+          "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:synthwave\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:pop\",\"weight\":1},{\"tag\":\"urn:tag:theme:qloo:hope\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:euphoria\",\"weight\":1}]",
+          "filter.exclude.entities": "F0A1E4B1-292B-4672-A9B0-2733049C61A9,F00C71B5-D787-496F-9FAD-8042556D7BE1,178BFAB6-30AF-4D11-AF60-A9966CC8757F,EFF8352C-DA96-44F7-9843-444A5152F335,4786114C-73C5-4C6E-8B41-788CEE8A72B8,F061EC52-469E-4856-A1D5-3A43B7EB339B,4148C56F-F5E2-4E41-829E-FD58F3707786,548C5DAA-3BCB-40CD-A8F7-AB77D2155947",
+          "signal.demographics.age": "24_and_younger",
+          "filter.release_year.min": "2020",
+          "take": "6",
+          "backfill.cross_domain.take": "6"
+        },
+        "status": 200,
+        "ms": 3652,
+        "resultCount": 6
+      },
+      {
+        "endpoint": "GET /v2/insights",
+        "label": "Comparables: television",
+        "params": {
+          "filter.type": "urn:entity:tv_show",
+          "signal.interests.entities": "",
+          "take": "5"
+        },
+        "status": 200,
+        "ms": 667,
+        "resultCount": 5
+      },
+      {
+        "endpoint": "GET /v2/trending",
+        "label": "Artist momentum",
+        "params": {
+          "signal.interests.entities": "F0A1E4B1-292B-4672-A9B0-2733049C61A9",
+          "filter.type": "urn:entity:artist",
+          "filter.start_date": "2024-10-25",
+          "filter.end_date": "2026-10-25",
+          "take": "12"
+        },
+        "status": 200,
+        "ms": 807,
+        "resultCount": 12
+      },
+      {
+        "endpoint": "GET /v2/trending",
+        "label": "Artist momentum",
+        "params": {
+          "signal.interests.entities": "F00C71B5-D787-496F-9FAD-8042556D7BE1",
+          "filter.type": "urn:entity:artist",
+          "filter.start_date": "2024-10-25",
+          "filter.end_date": "2026-10-25",
+          "take": "12"
+        },
+        "status": 200,
+        "ms": 865,
+        "resultCount": 0
+      },
+      {
+        "endpoint": "GET /v2/trending",
+        "label": "Artist momentum",
+        "params": {
+          "signal.interests.entities": "178BFAB6-30AF-4D11-AF60-A9966CC8757F",
+          "filter.type": "urn:entity:artist",
+          "filter.start_date": "2024-10-25",
+          "filter.end_date": "2026-10-25",
+          "take": "12"
+        },
+        "status": 200,
+        "ms": 981,
+        "resultCount": 12
+      },
+      {
+        "endpoint": "GET /v2/trending",
+        "label": "Artist momentum",
+        "params": {
+          "signal.interests.entities": "EFF8352C-DA96-44F7-9843-444A5152F335",
+          "filter.type": "urn:entity:artist",
+          "filter.start_date": "2024-10-25",
+          "filter.end_date": "2026-10-25",
+          "take": "12"
+        },
+        "status": 200,
+        "ms": 1018,
+        "resultCount": 12
+      },
+      {
+        "endpoint": "GET /v2/trending",
+        "label": "Artist momentum",
+        "params": {
+          "signal.interests.entities": "4786114C-73C5-4C6E-8B41-788CEE8A72B8",
+          "filter.type": "urn:entity:artist",
+          "filter.start_date": "2024-10-25",
+          "filter.end_date": "2026-10-25",
+          "take": "12"
+        },
+        "status": 200,
+        "ms": 1066,
+        "resultCount": 12
+      },
+      {
+        "endpoint": "GET /v2/trending",
+        "label": "Artist momentum",
+        "params": {
+          "signal.interests.entities": "F061EC52-469E-4856-A1D5-3A43B7EB339B",
+          "filter.type": "urn:entity:artist",
+          "filter.start_date": "2024-10-25",
+          "filter.end_date": "2026-10-25",
+          "take": "12"
+        },
+        "status": 200,
+        "ms": 1113,
+        "resultCount": 12
+      },
+      {
+        "endpoint": "GET /v2/insights",
+        "label": "Comparables: films",
+        "params": {
+          "filter.type": "urn:entity:movie",
+          "signal.interests.entities": "",
+          "take": "5"
+        },
+        "status": 200,
+        "ms": 1536,
+        "resultCount": 5
+      },
+      {
+        "endpoint": "GET /v2/insights",
+        "label": "Comparables: books",
+        "params": {
+          "filter.type": "urn:entity:book",
+          "signal.interests.entities": "",
+          "take": "5"
+        },
+        "status": 200,
+        "ms": 1600,
+        "resultCount": 5
+      },
+      {
+        "endpoint": "GET /v2/insights (cast)",
+        "label": "Casting fit: people",
+        "params": {
+          "filter.type": "urn:entity:person",
+          "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:synthwave\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:pop\",\"weight\":1},{\"tag\":\"urn:tag:theme:qloo:hope\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:euphoria\",\"weight\":1}]",
+          "take": "10"
+        },
+        "status": 200,
+        "ms": 770,
+        "resultCount": 10
+      },
+      {
+        "endpoint": "GET /v2/insights (brand)",
+        "label": "Cross-domain: brands",
+        "params": {
+          "filter.type": "urn:entity:brand",
+          "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:synthwave\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:pop\",\"weight\":1},{\"tag\":\"urn:tag:theme:qloo:hope\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:euphoria\",\"weight\":1}]",
+          "signal.demographics.age": "24_and_younger",
+          "take": "6"
+        },
+        "status": 200,
+        "ms": 1691,
+        "resultCount": 6
+      }
+    ],
+    "warnings": [
+      "Scene parsing fell back to the deterministic reader because the provider rate-limited the request (HTTP 429). Track titles are left for you to choose.",
+      "None of the scene's named references resolved to Qloo entities. Falling back to mood and genre tags.",
+      "No named references in the brief, so Qloo returned a uniform affinity for tag matches. Cues are ordered by popularity instead of affinity — add a film, director or artist to get true affinity ranking.",
+      "No cross-domain discoveries were searched: the brief resolved no Qloo anchor, so there was no audience to measure against. Naming a film, show or artist usually fixes this."
+    ],
+    "mode": "live",
+    "llmConfigured": true,
+    "casting": {
+      "audience": "the brief's taste tags",
+      "candidates": [
+        {
+          "name": "Melinda Ademi",
+          "entityId": "E59EC921-0DD3-4122-ADD8-0C8967A06CDB",
+          "affinity": 0.7649962877984056,
+          "popularity": 0.8910862025853166,
+          "crossDomain": false
+        },
+        {
+          "name": "Soraya Arnelas",
+          "entityId": "8FB1C527-0027-462E-ABA5-32F48BDAC527",
+          "affinity": 0.7649962877984056,
+          "popularity": 0.8805188027962296,
+          "crossDomain": false,
+          "image": "https://images.qloo.com/i/8FB1C527-0027-462E-ABA5-32F48BDAC527-420x-auto.jpg"
+        },
+        {
+          "name": "John Ross Bowie",
+          "entityId": "7755AB69-11B3-40FA-83FD-88FAFAAFF0B7",
+          "affinity": 0.7649962877984056,
+          "popularity": 0.6832552374947,
+          "crossDomain": false,
+          "image": "https://images.qloo.com/i/7755AB69-11B3-40FA-83FD-88FAFAAFF0B7-420x-auto.jpg"
+        },
+        {
+          "name": "Sean de Guzman",
+          "entityId": "27615752-21D8-4504-BFF3-6DA18551BA1E",
+          "affinity": 0.7649962877984056,
+          "popularity": 0.5935084419608397,
+          "crossDomain": false
+        },
+        {
+          "name": "Wadih Damous",
+          "entityId": "45366EEF-D794-4C15-912E-A5AF27F01A5A",
+          "affinity": 0.7649962877984056,
+          "popularity": 0.39748969895956776,
+          "crossDomain": false,
+          "image": "https://images.qloo.com/i/45366EEF-D794-4C15-912E-A5AF27F01A5A-420x-auto.jpg"
+        },
+        {
+          "name": "Deidre Henderson",
+          "entityId": "409F9E2E-FF87-4E5C-8677-F2EE8E071247",
+          "affinity": 0.7649962877984056,
+          "popularity": 0.3680923234146182,
+          "crossDomain": false,
+          "image": "https://images.qloo.com/i/409F9E2E-FF87-4E5C-8677-F2EE8E071247-420x-auto.jpg"
+        },
+        {
+          "name": "Donnie Lewis Jr.",
+          "entityId": "13C5116B-F1A0-45C7-AF93-3DFEF1D67F6B",
+          "affinity": 0.7649962877984056,
+          "popularity": 0.3209738967830313,
+          "crossDomain": false,
+          "image": "https://images.qloo.com/i/13C5116B-F1A0-45C7-AF93-3DFEF1D67F6B-420x-auto.jpg"
+        },
+        {
+          "name": "The Intruders",
+          "entityId": "4E3D8087-B486-4B7F-990D-1333967D2CA5",
+          "affinity": 0.7649962877984056,
+          "popularity": 0.18810406496993945,
+          "crossDomain": false
+        },
+        {
+          "name": "Brooklynn Prince",
+          "entityId": "D72621A5-C59C-47BA-972F-F6D55D3A0B93",
+          "affinity": 0.7649962877984056,
+          "popularity": 0.11197964797077657,
+          "crossDomain": false,
+          "image": "https://images.qloo.com/i/D72621A5-C59C-47BA-972F-F6D55D3A0B93-420x-auto.jpg"
+        },
+        {
+          "name": "Cockney Rebel",
+          "entityId": "FB524B81-D861-412F-8AB8-FC8B9B6059CC",
+          "affinity": 0.7649962877984056,
+          "popularity": 0.05261956273578239,
+          "crossDomain": false
+        },
+        {
+          "name": "Temple Run",
+          "entityId": "6AC40398-BD8F-4906-966E-CA47CBC53651",
+          "affinity": 0.8470673858191463,
+          "popularity": 0.6285196046854605,
+          "crossDomain": true,
+          "image": "https://images.qloo.com/i/6AC40398-BD8F-4906-966E-CA47CBC53651-420x-auto.jpg"
+        },
+        {
+          "name": "Aku Anak Sgm",
+          "entityId": "9B3055C6-7A6C-4D83-8C41-A14C83B91565",
+          "affinity": 0.8470673858191463,
+          "popularity": 0.5978369581800613,
+          "crossDomain": true,
+          "image": "https://images.qloo.com/i/9B3055C6-7A6C-4D83-8C41-A14C83B91565-420x-auto.jpg"
+        },
+        {
+          "name": "Thehowdy",
+          "entityId": "3D94D634-C2AF-49A6-AFC9-7B246AE3EA20",
+          "affinity": 0.8470673858191463,
+          "popularity": 0.5913783458493669,
+          "crossDomain": true,
+          "image": "https://images.qloo.com/i/3D94D634-C2AF-49A6-AFC9-7B246AE3EA20-420x-auto.jpg"
+        },
+        {
+          "name": "Club Media",
+          "entityId": "263B7FFA-B3D9-4341-A98C-813380D2F1DC",
+          "affinity": 0.8470673858191463,
+          "popularity": 0.4579427370276822,
+          "crossDomain": true,
+          "image": "https://images.qloo.com/i/263B7FFA-B3D9-4341-A98C-813380D2F1DC-420x-auto.jpg"
+        },
+        {
+          "name": "Extra Tuggummi Sverige",
+          "entityId": "3B9E7CA7-F1F9-454F-BD11-3928D4EEEF15",
+          "affinity": 0.8470673858191463,
+          "popularity": 0.18481632791442762,
+          "crossDomain": true,
+          "image": "https://images.qloo.com/i/3B9E7CA7-F1F9-454F-BD11-3928D4EEEF15-420x-auto.jpg"
+        },
+        {
+          "name": "Daryl K",
+          "entityId": "71B9734C-CCF8-4BF8-9B33-4F3609E54F5B",
+          "affinity": 0.8470673858191463,
+          "popularity": 0.17123798545540844,
+          "crossDomain": true,
+          "image": "https://images.qloo.com/i/71B9734C-CCF8-4BF8-9B33-4F3609E54F5B-420x-auto.jpg"
+        }
+      ],
+      "receipts": [
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"synthwave\"",
+          "params": {
+            "filter.query": "synthwave",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 44,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"pop\"",
+          "params": {
+            "filter.query": "pop",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 63,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"hope\"",
+          "params": {
+            "filter.query": "hope",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 45,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"euphoria\"",
+          "params": {
+            "filter.query": "euphoria",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 37,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Artist affinity (explainability on)",
+          "params": {
+            "filter.type": "urn:entity:artist",
+            "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:synthwave\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:pop\",\"weight\":1},{\"tag\":\"urn:tag:theme:qloo:hope\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:euphoria\",\"weight\":1}]",
+            "signal.demographics.age": "24_and_younger",
+            "bias.trends": "high",
+            "filter.release_year.min": "2020",
+            "feature.explainability": "true",
+            "take": "14"
+          },
+          "status": 200,
+          "ms": 4301,
+          "resultCount": 14
+        },
+        {
+          "endpoint": "GET /v2/insights (backfill)",
+          "label": "Cross-domain discovery",
+          "params": {
+            "filter.type": "urn:entity:artist",
+            "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:synthwave\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:pop\",\"weight\":1},{\"tag\":\"urn:tag:theme:qloo:hope\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:euphoria\",\"weight\":1}]",
+            "filter.exclude.entities": "F0A1E4B1-292B-4672-A9B0-2733049C61A9,F00C71B5-D787-496F-9FAD-8042556D7BE1,178BFAB6-30AF-4D11-AF60-A9966CC8757F,EFF8352C-DA96-44F7-9843-444A5152F335,4786114C-73C5-4C6E-8B41-788CEE8A72B8,F061EC52-469E-4856-A1D5-3A43B7EB339B,4148C56F-F5E2-4E41-829E-FD58F3707786,548C5DAA-3BCB-40CD-A8F7-AB77D2155947",
+            "signal.demographics.age": "24_and_younger",
+            "filter.release_year.min": "2020",
+            "take": "6",
+            "backfill.cross_domain.take": "6"
+          },
+          "status": 200,
+          "ms": 3652,
+          "resultCount": 6
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Comparables: television",
+          "params": {
+            "filter.type": "urn:entity:tv_show",
+            "signal.interests.entities": "",
+            "take": "5"
+          },
+          "status": 200,
+          "ms": 667,
+          "resultCount": 5
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "F0A1E4B1-292B-4672-A9B0-2733049C61A9",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 807,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "F00C71B5-D787-496F-9FAD-8042556D7BE1",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 865,
+          "resultCount": 0
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "178BFAB6-30AF-4D11-AF60-A9966CC8757F",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 981,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "EFF8352C-DA96-44F7-9843-444A5152F335",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 1018,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "4786114C-73C5-4C6E-8B41-788CEE8A72B8",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 1066,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "F061EC52-469E-4856-A1D5-3A43B7EB339B",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 1113,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Comparables: films",
+          "params": {
+            "filter.type": "urn:entity:movie",
+            "signal.interests.entities": "",
+            "take": "5"
+          },
+          "status": 200,
+          "ms": 1536,
+          "resultCount": 5
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Comparables: books",
+          "params": {
+            "filter.type": "urn:entity:book",
+            "signal.interests.entities": "",
+            "take": "5"
+          },
+          "status": 200,
+          "ms": 1600,
+          "resultCount": 5
+        },
+        {
+          "endpoint": "GET /v2/insights (cast)",
+          "label": "Casting fit: people",
+          "params": {
+            "filter.type": "urn:entity:person",
+            "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:synthwave\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:pop\",\"weight\":1},{\"tag\":\"urn:tag:theme:qloo:hope\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:euphoria\",\"weight\":1}]",
+            "take": "10"
+          },
+          "status": 200,
+          "ms": 770,
+          "resultCount": 10
+        },
+        {
+          "endpoint": "GET /v2/insights (brand)",
+          "label": "Cross-domain: brands",
+          "params": {
+            "filter.type": "urn:entity:brand",
+            "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:synthwave\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:pop\",\"weight\":1},{\"tag\":\"urn:tag:theme:qloo:hope\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:euphoria\",\"weight\":1}]",
+            "signal.demographics.age": "24_and_younger",
+            "take": "6"
+          },
+          "status": 200,
+          "ms": 1691,
+          "resultCount": 6
+        }
+      ],
+      "warnings": []
+    },
+    "audienceBrief": {
+      "available": false,
+      "evidence": [],
+      "interpretation": null,
+      "anchorsWithoutEvidence": [],
+      "anchorsUnresolved": [],
+      "noAnchors": true
+    },
+    "comparables": {
+      "groups": [
+        {
+          "domain": "movie",
+          "label": "Films",
+          "items": [
+            {
+              "name": "A Nice Neighbor",
+              "entityId": "48F3193E-9F20-4FB7-8965-C413D3294912",
+              "domain": "movie",
+              "affinity": 0.7649962877984056,
+              "popularity": 0,
+              "releaseYear": 1979,
+              "image": "https://images.qloo.com/i/48F3193E-9F20-4FB7-8965-C413D3294912-420x-auto.jpg"
+            },
+            {
+              "name": "7:11 PM",
+              "entityId": "E3E947F9-3E44-42F5-B8EE-5F3BAD7125B4",
+              "domain": "movie",
+              "affinity": 0.7649962877984056,
+              "popularity": 0.4316831897017214,
+              "releaseYear": 2023,
+              "image": "https://images.qloo.com/i/E3E947F9-3E44-42F5-B8EE-5F3BAD7125B4-420x-auto.jpg"
+            },
+            {
+              "name": "Come on Children",
+              "entityId": "1C4C0421-4AAE-473C-9994-6784E7A9462F",
+              "domain": "movie",
+              "affinity": 0.7649962877984056,
+              "popularity": 0.19812522948659797,
+              "releaseYear": 1973,
+              "image": "https://images.qloo.com/i/1C4C0421-4AAE-473C-9994-6784E7A9462F-420x-auto.jpg"
+            },
+            {
+              "name": "Always Audacious",
+              "entityId": "DFB7E774-B8E0-497A-A4B1-001AE2D61A33",
+              "domain": "movie",
+              "affinity": 0.7649962877984056,
+              "popularity": 0,
+              "releaseYear": 1920,
+              "image": "https://images.qloo.com/i/DFB7E774-B8E0-497A-A4B1-001AE2D61A33-420x-auto.jpg"
+            },
+            {
+              "name": "El enemigo",
+              "entityId": "1EB1BEE2-BF0F-48A2-8788-64FD3C50C1E7",
+              "domain": "movie",
+              "affinity": 0.7649962877984056,
+              "popularity": 0,
+              "releaseYear": 2008,
+              "image": "https://images.qloo.com/i/1EB1BEE2-BF0F-48A2-8788-64FD3C50C1E7-420x-auto.jpg"
+            }
+          ]
+        },
+        {
+          "domain": "tv_show",
+          "label": "Television",
+          "items": [
+            {
+              "name": "Kublai Khan",
+              "entityId": "A867B4FE-F0B7-43B7-ACDE-25BD1A5A5DFB",
+              "domain": "tv_show",
+              "affinity": 0.7649962877984056,
+              "popularity": 0,
+              "releaseYear": 2025,
+              "image": "https://images.qloo.com/i/A867B4FE-F0B7-43B7-ACDE-25BD1A5A5DFB-420x-auto.jpg"
+            },
+            {
+              "name": "Nostalgia Trip Longplays",
+              "entityId": "7554B6CD-7D95-48EC-B4AD-AA3F3CD905C7",
+              "domain": "tv_show",
+              "affinity": 0.7649962877984056,
+              "popularity": 0,
+              "releaseYear": 2025
+            },
+            {
+              "name": "The Thinkery Channel",
+              "entityId": "F316CB56-BFD3-4BB8-995E-D8C2487A10EA",
+              "domain": "tv_show",
+              "affinity": 0.7649962877984056,
+              "popularity": 0,
+              "releaseYear": 2017,
+              "image": "https://images.qloo.com/i/F316CB56-BFD3-4BB8-995E-D8C2487A10EA-420x-auto.jpg"
+            },
+            {
+              "name": "Regular Old Bogan",
+              "entityId": "8914F1D8-7C5E-415E-85DA-82E67F9BE3F9",
+              "domain": "tv_show",
+              "affinity": 0.7649962877984056,
+              "popularity": 0,
+              "releaseYear": 2020,
+              "image": "https://images.qloo.com/i/8914F1D8-7C5E-415E-85DA-82E67F9BE3F9-420x-auto.jpg"
+            },
+            {
+              "name": "Mocros",
+              "entityId": "CA368D19-431B-4214-97BE-1EA2E54326CE",
+              "domain": "tv_show",
+              "affinity": 0.7649962877984056,
+              "popularity": 0,
+              "releaseYear": 2026,
+              "image": "https://images.qloo.com/i/CA368D19-431B-4214-97BE-1EA2E54326CE-420x-auto.jpg"
+            }
+          ]
+        },
+        {
+          "domain": "book",
+          "label": "Books",
+          "items": [
+            {
+              "name": "Anne Arrives: Inspired by Anne of Green Gables",
+              "entityId": "6D6135EB-1B25-4EC7-ADFD-7D82D6BCE0BA",
+              "domain": "book",
+              "affinity": 0.7649962877984056,
+              "popularity": 0.1645337213888398,
+              "image": "https://images.qloo.com/i/6D6135EB-1B25-4EC7-ADFD-7D82D6BCE0BA-420x-auto.jpg"
+            },
+            {
+              "name": "Rising Fury (Jesse McDermitt Caribbean Adventure #12)",
+              "entityId": "5F8C0425-A0E3-4314-B735-93AAE116BAAA",
+              "domain": "book",
+              "affinity": 0.7649962877984056,
+              "popularity": 0.7153504059622734,
+              "image": "https://images.qloo.com/i/5F8C0425-A0E3-4314-B735-93AAE116BAAA-420x-auto.jpg"
+            },
+            {
+              "name": "Grim Witchery (Royals of Villain Academy, #7)",
+              "entityId": "92B45FF7-58A1-456F-AFEC-8AFAC7BF5276",
+              "domain": "book",
+              "affinity": 0.7649962877984056,
+              "popularity": 0.26927130791932435,
+              "image": "https://images.qloo.com/i/92B45FF7-58A1-456F-AFEC-8AFAC7BF5276-420x-auto.jpg"
+            },
+            {
+              "name": "The Woman on the Island (Vera Stanhope #9.5)",
+              "entityId": "6897CEE1-4A61-43A5-AFF4-D0DF69F7F4A3",
+              "domain": "book",
+              "affinity": 0.7649962877984056,
+              "popularity": 0.8363332834663875,
+              "image": "https://images.qloo.com/i/6897CEE1-4A61-43A5-AFF4-D0DF69F7F4A3-420x-auto.jpg"
+            },
+            {
+              "name": "#Poser (Hashtag, #5)",
+              "entityId": "847675C1-09F3-4338-8057-0FB47D32F19B",
+              "domain": "book",
+              "affinity": 0.7649962877984056,
+              "popularity": 0.08028124957499762,
+              "image": "https://images.qloo.com/i/847675C1-09F3-4338-8057-0FB47D32F19B-420x-auto.jpg"
+            }
+          ]
+        }
+      ],
+      "emptyDomains": [],
+      "skippedDomains": [],
+      "receipts": [
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"synthwave\"",
+          "params": {
+            "filter.query": "synthwave",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 44,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"pop\"",
+          "params": {
+            "filter.query": "pop",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 63,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"hope\"",
+          "params": {
+            "filter.query": "hope",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 45,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"euphoria\"",
+          "params": {
+            "filter.query": "euphoria",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 37,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Artist affinity (explainability on)",
+          "params": {
+            "filter.type": "urn:entity:artist",
+            "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:synthwave\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:pop\",\"weight\":1},{\"tag\":\"urn:tag:theme:qloo:hope\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:euphoria\",\"weight\":1}]",
+            "signal.demographics.age": "24_and_younger",
+            "bias.trends": "high",
+            "filter.release_year.min": "2020",
+            "feature.explainability": "true",
+            "take": "14"
+          },
+          "status": 200,
+          "ms": 4301,
+          "resultCount": 14
+        },
+        {
+          "endpoint": "GET /v2/insights (backfill)",
+          "label": "Cross-domain discovery",
+          "params": {
+            "filter.type": "urn:entity:artist",
+            "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:synthwave\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:pop\",\"weight\":1},{\"tag\":\"urn:tag:theme:qloo:hope\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:euphoria\",\"weight\":1}]",
+            "filter.exclude.entities": "F0A1E4B1-292B-4672-A9B0-2733049C61A9,F00C71B5-D787-496F-9FAD-8042556D7BE1,178BFAB6-30AF-4D11-AF60-A9966CC8757F,EFF8352C-DA96-44F7-9843-444A5152F335,4786114C-73C5-4C6E-8B41-788CEE8A72B8,F061EC52-469E-4856-A1D5-3A43B7EB339B,4148C56F-F5E2-4E41-829E-FD58F3707786,548C5DAA-3BCB-40CD-A8F7-AB77D2155947",
+            "signal.demographics.age": "24_and_younger",
+            "filter.release_year.min": "2020",
+            "take": "6",
+            "backfill.cross_domain.take": "6"
+          },
+          "status": 200,
+          "ms": 3652,
+          "resultCount": 6
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Comparables: television",
+          "params": {
+            "filter.type": "urn:entity:tv_show",
+            "signal.interests.entities": "",
+            "take": "5"
+          },
+          "status": 200,
+          "ms": 667,
+          "resultCount": 5
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "F0A1E4B1-292B-4672-A9B0-2733049C61A9",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 807,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "F00C71B5-D787-496F-9FAD-8042556D7BE1",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 865,
+          "resultCount": 0
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "178BFAB6-30AF-4D11-AF60-A9966CC8757F",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 981,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "EFF8352C-DA96-44F7-9843-444A5152F335",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 1018,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "4786114C-73C5-4C6E-8B41-788CEE8A72B8",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 1066,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "F061EC52-469E-4856-A1D5-3A43B7EB339B",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 1113,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Comparables: films",
+          "params": {
+            "filter.type": "urn:entity:movie",
+            "signal.interests.entities": "",
+            "take": "5"
+          },
+          "status": 200,
+          "ms": 1536,
+          "resultCount": 5
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Comparables: books",
+          "params": {
+            "filter.type": "urn:entity:book",
+            "signal.interests.entities": "",
+            "take": "5"
+          },
+          "status": 200,
+          "ms": 1600,
+          "resultCount": 5
+        },
+        {
+          "endpoint": "GET /v2/insights (cast)",
+          "label": "Casting fit: people",
+          "params": {
+            "filter.type": "urn:entity:person",
+            "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:synthwave\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:pop\",\"weight\":1},{\"tag\":\"urn:tag:theme:qloo:hope\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:euphoria\",\"weight\":1}]",
+            "take": "10"
+          },
+          "status": 200,
+          "ms": 770,
+          "resultCount": 10
+        },
+        {
+          "endpoint": "GET /v2/insights (brand)",
+          "label": "Cross-domain: brands",
+          "params": {
+            "filter.type": "urn:entity:brand",
+            "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:synthwave\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:pop\",\"weight\":1},{\"tag\":\"urn:tag:theme:qloo:hope\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:euphoria\",\"weight\":1}]",
+            "signal.demographics.age": "24_and_younger",
+            "take": "6"
+          },
+          "status": 200,
+          "ms": 1691,
+          "resultCount": 6
+        }
+      ],
+      "warnings": []
+    },
+    "tasteGap": {
+      "original": {
+        "index": 83.60655737704919,
+        "coveredTags": 51,
+        "vocabularySize": 61,
+        "redundancy": 0.12743508090756667,
+        "mostSimilarPair": {
+          "a": "Manos de Topo",
+          "b": "All the Young",
+          "overlap": 0.6363636363636364
+        },
+        "gaps": [
+          {
+            "tag": "Authentic",
+            "reachableBy": [
+              "Rich vom Dorf",
+              "Haley Klinkhammer"
+            ]
+          },
+          {
+            "tag": "Dynamic",
+            "reachableBy": [
+              "Solana",
+              "Andrey Exx"
+            ]
+          },
+          {
+            "tag": "Emotive",
+            "reachableBy": [
+              "Solana",
+              "Haley Klinkhammer"
+            ]
+          },
+          {
+            "tag": "Empowerment",
+            "reachableBy": [
+              "Solana",
+              "Haley Klinkhammer"
+            ]
+          },
+          {
+            "tag": "Engaged",
+            "reachableBy": [
+              "Solana",
+              "Haley Klinkhammer"
+            ]
+          },
+          {
+            "tag": "Heartbreak",
+            "reachableBy": [
+              "Solana",
+              "Haley Klinkhammer"
+            ]
+          },
+          {
+            "tag": "Piano",
+            "reachableBy": [
+              "Solana",
+              "Haley Klinkhammer"
+            ]
+          },
+          {
+            "tag": "Resilience",
+            "reachableBy": [
+              "Rich vom Dorf",
+              "Haley Klinkhammer"
+            ]
+          },
+          {
+            "tag": "Self Discovery",
+            "reachableBy": [
+              "Solana",
+              "Haley Klinkhammer"
+            ]
+          },
+          {
+            "tag": "Soulful",
+            "reachableBy": [
+              "Solana",
+              "Haley Klinkhammer"
+            ]
+          }
+        ],
+        "poolSize": 14,
+        "entitiesMeasured": 6,
+        "audit": {
+          "numerator": 51,
+          "denominator": 61,
+          "score": 83.60655737704919,
+          "coveredDimensions": [
+            "urn:tag:artist:qloo:catchy",
+            "urn:tag:artist:qloo:energetic",
+            "urn:tag:artist:qloo:innovative",
+            "urn:tag:artist:qloo:introspective",
+            "urn:tag:artist:qloo:melodic",
+            "urn:tag:artist:qloo:nostalgic",
+            "urn:tag:audience:qloo:dedicated",
+            "urn:tag:audience:qloo:energetic",
+            "urn:tag:audience:qloo:loyal",
+            "urn:tag:audience:qloo:nostalgic",
+            "urn:tag:audience:qloo:passionate",
+            "urn:tag:audience:qloo:youthful",
+            "urn:tag:genre:music:beats",
+            "urn:tag:genre:music:experimental",
+            "urn:tag:genre:music:hip_hop",
+            "urn:tag:genre:music:indie",
+            "urn:tag:genre:music:instrumental",
+            "urn:tag:genre:music:instrumental_hip_hop",
+            "urn:tag:genre:music:rock",
+            "urn:tag:genre:music:spanish",
+            "urn:tag:genre:qloo:alternative_rock",
+            "urn:tag:genre:qloo:electronic",
+            "urn:tag:genre:qloo:indie_rock",
+            "urn:tag:genre:qloo:pop",
+            "urn:tag:influence:qloo:alternative_rock",
+            "urn:tag:influenced_by:qloo:radiohead",
+            "urn:tag:influenced_by:qloo:the_smiths",
+            "urn:tag:instrument:qloo:bass",
+            "urn:tag:instrument:qloo:digital_audio_workstation",
+            "urn:tag:instrument:qloo:drum_machine",
+            "urn:tag:instrument:qloo:drums",
+            "urn:tag:instrument:qloo:guitar",
+            "urn:tag:instrument:qloo:synthesizer",
+            "urn:tag:instrument:qloo:vocals",
+            "urn:tag:music:qloo:accessible",
+            "urn:tag:music:qloo:atmospheric",
+            "urn:tag:music:qloo:catchy",
+            "urn:tag:music:qloo:emotional",
+            "urn:tag:music:qloo:emotive",
+            "urn:tag:music:qloo:energetic",
+            "urn:tag:music:qloo:introspective",
+            "urn:tag:music:qloo:melodic",
+            "urn:tag:obscurity:qloo:5",
+            "urn:tag:obscurity:qloo:6",
+            "urn:tag:style:qloo:energetic",
+            "urn:tag:style:qloo:engaging",
+            "urn:tag:style:qloo:expressive",
+            "urn:tag:style:qloo:intimate",
+            "urn:tag:subgenre:qloo:soul",
+            "urn:tag:theme:qloo:love",
+            "urn:tag:theme:qloo:struggle"
+          ],
+          "uncoveredDimensions": [
+            "urn:tag:artist:qloo:authentic",
+            "urn:tag:artist:qloo:emotive",
+            "urn:tag:audience:qloo:engaged",
+            "urn:tag:instrument:qloo:piano",
+            "urn:tag:music:qloo:soulful",
+            "urn:tag:style:qloo:dynamic",
+            "urn:tag:theme:qloo:empowerment",
+            "urn:tag:theme:qloo:heartbreak",
+            "urn:tag:theme:qloo:resilience",
+            "urn:tag:theme:qloo:self_discovery"
+          ],
+          "redundancy": 0.12743508090756667,
+          "mostSimilarPair": {
+            "a": "Manos de Topo",
+            "b": "All the Young",
+            "overlap": 0.6363636363636364
+          },
+          "warnings": [],
+          "valid": true,
+          "poolSize": 14,
+          "entitiesMeasured": 6,
+          "weightsUsed": "equal"
+        }
+      },
+      "revised": {
+        "entities": [
+          {
+            "entityId": "F0A1E4B1-292B-4672-A9B0-2733049C61A9",
+            "name": "Specimen",
+            "affinity": 0.7134200177415654,
+            "affinitySource": "query",
+            "backfill": false,
+            "tags": [
+              "urn:tag:style:qloo:dramatic",
+              "urn:tag:influenced_by:qloo:siouxsie_sioux",
+              "urn:tag:artist:qloo:influential",
+              "urn:tag:style:qloo:expressive",
+              "urn:tag:subgenre:qloo:alternative_rock",
+              "urn:tag:instrument:qloo:vocals",
+              "urn:tag:style:qloo:new_wave",
+              "urn:tag:audience:qloo:passionate",
+              "urn:tag:genre:qloo:post_punk",
+              "urn:tag:instrument:qloo:drums",
+              "urn:tag:artist:qloo:stylish",
+              "urn:tag:artist:qloo:dark",
+              "urn:tag:audience:qloo:dedicated",
+              "urn:tag:genre:music:post_punk",
+              "urn:tag:audience:qloo:alternative",
+              "urn:tag:influenced_by:qloo:david_bowie",
+              "urn:tag:theme:qloo:mystery",
+              "urn:tag:theme:qloo:romance",
+              "urn:tag:style:qloo:gothic_rock",
+              "urn:tag:instrument:qloo:keyboards",
+              "urn:tag:theme:qloo:fantasy",
+              "urn:tag:style:qloo:darkwave",
+              "urn:tag:style:qloo:theatrical",
+              "urn:tag:audience:qloo:creative",
+              "urn:tag:instrument:qloo:bass",
+              "urn:tag:music:qloo:dark",
+              "urn:tag:style:qloo:energetic",
+              "urn:tag:music:qloo:melodic",
+              "urn:tag:style:qloo:post_punk",
+              "urn:tag:influence:qloo:post_punk",
+              "urn:tag:subgenre:qloo:new_wave",
+              "urn:tag:theme:qloo:darkness",
+              "urn:tag:music:qloo:atmospheric",
+              "urn:tag:obscurity:qloo:6",
+              "urn:tag:genre:music:gothic_rock",
+              "urn:tag:genre:qloo:gothic_rock",
+              "urn:tag:theme:qloo:alienation",
+              "urn:tag:genre:music:gothic",
+              "urn:tag:artist:qloo:theatrical",
+              "urn:tag:influence:qloo:gothic_rock",
+              "urn:tag:influenced_by:qloo:roxy_music",
+              "urn:tag:influence:qloo:darkwave",
+              "urn:tag:instrument:qloo:guitar",
+              "urn:tag:artist:qloo:energetic",
+              "urn:tag:music:qloo:theatrical",
+              "urn:tag:music:qloo:energetic"
+            ],
+            "tagNames": {
+              "urn:tag:style:qloo:dramatic": "Dramatic",
+              "urn:tag:influenced_by:qloo:siouxsie_sioux": "Siouxsie Sioux",
+              "urn:tag:artist:qloo:influential": "Influential",
+              "urn:tag:style:qloo:expressive": "Expressive",
+              "urn:tag:subgenre:qloo:alternative_rock": "Alternative Rock",
+              "urn:tag:instrument:qloo:vocals": "Vocals",
+              "urn:tag:style:qloo:new_wave": "New Wave",
+              "urn:tag:audience:qloo:passionate": "Passionate",
+              "urn:tag:genre:qloo:post_punk": "Post Punk",
+              "urn:tag:instrument:qloo:drums": "Drums",
+              "urn:tag:artist:qloo:stylish": "Stylish",
+              "urn:tag:artist:qloo:dark": "Dark",
+              "urn:tag:audience:qloo:dedicated": "Dedicated",
+              "urn:tag:genre:music:post_punk": "Post Punk",
+              "urn:tag:audience:qloo:alternative": "Alternative",
+              "urn:tag:influenced_by:qloo:david_bowie": "David Bowie",
+              "urn:tag:theme:qloo:mystery": "Mystery",
+              "urn:tag:theme:qloo:romance": "Romance",
+              "urn:tag:style:qloo:gothic_rock": "Gothic Rock",
+              "urn:tag:instrument:qloo:keyboards": "Keyboards",
+              "urn:tag:theme:qloo:fantasy": "Fantasy",
+              "urn:tag:style:qloo:darkwave": "Darkwave",
+              "urn:tag:style:qloo:theatrical": "Theatrical",
+              "urn:tag:audience:qloo:creative": "Creative",
+              "urn:tag:instrument:qloo:bass": "Bass",
+              "urn:tag:music:qloo:dark": "Dark",
+              "urn:tag:style:qloo:energetic": "Energetic",
+              "urn:tag:music:qloo:melodic": "Melodic",
+              "urn:tag:style:qloo:post_punk": "Post Punk",
+              "urn:tag:influence:qloo:post_punk": "Post-Punk",
+              "urn:tag:subgenre:qloo:new_wave": "New Wave",
+              "urn:tag:theme:qloo:darkness": "Darkness",
+              "urn:tag:music:qloo:atmospheric": "Atmospheric",
+              "urn:tag:obscurity:qloo:6": "6",
+              "urn:tag:genre:music:gothic_rock": "Gothic Rock",
+              "urn:tag:genre:qloo:gothic_rock": "Gothic Rock",
+              "urn:tag:theme:qloo:alienation": "Alienation",
+              "urn:tag:genre:music:gothic": "Gothic",
+              "urn:tag:artist:qloo:theatrical": "Theatrical",
+              "urn:tag:influence:qloo:gothic_rock": "Gothic Rock",
+              "urn:tag:influenced_by:qloo:roxy_music": "Roxy Music",
+              "urn:tag:influence:qloo:darkwave": "Darkwave",
+              "urn:tag:instrument:qloo:guitar": "Guitar",
+              "urn:tag:artist:qloo:energetic": "Energetic",
+              "urn:tag:music:qloo:theatrical": "Theatrical",
+              "urn:tag:music:qloo:energetic": "Energetic"
+            }
+          },
+          {
+            "entityId": "178BFAB6-30AF-4D11-AF60-A9966CC8757F",
+            "name": "Manos de Topo",
+            "affinity": 0.7134200177415654,
+            "affinitySource": "query",
+            "backfill": false,
+            "tags": [
+              "urn:tag:genre:qloo:indie_rock",
+              "urn:tag:genre:qloo:alternative_rock",
+              "urn:tag:audience:qloo:loyal",
+              "urn:tag:artist:qloo:catchy",
+              "urn:tag:instrument:qloo:vocals",
+              "urn:tag:style:qloo:melodic_alternative",
+              "urn:tag:theme:qloo:urban_life",
+              "urn:tag:instrument:qloo:drums",
+              "urn:tag:artist:qloo:melodic",
+              "urn:tag:theme:qloo:existentialism",
+              "urn:tag:style:qloo:energetic",
+              "urn:tag:genre:music:spanish_indie_pop",
+              "urn:tag:instrument:qloo:guitar",
+              "urn:tag:subgenre:qloo:garage_rock",
+              "urn:tag:artist:qloo:thoughtful",
+              "urn:tag:artist:qloo:emotional",
+              "urn:tag:obscurity:qloo:5",
+              "urn:tag:audience:qloo:youthful",
+              "urn:tag:style:qloo:accessible_indie",
+              "urn:tag:genre:music:indie",
+              "urn:tag:influenced_by:qloo:the_beatles",
+              "urn:tag:subgenre:qloo:pop_rock",
+              "urn:tag:instrument:qloo:bass",
+              "urn:tag:influence:qloo:alternative_rock",
+              "urn:tag:style:qloo:introspective_pop_rock",
+              "urn:tag:music:qloo:catchy",
+              "urn:tag:influenced_by:qloo:the_smiths",
+              "urn:tag:theme:qloo:melancholy",
+              "urn:tag:theme:qloo:love",
+              "urn:tag:artist:qloo:introspective",
+              "urn:tag:style:qloo:spanish_indie_rock",
+              "urn:tag:style:qloo:intimate",
+              "urn:tag:style:qloo:engaging",
+              "urn:tag:music:qloo:melodic",
+              "urn:tag:style:qloo:emotional_garage_rock",
+              "urn:tag:audience:qloo:passionate",
+              "urn:tag:music:qloo:emotional",
+              "urn:tag:genre:music:spanish",
+              "urn:tag:influenced_by:qloo:radiohead",
+              "urn:tag:influence:qloo:spanish_indie_rock",
+              "urn:tag:genre:music:surrealism",
+              "urn:tag:music:qloo:introspective",
+              "urn:tag:music:qloo:accessible"
+            ],
+            "tagNames": {
+              "urn:tag:genre:qloo:indie_rock": "Indie Rock",
+              "urn:tag:genre:qloo:alternative_rock": "Alternative Rock",
+              "urn:tag:audience:qloo:loyal": "Loyal",
+              "urn:tag:artist:qloo:catchy": "Catchy",
+              "urn:tag:instrument:qloo:vocals": "Vocals",
+              "urn:tag:style:qloo:melodic_alternative": "Melodic Alternative",
+              "urn:tag:theme:qloo:urban_life": "Urban Life",
+              "urn:tag:instrument:qloo:drums": "Drums",
+              "urn:tag:artist:qloo:melodic": "Melodic",
+              "urn:tag:theme:qloo:existentialism": "Existentialism",
+              "urn:tag:style:qloo:energetic": "Energetic",
+              "urn:tag:genre:music:spanish_indie_pop": "Spanish Indie Pop",
+              "urn:tag:instrument:qloo:guitar": "Guitar",
+              "urn:tag:subgenre:qloo:garage_rock": "Garage Rock",
+              "urn:tag:artist:qloo:thoughtful": "Thoughtful",
+              "urn:tag:artist:qloo:emotional": "Emotional",
+              "urn:tag:obscurity:qloo:5": "5",
+              "urn:tag:audience:qloo:youthful": "Youthful",
+              "urn:tag:style:qloo:accessible_indie": "Accessible Indie",
+              "urn:tag:genre:music:indie": "Indie",
+              "urn:tag:influenced_by:qloo:the_beatles": "The Beatles",
+              "urn:tag:subgenre:qloo:pop_rock": "Pop Rock",
+              "urn:tag:instrument:qloo:bass": "Bass",
+              "urn:tag:influence:qloo:alternative_rock": "Alternative Rock",
+              "urn:tag:style:qloo:introspective_pop_rock": "Introspective Pop Rock",
+              "urn:tag:music:qloo:catchy": "Catchy",
+              "urn:tag:influenced_by:qloo:the_smiths": "The Smiths",
+              "urn:tag:theme:qloo:melancholy": "Melancholy",
+              "urn:tag:theme:qloo:love": "Love",
+              "urn:tag:artist:qloo:introspective": "Introspective",
+              "urn:tag:style:qloo:spanish_indie_rock": "Spanish Indie Rock",
+              "urn:tag:style:qloo:intimate": "Intimate",
+              "urn:tag:style:qloo:engaging": "Engaging",
+              "urn:tag:music:qloo:melodic": "Melodic",
+              "urn:tag:style:qloo:emotional_garage_rock": "Emotional Garage Rock",
+              "urn:tag:audience:qloo:passionate": "Passionate",
+              "urn:tag:music:qloo:emotional": "Emotional",
+              "urn:tag:genre:music:spanish": "Spanish",
+              "urn:tag:influenced_by:qloo:radiohead": "Radiohead",
+              "urn:tag:influence:qloo:spanish_indie_rock": "Spanish Indie Rock",
+              "urn:tag:genre:music:surrealism": "Surrealism",
+              "urn:tag:music:qloo:introspective": "Introspective",
+              "urn:tag:music:qloo:accessible": "Accessible"
+            }
+          },
+          {
+            "entityId": "4148C56F-F5E2-4E41-829E-FD58F3707786",
+            "name": "Solana",
+            "affinity": 0.7134200177415654,
+            "affinitySource": "query",
+            "backfill": false,
+            "tags": [
+              "urn:tag:artist:qloo:versatile",
+              "urn:tag:theme:qloo:love",
+              "urn:tag:artist:qloo:expressive",
+              "urn:tag:style:qloo:intimate",
+              "urn:tag:instrument:qloo:synthesizer",
+              "urn:tag:influenced_by:qloo:frank_ocean",
+              "urn:tag:audience:qloo:loyal",
+              "urn:tag:style:qloo:alternative_r_b",
+              "urn:tag:influenced_by:qloo:lauryn_hill",
+              "urn:tag:theme:qloo:introspection",
+              "urn:tag:audience:qloo:passionate",
+              "urn:tag:influenced_by:qloo:erykah_badu",
+              "urn:tag:instrument:qloo:vocals",
+              "urn:tag:audience:qloo:diverse",
+              "urn:tag:music:qloo:soulful",
+              "urn:tag:music:qloo:contemporary",
+              "urn:tag:theme:qloo:self_discovery",
+              "urn:tag:subgenre:qloo:electronic",
+              "urn:tag:artist:qloo:smooth",
+              "urn:tag:genre:qloo:r_b",
+              "urn:tag:influence:qloo:contemporary_r_b",
+              "urn:tag:style:qloo:dynamic",
+              "urn:tag:genre:music:rock",
+              "urn:tag:genre:qloo:pop",
+              "urn:tag:audience:qloo:engaged",
+              "urn:tag:style:qloo:synth_infused",
+              "urn:tag:influenced_by:qloo:alicia_keys",
+              "urn:tag:influence:qloo:electropop",
+              "urn:tag:artist:qloo:contemporary",
+              "urn:tag:theme:qloo:heartbreak",
+              "urn:tag:style:qloo:contemporary_r_b",
+              "urn:tag:obscurity:qloo:4",
+              "urn:tag:influence:qloo:alternative_r_b",
+              "urn:tag:instrument:qloo:piano",
+              "urn:tag:style:qloo:soulful_balladry",
+              "urn:tag:artist:qloo:emotive",
+              "urn:tag:music:qloo:smooth",
+              "urn:tag:style:qloo:electropop",
+              "urn:tag:genre:music:experimental",
+              "urn:tag:genre:music:brazilian_rock",
+              "urn:tag:subgenre:qloo:soul",
+              "urn:tag:style:qloo:expressive",
+              "urn:tag:theme:qloo:empowerment",
+              "urn:tag:music:qloo:emotive",
+              "urn:tag:music:qloo:layered"
+            ],
+            "tagNames": {
+              "urn:tag:artist:qloo:versatile": "Versatile",
+              "urn:tag:theme:qloo:love": "Love",
+              "urn:tag:artist:qloo:expressive": "Expressive",
+              "urn:tag:style:qloo:intimate": "Intimate",
+              "urn:tag:instrument:qloo:synthesizer": "Synthesizer",
+              "urn:tag:influenced_by:qloo:frank_ocean": "Frank Ocean",
+              "urn:tag:audience:qloo:loyal": "Loyal",
+              "urn:tag:style:qloo:alternative_r_b": "Alternative R&B",
+              "urn:tag:influenced_by:qloo:lauryn_hill": "Lauryn Hill",
+              "urn:tag:theme:qloo:introspection": "Introspection",
+              "urn:tag:audience:qloo:passionate": "Passionate",
+              "urn:tag:influenced_by:qloo:erykah_badu": "Erykah Badu",
+              "urn:tag:instrument:qloo:vocals": "Vocals",
+              "urn:tag:audience:qloo:diverse": "Diverse",
+              "urn:tag:music:qloo:soulful": "Soulful",
+              "urn:tag:music:qloo:contemporary": "Contemporary",
+              "urn:tag:theme:qloo:self_discovery": "Self Discovery",
+              "urn:tag:subgenre:qloo:electronic": "Electronic",
+              "urn:tag:artist:qloo:smooth": "Smooth",
+              "urn:tag:genre:qloo:r_b": "R & B",
+              "urn:tag:influence:qloo:contemporary_r_b": "Contemporary R&B",
+              "urn:tag:style:qloo:dynamic": "Dynamic",
+              "urn:tag:genre:music:rock": "Rock",
+              "urn:tag:genre:qloo:pop": "Pop",
+              "urn:tag:audience:qloo:engaged": "Engaged",
+              "urn:tag:style:qloo:synth_infused": "Synth-Infused",
+              "urn:tag:influenced_by:qloo:alicia_keys": "Alicia Keys",
+              "urn:tag:influence:qloo:electropop": "Electropop",
+              "urn:tag:artist:qloo:contemporary": "Contemporary",
+              "urn:tag:theme:qloo:heartbreak": "Heartbreak",
+              "urn:tag:style:qloo:contemporary_r_b": "Contemporary R&B",
+              "urn:tag:obscurity:qloo:4": "4",
+              "urn:tag:influence:qloo:alternative_r_b": "Alternative R&B",
+              "urn:tag:instrument:qloo:piano": "Piano",
+              "urn:tag:style:qloo:soulful_balladry": "Soulful Balladry",
+              "urn:tag:artist:qloo:emotive": "Emotive",
+              "urn:tag:music:qloo:smooth": "Smooth",
+              "urn:tag:style:qloo:electropop": "Electropop",
+              "urn:tag:genre:music:experimental": "Experimental",
+              "urn:tag:genre:music:brazilian_rock": "Brazilian Rock",
+              "urn:tag:subgenre:qloo:soul": "Soul",
+              "urn:tag:style:qloo:expressive": "Expressive",
+              "urn:tag:theme:qloo:empowerment": "Empowerment",
+              "urn:tag:music:qloo:emotive": "Emotive",
+              "urn:tag:music:qloo:layered": "Layered"
+            }
+          },
+          {
+            "entityId": "F00C71B5-D787-496F-9FAD-8042556D7BE1",
+            "name": "death's dynamic shroud",
+            "affinity": 0.7134200177415654,
+            "affinitySource": "query",
+            "backfill": false,
+            "tags": [
+              "urn:tag:music:qloo:futuristic",
+              "urn:tag:influenced_by:qloo:boards_of_canada",
+              "urn:tag:theme:qloo:nostalgia",
+              "urn:tag:artist:qloo:nostalgic",
+              "urn:tag:music:qloo:experimental",
+              "urn:tag:genre:qloo:electronic",
+              "urn:tag:style:qloo:experimental",
+              "urn:tag:theme:qloo:memory",
+              "urn:tag:instrument:qloo:sampler",
+              "urn:tag:influenced_by:qloo:aphex_twin",
+              "urn:tag:influence:qloo:experimental_electronic",
+              "urn:tag:audience:qloo:experimental",
+              "urn:tag:genre:music:experimental",
+              "urn:tag:theme:qloo:technology",
+              "urn:tag:instrument:qloo:digital_audio_workstation",
+              "urn:tag:theme:qloo:digital_decay",
+              "urn:tag:subgenre:qloo:ambient",
+              "urn:tag:genre:music:art_pop",
+              "urn:tag:artist:qloo:innovative",
+              "urn:tag:artist:qloo:futuristic",
+              "urn:tag:style:qloo:atmospheric",
+              "urn:tag:genre:qloo:experimental",
+              "urn:tag:artist:qloo:layered",
+              "urn:tag:genre:music:american",
+              "urn:tag:style:qloo:glitchy",
+              "urn:tag:subgenre:qloo:synthwave",
+              "urn:tag:audience:qloo:nostalgic",
+              "urn:tag:theme:qloo:futurism",
+              "urn:tag:style:qloo:nostalgic",
+              "urn:tag:obscurity:qloo:6",
+              "urn:tag:style:qloo:synth_heavy",
+              "urn:tag:subgenre:qloo:chillwave",
+              "urn:tag:influenced_by:qloo:vektroid",
+              "urn:tag:influence:qloo:future_funk",
+              "urn:tag:music:qloo:ambient",
+              "urn:tag:audience:qloo:dedicated",
+              "urn:tag:style:qloo:ambient",
+              "urn:tag:instrument:qloo:synthesizer",
+              "urn:tag:style:qloo:immersive",
+              "urn:tag:audience:qloo:open_minded",
+              "urn:tag:influence:qloo:synthwave",
+              "urn:tag:artist:qloo:experimental",
+              "urn:tag:influenced_by:qloo:oneohtrix_point_never",
+              "urn:tag:style:qloo:chopped_and_screwed",
+              "urn:tag:genre:qloo:vaporwave",
+              "urn:tag:instrument:qloo:drum_machine"
+            ],
+            "tagNames": {
+              "urn:tag:music:qloo:futuristic": "Futuristic",
+              "urn:tag:influenced_by:qloo:boards_of_canada": "Boards Of Canada",
+              "urn:tag:theme:qloo:nostalgia": "Nostalgia",
+              "urn:tag:artist:qloo:nostalgic": "Nostalgic",
+              "urn:tag:music:qloo:experimental": "Experimental",
+              "urn:tag:genre:qloo:electronic": "Electronic",
+              "urn:tag:style:qloo:experimental": "Experimental",
+              "urn:tag:theme:qloo:memory": "Memory",
+              "urn:tag:instrument:qloo:sampler": "Sampler",
+              "urn:tag:influenced_by:qloo:aphex_twin": "Aphex Twin",
+              "urn:tag:influence:qloo:experimental_electronic": "Experimental Electronic",
+              "urn:tag:audience:qloo:experimental": "Experimental",
+              "urn:tag:genre:music:experimental": "Experimental",
+              "urn:tag:theme:qloo:technology": "Technology",
+              "urn:tag:instrument:qloo:digital_audio_workstation": "Digital Audio Workstation",
+              "urn:tag:theme:qloo:digital_decay": "Digital Decay",
+              "urn:tag:subgenre:qloo:ambient": "Ambient",
+              "urn:tag:genre:music:art_pop": "Art Pop",
+              "urn:tag:artist:qloo:innovative": "Innovative",
+              "urn:tag:artist:qloo:futuristic": "Futuristic",
+              "urn:tag:style:qloo:atmospheric": "Atmospheric",
+              "urn:tag:genre:qloo:experimental": "Experimental",
+              "urn:tag:artist:qloo:layered": "Layered",
+              "urn:tag:genre:music:american": "American",
+              "urn:tag:style:qloo:glitchy": "Glitchy",
+              "urn:tag:subgenre:qloo:synthwave": "Synthwave",
+              "urn:tag:audience:qloo:nostalgic": "Nostalgic",
+              "urn:tag:theme:qloo:futurism": "Futurism",
+              "urn:tag:style:qloo:nostalgic": "Nostalgic",
+              "urn:tag:obscurity:qloo:6": "6",
+              "urn:tag:style:qloo:synth_heavy": "Synth-Heavy",
+              "urn:tag:subgenre:qloo:chillwave": "Chillwave",
+              "urn:tag:influenced_by:qloo:vektroid": "Vektroid",
+              "urn:tag:influence:qloo:future_funk": "Future Funk",
+              "urn:tag:music:qloo:ambient": "Ambient",
+              "urn:tag:audience:qloo:dedicated": "Dedicated",
+              "urn:tag:style:qloo:ambient": "Ambient",
+              "urn:tag:instrument:qloo:synthesizer": "Synthesizer",
+              "urn:tag:style:qloo:immersive": "Immersive",
+              "urn:tag:audience:qloo:open_minded": "Open-Minded",
+              "urn:tag:influence:qloo:synthwave": "Synthwave",
+              "urn:tag:artist:qloo:experimental": "Experimental",
+              "urn:tag:influenced_by:qloo:oneohtrix_point_never": "Oneohtrix Point Never",
+              "urn:tag:style:qloo:chopped_and_screwed": "Chopped and Screwed",
+              "urn:tag:genre:qloo:vaporwave": "Vaporwave",
+              "urn:tag:instrument:qloo:drum_machine": "Drum Machine"
+            }
+          },
+          {
+            "entityId": "EFF8352C-DA96-44F7-9843-444A5152F335",
+            "name": "Shag",
+            "affinity": 0.7134200177415654,
+            "affinitySource": "query",
+            "backfill": false,
+            "tags": [
+              "urn:tag:obscurity:qloo:5",
+              "urn:tag:genre:music:instrumental",
+              "urn:tag:genre:music:instrumental_hip_hop",
+              "urn:tag:genre:music:hip_hop",
+              "urn:tag:influence:qloo:mid_century_modern_revival",
+              "urn:tag:genre:music:psychedelic_rock",
+              "urn:tag:influenced_by:qloo:mid_century_modern_art",
+              "urn:tag:artist:qloo:retro",
+              "urn:tag:influenced_by:qloo:tiki_culture",
+              "urn:tag:audience:qloo:art_enthusiasts",
+              "urn:tag:influenced_by:qloo:pop_art",
+              "urn:tag:genre:music:beats",
+              "urn:tag:subgenre:qloo:funk",
+              "urn:tag:artist:qloo:playful",
+              "urn:tag:genre:qloo:rock",
+              "urn:tag:artist:qloo:nostalgic",
+              "urn:tag:genre:qloo:pop",
+              "urn:tag:audience:qloo:nostalgic",
+              "urn:tag:subgenre:qloo:soul",
+              "urn:tag:artist:qloo:stylized",
+              "urn:tag:audience:qloo:dedicated",
+              "urn:tag:influence:qloo:art_pop",
+              "urn:tag:artist:qloo:vibrant",
+              "urn:tag:subgenre:qloo:jazz",
+              "urn:tag:influence:qloo:pop_art"
+            ],
+            "tagNames": {
+              "urn:tag:obscurity:qloo:5": "5",
+              "urn:tag:genre:music:instrumental": "Instrumental",
+              "urn:tag:genre:music:instrumental_hip_hop": "Instrumental Hip Hop",
+              "urn:tag:genre:music:hip_hop": "Hip - Hop",
+              "urn:tag:influence:qloo:mid_century_modern_revival": "Mid-Century Modern Revival",
+              "urn:tag:genre:music:psychedelic_rock": "Psychedelic Rock",
+              "urn:tag:influenced_by:qloo:mid_century_modern_art": "Mid-Century Modern Art",
+              "urn:tag:artist:qloo:retro": "Retro",
+              "urn:tag:influenced_by:qloo:tiki_culture": "Tiki Culture",
+              "urn:tag:audience:qloo:art_enthusiasts": "Art Enthusiasts",
+              "urn:tag:influenced_by:qloo:pop_art": "Pop Art",
+              "urn:tag:genre:music:beats": "Beats",
+              "urn:tag:subgenre:qloo:funk": "Funk",
+              "urn:tag:artist:qloo:playful": "Playful",
+              "urn:tag:genre:qloo:rock": "Rock",
+              "urn:tag:artist:qloo:nostalgic": "Nostalgic",
+              "urn:tag:genre:qloo:pop": "Pop",
+              "urn:tag:audience:qloo:nostalgic": "Nostalgic",
+              "urn:tag:subgenre:qloo:soul": "Soul",
+              "urn:tag:artist:qloo:stylized": "Stylized",
+              "urn:tag:audience:qloo:dedicated": "Dedicated",
+              "urn:tag:influence:qloo:art_pop": "Art Pop",
+              "urn:tag:artist:qloo:vibrant": "Vibrant",
+              "urn:tag:subgenre:qloo:jazz": "Jazz",
+              "urn:tag:influence:qloo:pop_art": "Pop Art"
+            }
+          },
+          {
+            "entityId": "D22CA4E1-9634-4603-A7BA-78F346EF000D",
+            "name": "Rich vom Dorf",
+            "affinity": 0.7134200177415654,
+            "affinitySource": "query",
+            "backfill": false,
+            "tags": [
+              "urn:tag:artist:qloo:resilient",
+              "urn:tag:artist:qloo:streetwise",
+              "urn:tag:instrument:qloo:vocals",
+              "urn:tag:theme:qloo:hustle",
+              "urn:tag:influenced_by:qloo:mobb_deep",
+              "urn:tag:artist:qloo:gritty",
+              "urn:tag:influenced_by:qloo:nas",
+              "urn:tag:genre:music:electronic",
+              "urn:tag:music:qloo:emotional",
+              "urn:tag:theme:qloo:authenticity",
+              "urn:tag:obscurity:qloo:6",
+              "urn:tag:theme:qloo:struggle",
+              "urn:tag:style:qloo:energetic",
+              "urn:tag:audience:qloo:streetwise",
+              "urn:tag:style:qloo:authentic_narrative_rap",
+              "urn:tag:theme:qloo:street_life",
+              "urn:tag:subgenre:qloo:trap",
+              "urn:tag:genre:qloo:rap",
+              "urn:tag:influence:qloo:trap",
+              "urn:tag:artist:qloo:authentic",
+              "urn:tag:subgenre:qloo:underground_hip_hop",
+              "urn:tag:genre:qloo:hip_hop",
+              "urn:tag:style:qloo:streetwise_hardcore_rap",
+              "urn:tag:style:qloo:underground_boom_bap",
+              "urn:tag:influence:qloo:underground_hip_hop",
+              "urn:tag:audience:qloo:loyal",
+              "urn:tag:audience:qloo:authentic",
+              "urn:tag:style:qloo:gritty_trap",
+              "urn:tag:genre:music:minimal_dub",
+              "urn:tag:influenced_by:qloo:jay_z",
+              "urn:tag:style:qloo:raw_east_coast_hip_hop",
+              "urn:tag:artist:qloo:raw",
+              "urn:tag:theme:qloo:resilience",
+              "urn:tag:style:qloo:authentic",
+              "urn:tag:genre:music:minimal",
+              "urn:tag:music:qloo:gritty",
+              "urn:tag:style:qloo:raw",
+              "urn:tag:audience:qloo:passionate",
+              "urn:tag:music:qloo:raw",
+              "urn:tag:music:qloo:authentic",
+              "urn:tag:music:qloo:streetwise"
+            ],
+            "tagNames": {
+              "urn:tag:artist:qloo:resilient": "Resilient",
+              "urn:tag:artist:qloo:streetwise": "Streetwise",
+              "urn:tag:instrument:qloo:vocals": "Vocals",
+              "urn:tag:theme:qloo:hustle": "Hustle",
+              "urn:tag:influenced_by:qloo:mobb_deep": "Mobb Deep",
+              "urn:tag:artist:qloo:gritty": "Gritty",
+              "urn:tag:influenced_by:qloo:nas": "Nas",
+              "urn:tag:genre:music:electronic": "Electronic",
+              "urn:tag:music:qloo:emotional": "Emotional",
+              "urn:tag:theme:qloo:authenticity": "Authenticity",
+              "urn:tag:obscurity:qloo:6": "6",
+              "urn:tag:theme:qloo:struggle": "Struggle",
+              "urn:tag:style:qloo:energetic": "Energetic",
+              "urn:tag:audience:qloo:streetwise": "Streetwise",
+              "urn:tag:style:qloo:authentic_narrative_rap": "Authentic Narrative Rap",
+              "urn:tag:theme:qloo:street_life": "Street Life",
+              "urn:tag:subgenre:qloo:trap": "Trap",
+              "urn:tag:genre:qloo:rap": "Rap",
+              "urn:tag:influence:qloo:trap": "Trap",
+              "urn:tag:artist:qloo:authentic": "Authentic",
+              "urn:tag:subgenre:qloo:underground_hip_hop": "Underground Hip Hop",
+              "urn:tag:genre:qloo:hip_hop": "Hip Hop",
+              "urn:tag:style:qloo:streetwise_hardcore_rap": "Streetwise Hardcore Rap",
+              "urn:tag:style:qloo:underground_boom_bap": "Underground Boom Bap",
+              "urn:tag:influence:qloo:underground_hip_hop": "Underground Hip Hop",
+              "urn:tag:audience:qloo:loyal": "Loyal",
+              "urn:tag:audience:qloo:authentic": "Authentic",
+              "urn:tag:style:qloo:gritty_trap": "Gritty Trap",
+              "urn:tag:genre:music:minimal_dub": "Minimal Dub",
+              "urn:tag:influenced_by:qloo:jay_z": "Jay Z",
+              "urn:tag:style:qloo:raw_east_coast_hip_hop": "Raw East Coast Hip Hop",
+              "urn:tag:artist:qloo:raw": "Raw",
+              "urn:tag:theme:qloo:resilience": "Resilience",
+              "urn:tag:style:qloo:authentic": "Authentic",
+              "urn:tag:genre:music:minimal": "Minimal",
+              "urn:tag:music:qloo:gritty": "Gritty",
+              "urn:tag:style:qloo:raw": "Raw",
+              "urn:tag:audience:qloo:passionate": "Passionate",
+              "urn:tag:music:qloo:raw": "Raw",
+              "urn:tag:music:qloo:authentic": "Authentic",
+              "urn:tag:music:qloo:streetwise": "Streetwise"
+            }
+          }
+        ],
+        "coverage": {
+          "index": 98.36065573770492,
+          "coveredTags": 60,
+          "vocabularySize": 61,
+          "redundancy": 0.09822797976498167,
+          "mostSimilarPair": {
+            "a": "Specimen",
+            "b": "Rich vom Dorf",
+            "overlap": 0.2222222222222222
+          },
+          "gaps": [
+            {
+              "tag": "Energetic",
+              "reachableBy": [
+                "All the Young",
+                "Andrey Exx"
+              ]
+            }
+          ],
+          "poolSize": 14,
+          "entitiesMeasured": 6,
+          "audit": {
+            "numerator": 60,
+            "denominator": 61,
+            "score": 98.36065573770492,
+            "coveredDimensions": [
+              "urn:tag:artist:qloo:authentic",
+              "urn:tag:artist:qloo:catchy",
+              "urn:tag:artist:qloo:emotive",
+              "urn:tag:artist:qloo:energetic",
+              "urn:tag:artist:qloo:innovative",
+              "urn:tag:artist:qloo:introspective",
+              "urn:tag:artist:qloo:melodic",
+              "urn:tag:artist:qloo:nostalgic",
+              "urn:tag:audience:qloo:dedicated",
+              "urn:tag:audience:qloo:engaged",
+              "urn:tag:audience:qloo:loyal",
+              "urn:tag:audience:qloo:nostalgic",
+              "urn:tag:audience:qloo:passionate",
+              "urn:tag:audience:qloo:youthful",
+              "urn:tag:genre:music:beats",
+              "urn:tag:genre:music:experimental",
+              "urn:tag:genre:music:hip_hop",
+              "urn:tag:genre:music:indie",
+              "urn:tag:genre:music:instrumental",
+              "urn:tag:genre:music:instrumental_hip_hop",
+              "urn:tag:genre:music:rock",
+              "urn:tag:genre:music:spanish",
+              "urn:tag:genre:qloo:alternative_rock",
+              "urn:tag:genre:qloo:electronic",
+              "urn:tag:genre:qloo:indie_rock",
+              "urn:tag:genre:qloo:pop",
+              "urn:tag:influence:qloo:alternative_rock",
+              "urn:tag:influenced_by:qloo:radiohead",
+              "urn:tag:influenced_by:qloo:the_smiths",
+              "urn:tag:instrument:qloo:bass",
+              "urn:tag:instrument:qloo:digital_audio_workstation",
+              "urn:tag:instrument:qloo:drum_machine",
+              "urn:tag:instrument:qloo:drums",
+              "urn:tag:instrument:qloo:guitar",
+              "urn:tag:instrument:qloo:piano",
+              "urn:tag:instrument:qloo:synthesizer",
+              "urn:tag:instrument:qloo:vocals",
+              "urn:tag:music:qloo:accessible",
+              "urn:tag:music:qloo:atmospheric",
+              "urn:tag:music:qloo:catchy",
+              "urn:tag:music:qloo:emotional",
+              "urn:tag:music:qloo:emotive",
+              "urn:tag:music:qloo:energetic",
+              "urn:tag:music:qloo:introspective",
+              "urn:tag:music:qloo:melodic",
+              "urn:tag:music:qloo:soulful",
+              "urn:tag:obscurity:qloo:5",
+              "urn:tag:obscurity:qloo:6",
+              "urn:tag:style:qloo:dynamic",
+              "urn:tag:style:qloo:energetic",
+              "urn:tag:style:qloo:engaging",
+              "urn:tag:style:qloo:expressive",
+              "urn:tag:style:qloo:intimate",
+              "urn:tag:subgenre:qloo:soul",
+              "urn:tag:theme:qloo:empowerment",
+              "urn:tag:theme:qloo:heartbreak",
+              "urn:tag:theme:qloo:love",
+              "urn:tag:theme:qloo:resilience",
+              "urn:tag:theme:qloo:self_discovery",
+              "urn:tag:theme:qloo:struggle"
+            ],
+            "uncoveredDimensions": [
+              "urn:tag:audience:qloo:energetic"
+            ],
+            "redundancy": 0.09822797976498167,
+            "mostSimilarPair": {
+              "a": "Specimen",
+              "b": "Rich vom Dorf",
+              "overlap": 0.2222222222222222
+            },
+            "warnings": [],
+            "valid": true,
+            "poolSize": 14,
+            "entitiesMeasured": 6,
+            "weightsUsed": "equal"
+          }
+        },
+        "indexDelta": 14.754098360655732,
+        "redundancyDelta": -0.029207101142585,
+        "improves": true,
+        "newlyCovered": [
+          "urn:tag:artist:qloo:authentic",
+          "urn:tag:artist:qloo:emotive",
+          "urn:tag:audience:qloo:engaged",
+          "urn:tag:instrument:qloo:piano",
+          "urn:tag:music:qloo:soulful",
+          "urn:tag:style:qloo:dynamic",
+          "urn:tag:theme:qloo:empowerment",
+          "urn:tag:theme:qloo:heartbreak",
+          "urn:tag:theme:qloo:resilience",
+          "urn:tag:theme:qloo:self_discovery"
+        ],
+        "rationale": "Reaches 60 of 61 shared taste tags against 51, holding the slate at 6. Brings in Solana, Rich vom Dorf, in place of All the Young, Kasper Lindmark."
+      },
+      "originalEntities": [
+        {
+          "entityId": "F0A1E4B1-292B-4672-A9B0-2733049C61A9",
+          "name": "Specimen",
+          "affinity": 0.7134200177415654,
+          "affinitySource": "query",
+          "backfill": false,
+          "tags": [
+            "urn:tag:style:qloo:dramatic",
+            "urn:tag:influenced_by:qloo:siouxsie_sioux",
+            "urn:tag:artist:qloo:influential",
+            "urn:tag:style:qloo:expressive",
+            "urn:tag:subgenre:qloo:alternative_rock",
+            "urn:tag:instrument:qloo:vocals",
+            "urn:tag:style:qloo:new_wave",
+            "urn:tag:audience:qloo:passionate",
+            "urn:tag:genre:qloo:post_punk",
+            "urn:tag:instrument:qloo:drums",
+            "urn:tag:artist:qloo:stylish",
+            "urn:tag:artist:qloo:dark",
+            "urn:tag:audience:qloo:dedicated",
+            "urn:tag:genre:music:post_punk",
+            "urn:tag:audience:qloo:alternative",
+            "urn:tag:influenced_by:qloo:david_bowie",
+            "urn:tag:theme:qloo:mystery",
+            "urn:tag:theme:qloo:romance",
+            "urn:tag:style:qloo:gothic_rock",
+            "urn:tag:instrument:qloo:keyboards",
+            "urn:tag:theme:qloo:fantasy",
+            "urn:tag:style:qloo:darkwave",
+            "urn:tag:style:qloo:theatrical",
+            "urn:tag:audience:qloo:creative",
+            "urn:tag:instrument:qloo:bass",
+            "urn:tag:music:qloo:dark",
+            "urn:tag:style:qloo:energetic",
+            "urn:tag:music:qloo:melodic",
+            "urn:tag:style:qloo:post_punk",
+            "urn:tag:influence:qloo:post_punk",
+            "urn:tag:subgenre:qloo:new_wave",
+            "urn:tag:theme:qloo:darkness",
+            "urn:tag:music:qloo:atmospheric",
+            "urn:tag:obscurity:qloo:6",
+            "urn:tag:genre:music:gothic_rock",
+            "urn:tag:genre:qloo:gothic_rock",
+            "urn:tag:theme:qloo:alienation",
+            "urn:tag:genre:music:gothic",
+            "urn:tag:artist:qloo:theatrical",
+            "urn:tag:influence:qloo:gothic_rock",
+            "urn:tag:influenced_by:qloo:roxy_music",
+            "urn:tag:influence:qloo:darkwave",
+            "urn:tag:instrument:qloo:guitar",
+            "urn:tag:artist:qloo:energetic",
+            "urn:tag:music:qloo:theatrical",
+            "urn:tag:music:qloo:energetic"
+          ],
+          "tagNames": {
+            "urn:tag:style:qloo:dramatic": "Dramatic",
+            "urn:tag:influenced_by:qloo:siouxsie_sioux": "Siouxsie Sioux",
+            "urn:tag:artist:qloo:influential": "Influential",
+            "urn:tag:style:qloo:expressive": "Expressive",
+            "urn:tag:subgenre:qloo:alternative_rock": "Alternative Rock",
+            "urn:tag:instrument:qloo:vocals": "Vocals",
+            "urn:tag:style:qloo:new_wave": "New Wave",
+            "urn:tag:audience:qloo:passionate": "Passionate",
+            "urn:tag:genre:qloo:post_punk": "Post Punk",
+            "urn:tag:instrument:qloo:drums": "Drums",
+            "urn:tag:artist:qloo:stylish": "Stylish",
+            "urn:tag:artist:qloo:dark": "Dark",
+            "urn:tag:audience:qloo:dedicated": "Dedicated",
+            "urn:tag:genre:music:post_punk": "Post Punk",
+            "urn:tag:audience:qloo:alternative": "Alternative",
+            "urn:tag:influenced_by:qloo:david_bowie": "David Bowie",
+            "urn:tag:theme:qloo:mystery": "Mystery",
+            "urn:tag:theme:qloo:romance": "Romance",
+            "urn:tag:style:qloo:gothic_rock": "Gothic Rock",
+            "urn:tag:instrument:qloo:keyboards": "Keyboards",
+            "urn:tag:theme:qloo:fantasy": "Fantasy",
+            "urn:tag:style:qloo:darkwave": "Darkwave",
+            "urn:tag:style:qloo:theatrical": "Theatrical",
+            "urn:tag:audience:qloo:creative": "Creative",
+            "urn:tag:instrument:qloo:bass": "Bass",
+            "urn:tag:music:qloo:dark": "Dark",
+            "urn:tag:style:qloo:energetic": "Energetic",
+            "urn:tag:music:qloo:melodic": "Melodic",
+            "urn:tag:style:qloo:post_punk": "Post Punk",
+            "urn:tag:influence:qloo:post_punk": "Post-Punk",
+            "urn:tag:subgenre:qloo:new_wave": "New Wave",
+            "urn:tag:theme:qloo:darkness": "Darkness",
+            "urn:tag:music:qloo:atmospheric": "Atmospheric",
+            "urn:tag:obscurity:qloo:6": "6",
+            "urn:tag:genre:music:gothic_rock": "Gothic Rock",
+            "urn:tag:genre:qloo:gothic_rock": "Gothic Rock",
+            "urn:tag:theme:qloo:alienation": "Alienation",
+            "urn:tag:genre:music:gothic": "Gothic",
+            "urn:tag:artist:qloo:theatrical": "Theatrical",
+            "urn:tag:influence:qloo:gothic_rock": "Gothic Rock",
+            "urn:tag:influenced_by:qloo:roxy_music": "Roxy Music",
+            "urn:tag:influence:qloo:darkwave": "Darkwave",
+            "urn:tag:instrument:qloo:guitar": "Guitar",
+            "urn:tag:artist:qloo:energetic": "Energetic",
+            "urn:tag:music:qloo:theatrical": "Theatrical",
+            "urn:tag:music:qloo:energetic": "Energetic"
+          }
+        },
+        {
+          "entityId": "F00C71B5-D787-496F-9FAD-8042556D7BE1",
+          "name": "death's dynamic shroud",
+          "affinity": 0.7134200177415654,
+          "affinitySource": "query",
+          "backfill": false,
+          "tags": [
+            "urn:tag:music:qloo:futuristic",
+            "urn:tag:influenced_by:qloo:boards_of_canada",
+            "urn:tag:theme:qloo:nostalgia",
+            "urn:tag:artist:qloo:nostalgic",
+            "urn:tag:music:qloo:experimental",
+            "urn:tag:genre:qloo:electronic",
+            "urn:tag:style:qloo:experimental",
+            "urn:tag:theme:qloo:memory",
+            "urn:tag:instrument:qloo:sampler",
+            "urn:tag:influenced_by:qloo:aphex_twin",
+            "urn:tag:influence:qloo:experimental_electronic",
+            "urn:tag:audience:qloo:experimental",
+            "urn:tag:genre:music:experimental",
+            "urn:tag:theme:qloo:technology",
+            "urn:tag:instrument:qloo:digital_audio_workstation",
+            "urn:tag:theme:qloo:digital_decay",
+            "urn:tag:subgenre:qloo:ambient",
+            "urn:tag:genre:music:art_pop",
+            "urn:tag:artist:qloo:innovative",
+            "urn:tag:artist:qloo:futuristic",
+            "urn:tag:style:qloo:atmospheric",
+            "urn:tag:genre:qloo:experimental",
+            "urn:tag:artist:qloo:layered",
+            "urn:tag:genre:music:american",
+            "urn:tag:style:qloo:glitchy",
+            "urn:tag:subgenre:qloo:synthwave",
+            "urn:tag:audience:qloo:nostalgic",
+            "urn:tag:theme:qloo:futurism",
+            "urn:tag:style:qloo:nostalgic",
+            "urn:tag:obscurity:qloo:6",
+            "urn:tag:style:qloo:synth_heavy",
+            "urn:tag:subgenre:qloo:chillwave",
+            "urn:tag:influenced_by:qloo:vektroid",
+            "urn:tag:influence:qloo:future_funk",
+            "urn:tag:music:qloo:ambient",
+            "urn:tag:audience:qloo:dedicated",
+            "urn:tag:style:qloo:ambient",
+            "urn:tag:instrument:qloo:synthesizer",
+            "urn:tag:style:qloo:immersive",
+            "urn:tag:audience:qloo:open_minded",
+            "urn:tag:influence:qloo:synthwave",
+            "urn:tag:artist:qloo:experimental",
+            "urn:tag:influenced_by:qloo:oneohtrix_point_never",
+            "urn:tag:style:qloo:chopped_and_screwed",
+            "urn:tag:genre:qloo:vaporwave",
+            "urn:tag:instrument:qloo:drum_machine"
+          ],
+          "tagNames": {
+            "urn:tag:music:qloo:futuristic": "Futuristic",
+            "urn:tag:influenced_by:qloo:boards_of_canada": "Boards Of Canada",
+            "urn:tag:theme:qloo:nostalgia": "Nostalgia",
+            "urn:tag:artist:qloo:nostalgic": "Nostalgic",
+            "urn:tag:music:qloo:experimental": "Experimental",
+            "urn:tag:genre:qloo:electronic": "Electronic",
+            "urn:tag:style:qloo:experimental": "Experimental",
+            "urn:tag:theme:qloo:memory": "Memory",
+            "urn:tag:instrument:qloo:sampler": "Sampler",
+            "urn:tag:influenced_by:qloo:aphex_twin": "Aphex Twin",
+            "urn:tag:influence:qloo:experimental_electronic": "Experimental Electronic",
+            "urn:tag:audience:qloo:experimental": "Experimental",
+            "urn:tag:genre:music:experimental": "Experimental",
+            "urn:tag:theme:qloo:technology": "Technology",
+            "urn:tag:instrument:qloo:digital_audio_workstation": "Digital Audio Workstation",
+            "urn:tag:theme:qloo:digital_decay": "Digital Decay",
+            "urn:tag:subgenre:qloo:ambient": "Ambient",
+            "urn:tag:genre:music:art_pop": "Art Pop",
+            "urn:tag:artist:qloo:innovative": "Innovative",
+            "urn:tag:artist:qloo:futuristic": "Futuristic",
+            "urn:tag:style:qloo:atmospheric": "Atmospheric",
+            "urn:tag:genre:qloo:experimental": "Experimental",
+            "urn:tag:artist:qloo:layered": "Layered",
+            "urn:tag:genre:music:american": "American",
+            "urn:tag:style:qloo:glitchy": "Glitchy",
+            "urn:tag:subgenre:qloo:synthwave": "Synthwave",
+            "urn:tag:audience:qloo:nostalgic": "Nostalgic",
+            "urn:tag:theme:qloo:futurism": "Futurism",
+            "urn:tag:style:qloo:nostalgic": "Nostalgic",
+            "urn:tag:obscurity:qloo:6": "6",
+            "urn:tag:style:qloo:synth_heavy": "Synth-Heavy",
+            "urn:tag:subgenre:qloo:chillwave": "Chillwave",
+            "urn:tag:influenced_by:qloo:vektroid": "Vektroid",
+            "urn:tag:influence:qloo:future_funk": "Future Funk",
+            "urn:tag:music:qloo:ambient": "Ambient",
+            "urn:tag:audience:qloo:dedicated": "Dedicated",
+            "urn:tag:style:qloo:ambient": "Ambient",
+            "urn:tag:instrument:qloo:synthesizer": "Synthesizer",
+            "urn:tag:style:qloo:immersive": "Immersive",
+            "urn:tag:audience:qloo:open_minded": "Open-Minded",
+            "urn:tag:influence:qloo:synthwave": "Synthwave",
+            "urn:tag:artist:qloo:experimental": "Experimental",
+            "urn:tag:influenced_by:qloo:oneohtrix_point_never": "Oneohtrix Point Never",
+            "urn:tag:style:qloo:chopped_and_screwed": "Chopped and Screwed",
+            "urn:tag:genre:qloo:vaporwave": "Vaporwave",
+            "urn:tag:instrument:qloo:drum_machine": "Drum Machine"
+          }
+        },
+        {
+          "entityId": "178BFAB6-30AF-4D11-AF60-A9966CC8757F",
+          "name": "Manos de Topo",
+          "affinity": 0.7134200177415654,
+          "affinitySource": "query",
+          "backfill": false,
+          "tags": [
+            "urn:tag:genre:qloo:indie_rock",
+            "urn:tag:genre:qloo:alternative_rock",
+            "urn:tag:audience:qloo:loyal",
+            "urn:tag:artist:qloo:catchy",
+            "urn:tag:instrument:qloo:vocals",
+            "urn:tag:style:qloo:melodic_alternative",
+            "urn:tag:theme:qloo:urban_life",
+            "urn:tag:instrument:qloo:drums",
+            "urn:tag:artist:qloo:melodic",
+            "urn:tag:theme:qloo:existentialism",
+            "urn:tag:style:qloo:energetic",
+            "urn:tag:genre:music:spanish_indie_pop",
+            "urn:tag:instrument:qloo:guitar",
+            "urn:tag:subgenre:qloo:garage_rock",
+            "urn:tag:artist:qloo:thoughtful",
+            "urn:tag:artist:qloo:emotional",
+            "urn:tag:obscurity:qloo:5",
+            "urn:tag:audience:qloo:youthful",
+            "urn:tag:style:qloo:accessible_indie",
+            "urn:tag:genre:music:indie",
+            "urn:tag:influenced_by:qloo:the_beatles",
+            "urn:tag:subgenre:qloo:pop_rock",
+            "urn:tag:instrument:qloo:bass",
+            "urn:tag:influence:qloo:alternative_rock",
+            "urn:tag:style:qloo:introspective_pop_rock",
+            "urn:tag:music:qloo:catchy",
+            "urn:tag:influenced_by:qloo:the_smiths",
+            "urn:tag:theme:qloo:melancholy",
+            "urn:tag:theme:qloo:love",
+            "urn:tag:artist:qloo:introspective",
+            "urn:tag:style:qloo:spanish_indie_rock",
+            "urn:tag:style:qloo:intimate",
+            "urn:tag:style:qloo:engaging",
+            "urn:tag:music:qloo:melodic",
+            "urn:tag:style:qloo:emotional_garage_rock",
+            "urn:tag:audience:qloo:passionate",
+            "urn:tag:music:qloo:emotional",
+            "urn:tag:genre:music:spanish",
+            "urn:tag:influenced_by:qloo:radiohead",
+            "urn:tag:influence:qloo:spanish_indie_rock",
+            "urn:tag:genre:music:surrealism",
+            "urn:tag:music:qloo:introspective",
+            "urn:tag:music:qloo:accessible"
+          ],
+          "tagNames": {
+            "urn:tag:genre:qloo:indie_rock": "Indie Rock",
+            "urn:tag:genre:qloo:alternative_rock": "Alternative Rock",
+            "urn:tag:audience:qloo:loyal": "Loyal",
+            "urn:tag:artist:qloo:catchy": "Catchy",
+            "urn:tag:instrument:qloo:vocals": "Vocals",
+            "urn:tag:style:qloo:melodic_alternative": "Melodic Alternative",
+            "urn:tag:theme:qloo:urban_life": "Urban Life",
+            "urn:tag:instrument:qloo:drums": "Drums",
+            "urn:tag:artist:qloo:melodic": "Melodic",
+            "urn:tag:theme:qloo:existentialism": "Existentialism",
+            "urn:tag:style:qloo:energetic": "Energetic",
+            "urn:tag:genre:music:spanish_indie_pop": "Spanish Indie Pop",
+            "urn:tag:instrument:qloo:guitar": "Guitar",
+            "urn:tag:subgenre:qloo:garage_rock": "Garage Rock",
+            "urn:tag:artist:qloo:thoughtful": "Thoughtful",
+            "urn:tag:artist:qloo:emotional": "Emotional",
+            "urn:tag:obscurity:qloo:5": "5",
+            "urn:tag:audience:qloo:youthful": "Youthful",
+            "urn:tag:style:qloo:accessible_indie": "Accessible Indie",
+            "urn:tag:genre:music:indie": "Indie",
+            "urn:tag:influenced_by:qloo:the_beatles": "The Beatles",
+            "urn:tag:subgenre:qloo:pop_rock": "Pop Rock",
+            "urn:tag:instrument:qloo:bass": "Bass",
+            "urn:tag:influence:qloo:alternative_rock": "Alternative Rock",
+            "urn:tag:style:qloo:introspective_pop_rock": "Introspective Pop Rock",
+            "urn:tag:music:qloo:catchy": "Catchy",
+            "urn:tag:influenced_by:qloo:the_smiths": "The Smiths",
+            "urn:tag:theme:qloo:melancholy": "Melancholy",
+            "urn:tag:theme:qloo:love": "Love",
+            "urn:tag:artist:qloo:introspective": "Introspective",
+            "urn:tag:style:qloo:spanish_indie_rock": "Spanish Indie Rock",
+            "urn:tag:style:qloo:intimate": "Intimate",
+            "urn:tag:style:qloo:engaging": "Engaging",
+            "urn:tag:music:qloo:melodic": "Melodic",
+            "urn:tag:style:qloo:emotional_garage_rock": "Emotional Garage Rock",
+            "urn:tag:audience:qloo:passionate": "Passionate",
+            "urn:tag:music:qloo:emotional": "Emotional",
+            "urn:tag:genre:music:spanish": "Spanish",
+            "urn:tag:influenced_by:qloo:radiohead": "Radiohead",
+            "urn:tag:influence:qloo:spanish_indie_rock": "Spanish Indie Rock",
+            "urn:tag:genre:music:surrealism": "Surrealism",
+            "urn:tag:music:qloo:introspective": "Introspective",
+            "urn:tag:music:qloo:accessible": "Accessible"
+          }
+        },
+        {
+          "entityId": "EFF8352C-DA96-44F7-9843-444A5152F335",
+          "name": "Shag",
+          "affinity": 0.7134200177415654,
+          "affinitySource": "query",
+          "backfill": false,
+          "tags": [
+            "urn:tag:obscurity:qloo:5",
+            "urn:tag:genre:music:instrumental",
+            "urn:tag:genre:music:instrumental_hip_hop",
+            "urn:tag:genre:music:hip_hop",
+            "urn:tag:influence:qloo:mid_century_modern_revival",
+            "urn:tag:genre:music:psychedelic_rock",
+            "urn:tag:influenced_by:qloo:mid_century_modern_art",
+            "urn:tag:artist:qloo:retro",
+            "urn:tag:influenced_by:qloo:tiki_culture",
+            "urn:tag:audience:qloo:art_enthusiasts",
+            "urn:tag:influenced_by:qloo:pop_art",
+            "urn:tag:genre:music:beats",
+            "urn:tag:subgenre:qloo:funk",
+            "urn:tag:artist:qloo:playful",
+            "urn:tag:genre:qloo:rock",
+            "urn:tag:artist:qloo:nostalgic",
+            "urn:tag:genre:qloo:pop",
+            "urn:tag:audience:qloo:nostalgic",
+            "urn:tag:subgenre:qloo:soul",
+            "urn:tag:artist:qloo:stylized",
+            "urn:tag:audience:qloo:dedicated",
+            "urn:tag:influence:qloo:art_pop",
+            "urn:tag:artist:qloo:vibrant",
+            "urn:tag:subgenre:qloo:jazz",
+            "urn:tag:influence:qloo:pop_art"
+          ],
+          "tagNames": {
+            "urn:tag:obscurity:qloo:5": "5",
+            "urn:tag:genre:music:instrumental": "Instrumental",
+            "urn:tag:genre:music:instrumental_hip_hop": "Instrumental Hip Hop",
+            "urn:tag:genre:music:hip_hop": "Hip - Hop",
+            "urn:tag:influence:qloo:mid_century_modern_revival": "Mid-Century Modern Revival",
+            "urn:tag:genre:music:psychedelic_rock": "Psychedelic Rock",
+            "urn:tag:influenced_by:qloo:mid_century_modern_art": "Mid-Century Modern Art",
+            "urn:tag:artist:qloo:retro": "Retro",
+            "urn:tag:influenced_by:qloo:tiki_culture": "Tiki Culture",
+            "urn:tag:audience:qloo:art_enthusiasts": "Art Enthusiasts",
+            "urn:tag:influenced_by:qloo:pop_art": "Pop Art",
+            "urn:tag:genre:music:beats": "Beats",
+            "urn:tag:subgenre:qloo:funk": "Funk",
+            "urn:tag:artist:qloo:playful": "Playful",
+            "urn:tag:genre:qloo:rock": "Rock",
+            "urn:tag:artist:qloo:nostalgic": "Nostalgic",
+            "urn:tag:genre:qloo:pop": "Pop",
+            "urn:tag:audience:qloo:nostalgic": "Nostalgic",
+            "urn:tag:subgenre:qloo:soul": "Soul",
+            "urn:tag:artist:qloo:stylized": "Stylized",
+            "urn:tag:audience:qloo:dedicated": "Dedicated",
+            "urn:tag:influence:qloo:art_pop": "Art Pop",
+            "urn:tag:artist:qloo:vibrant": "Vibrant",
+            "urn:tag:subgenre:qloo:jazz": "Jazz",
+            "urn:tag:influence:qloo:pop_art": "Pop Art"
+          }
+        },
+        {
+          "entityId": "4786114C-73C5-4C6E-8B41-788CEE8A72B8",
+          "name": "All the Young",
+          "affinity": 0.7134200177415654,
+          "affinitySource": "query",
+          "backfill": false,
+          "tags": [
+            "urn:tag:genre:music:indie",
+            "urn:tag:music:qloo:melodic",
+            "urn:tag:music:qloo:catchy",
+            "urn:tag:theme:qloo:youth",
+            "urn:tag:genre:music:rock",
+            "urn:tag:style:qloo:alternative_rock",
+            "urn:tag:influenced_by:qloo:oasis",
+            "urn:tag:genre:music:alternative_rock",
+            "urn:tag:artist:qloo:melodic",
+            "urn:tag:artist:qloo:energetic",
+            "urn:tag:instrument:qloo:guitar",
+            "urn:tag:style:qloo:engaging",
+            "urn:tag:style:qloo:passionate",
+            "urn:tag:audience:qloo:passionate",
+            "urn:tag:genre:qloo:alternative_rock",
+            "urn:tag:influenced_by:qloo:radiohead",
+            "urn:tag:style:qloo:energetic",
+            "urn:tag:style:qloo:post_britpop",
+            "urn:tag:theme:qloo:hope",
+            "urn:tag:genre:music:british",
+            "urn:tag:genre:qloo:indie_rock",
+            "urn:tag:style:qloo:indie_rock",
+            "urn:tag:artist:qloo:alternative",
+            "urn:tag:subgenre:qloo:post_britpop",
+            "urn:tag:influenced_by:qloo:blur",
+            "urn:tag:influence:qloo:indie_rock",
+            "urn:tag:theme:qloo:love",
+            "urn:tag:theme:qloo:struggle",
+            "urn:tag:style:qloo:melodic_indie",
+            "urn:tag:artist:qloo:catchy",
+            "urn:tag:audience:qloo:loyal",
+            "urn:tag:audience:qloo:energetic",
+            "urn:tag:influenced_by:qloo:the_smiths",
+            "urn:tag:instrument:qloo:drums",
+            "urn:tag:theme:qloo:identity",
+            "urn:tag:subgenre:qloo:britpop",
+            "urn:tag:instrument:qloo:bass",
+            "urn:tag:audience:qloo:youthful",
+            "urn:tag:obscurity:qloo:5",
+            "urn:tag:artist:qloo:anthemic",
+            "urn:tag:influence:qloo:alternative_rock",
+            "urn:tag:instrument:qloo:vocals",
+            "urn:tag:style:qloo:anthemic_rock",
+            "urn:tag:music:qloo:anthemic",
+            "urn:tag:music:qloo:energetic",
+            "urn:tag:music:qloo:emotive"
+          ],
+          "tagNames": {
+            "urn:tag:genre:music:indie": "Indie",
+            "urn:tag:music:qloo:melodic": "Melodic",
+            "urn:tag:music:qloo:catchy": "Catchy",
+            "urn:tag:theme:qloo:youth": "Youth",
+            "urn:tag:genre:music:rock": "Rock",
+            "urn:tag:style:qloo:alternative_rock": "Alternative Rock",
+            "urn:tag:influenced_by:qloo:oasis": "Oasis",
+            "urn:tag:genre:music:alternative_rock": "Alternative Rock",
+            "urn:tag:artist:qloo:melodic": "Melodic",
+            "urn:tag:artist:qloo:energetic": "Energetic",
+            "urn:tag:instrument:qloo:guitar": "Guitar",
+            "urn:tag:style:qloo:engaging": "Engaging",
+            "urn:tag:style:qloo:passionate": "Passionate",
+            "urn:tag:audience:qloo:passionate": "Passionate",
+            "urn:tag:genre:qloo:alternative_rock": "Alternative Rock",
+            "urn:tag:influenced_by:qloo:radiohead": "Radiohead",
+            "urn:tag:style:qloo:energetic": "Energetic",
+            "urn:tag:style:qloo:post_britpop": "Post-Britpop",
+            "urn:tag:theme:qloo:hope": "Hope",
+            "urn:tag:genre:music:british": "British",
+            "urn:tag:genre:qloo:indie_rock": "Indie Rock",
+            "urn:tag:style:qloo:indie_rock": "Indie Rock",
+            "urn:tag:artist:qloo:alternative": "Alternative",
+            "urn:tag:subgenre:qloo:post_britpop": "Post-Britpop",
+            "urn:tag:influenced_by:qloo:blur": "Blur",
+            "urn:tag:influence:qloo:indie_rock": "Indie Rock",
+            "urn:tag:theme:qloo:love": "Love",
+            "urn:tag:theme:qloo:struggle": "Struggle",
+            "urn:tag:style:qloo:melodic_indie": "Melodic Indie",
+            "urn:tag:artist:qloo:catchy": "Catchy",
+            "urn:tag:audience:qloo:loyal": "Loyal",
+            "urn:tag:audience:qloo:energetic": "Energetic",
+            "urn:tag:influenced_by:qloo:the_smiths": "The Smiths",
+            "urn:tag:instrument:qloo:drums": "Drums",
+            "urn:tag:theme:qloo:identity": "Identity",
+            "urn:tag:subgenre:qloo:britpop": "Britpop",
+            "urn:tag:instrument:qloo:bass": "Bass",
+            "urn:tag:audience:qloo:youthful": "Youthful",
+            "urn:tag:obscurity:qloo:5": "5",
+            "urn:tag:artist:qloo:anthemic": "Anthemic",
+            "urn:tag:influence:qloo:alternative_rock": "Alternative Rock",
+            "urn:tag:instrument:qloo:vocals": "Vocals",
+            "urn:tag:style:qloo:anthemic_rock": "Anthemic Rock",
+            "urn:tag:music:qloo:anthemic": "Anthemic",
+            "urn:tag:music:qloo:energetic": "Energetic",
+            "urn:tag:music:qloo:emotive": "Emotive"
+          }
+        },
+        {
+          "entityId": "F061EC52-469E-4856-A1D5-3A43B7EB339B",
+          "name": "Kasper Lindmark",
+          "affinity": 0.7134200177415654,
+          "affinitySource": "query",
+          "backfill": false,
+          "tags": [
+            "urn:tag:genre:music:beats",
+            "urn:tag:genre:music:instrumental",
+            "urn:tag:genre:music:swedish",
+            "urn:tag:genre:music:hip_hop",
+            "urn:tag:genre:music:instrumental_hip_hop"
+          ],
+          "tagNames": {
+            "urn:tag:genre:music:beats": "Beats",
+            "urn:tag:genre:music:instrumental": "Instrumental",
+            "urn:tag:genre:music:swedish": "Swedish",
+            "urn:tag:genre:music:hip_hop": "Hip - Hop",
+            "urn:tag:genre:music:instrumental_hip_hop": "Instrumental Hip Hop"
+          }
+        }
+      ],
+      "warnings": []
+    },
+    "status": {
+      "kind": "degraded",
+      "label": "degraded",
+      "detail": "The cue sheet is usable, but part of the workflow did not complete. The ranking below is Qloo's; the notes list what is missing.",
+      "reasons": [
+        "The scene reader fell back to the deterministic parser because the provider rate-limited the request. The brief is parser-generated, not model-generated."
+      ]
+    }
+  }
+}

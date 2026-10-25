@@ -1,0 +1,3887 @@
+{
+  "evidenceVersion": "1.0.0",
+  "briefId": "nordic-noir-minimal-piano",
+  "scene": "A Nordic noir scene. Ominous and intimate, minimal classical piano and ambient texture. Snow, silence, a long corridor. In the spirit of Nils Frahm.",
+  "recordedAt": "2026-10-25T09:26:26.838Z",
+  "sourceUrl": "https://cue-nine-iota.vercel.app/api/cue",
+  "sourceCommit": "6d38c7d971afb47a54bd7f4e8b0eda565971f55d",
+  "protocolVersion": "1.0.0",
+  "protocolHash": "c079c8f74dc182d42a7d7c51bee44b4afdcb3baba4950bad6b835aef7ad7d556",
+  "httpStatus": 200,
+  "latencyMs": 11330,
+  "deployment": {
+    "mode": "live",
+    "sceneParse": {
+      "source": "deterministic",
+      "provider": null
+    },
+    "baselineSource": "llm",
+    "qlooEndpoints": [
+      "GET /search",
+      "GET /v2/tags",
+      "GET /v2/insights",
+      "GET /v2/insights (backfill)",
+      "GET /v2/insights (cast)",
+      "GET /v2/insights (brand)",
+      "GET /v2/trending"
+    ]
+  },
+  "raw": {
+    "brief": {
+      "title": "Nils Frahm",
+      "raw": "A Nordic noir scene. Ominous and intimate, minimal classical piano and ambient texture. Snow, silence, a long corridor. In the spirit of Nils Frahm.",
+      "mood": [
+        "ominous",
+        "noir",
+        "intimacy"
+      ],
+      "genre": [
+        "classical",
+        "ambient"
+      ],
+      "era": "contemporary",
+      "setting": "A Nordic noir scene",
+      "arc": "Establish the emotional register, then hold it without resolving.",
+      "audience": {},
+      "anchors": [
+        "Nils Frahm"
+      ],
+      "diegetic": false
+    },
+    "cues": [
+      {
+        "id": "44A7D755-C551-440C-9DF7-4B3798164F49",
+        "artist": "Federico Albanese",
+        "artistId": "44A7D755-C551-440C-9DF7-4B3798164F49",
+        "track": "Track TBD — pick from this artist's catalogue",
+        "affinity": 0.7528675202298813,
+        "popularity": 0.9388225887842505,
+        "momentum": 0,
+        "image": "https://images.qloo.com/i/44A7D755-C551-440C-9DF7-4B3798164F49-420x-auto.jpg",
+        "why": [
+          "Audiences who like Nils Frahm also index highly for Federico Albanese in Qloo's taste graph.",
+          "Qloo attributes the match to 0D8EAFA4-CEEA-44D5-8E1F-26A8A9F49A77 (weight 1.00)."
+        ],
+        "explainability": [
+          {
+            "entity_id": "0D8EAFA4-CEEA-44D5-8E1F-26A8A9F49A77",
+            "score": 1,
+            "signal": "signal.interests.entities"
+          }
+        ],
+        "placement": "needle_drop",
+        "clearance": "major_label",
+        "risk": "High-profile catalogue; expect a competitive sync fee and a slower clearance.",
+        "confidence": 0.8011470080919526,
+        "discovery": false,
+        "trackUnverified": true
+      },
+      {
+        "id": "02940707-9635-45DA-B290-243F84C6B910",
+        "artist": "Ólafur Arnalds",
+        "artistId": "02940707-9635-45DA-B290-243F84C6B910",
+        "track": "Track TBD — pick from this artist's catalogue",
+        "affinity": 0.7524329962697127,
+        "popularity": 0.9966314740905308,
+        "momentum": 0,
+        "image": "https://images.qloo.com/i/02940707-9635-45DA-B290-243F84C6B910-420x-auto.jpg",
+        "why": [
+          "Audiences who like Nils Frahm also index highly for Ólafur Arnalds in Qloo's taste graph.",
+          "Qloo attributes the match to 0D8EAFA4-CEEA-44D5-8E1F-26A8A9F49A77 (weight 1.00)."
+        ],
+        "explainability": [
+          {
+            "entity_id": "0D8EAFA4-CEEA-44D5-8E1F-26A8A9F49A77",
+            "score": 1,
+            "signal": "signal.interests.entities"
+          }
+        ],
+        "placement": "score_bed",
+        "clearance": "major_label",
+        "risk": "High-profile catalogue; expect a competitive sync fee and a slower clearance.",
+        "confidence": 0.8009731985078852,
+        "discovery": false,
+        "trackUnverified": true
+      },
+      {
+        "id": "3691C25A-CE18-44CA-8DEE-A19579FC37E5",
+        "artist": "Luke Howard",
+        "artistId": "3691C25A-CE18-44CA-8DEE-A19579FC37E5",
+        "track": "Track TBD — pick from this artist's catalogue",
+        "affinity": 0.7516331427171747,
+        "popularity": 0.9395959079619107,
+        "momentum": 0,
+        "image": "https://images.qloo.com/i/3691C25A-CE18-44CA-8DEE-A19579FC37E5-420x-auto.jpg",
+        "why": [
+          "Audiences who like Nils Frahm also index highly for Luke Howard in Qloo's taste graph.",
+          "Qloo attributes the match to 0D8EAFA4-CEEA-44D5-8E1F-26A8A9F49A77 (weight 1.00)."
+        ],
+        "explainability": [
+          {
+            "entity_id": "0D8EAFA4-CEEA-44D5-8E1F-26A8A9F49A77",
+            "score": 1,
+            "signal": "signal.interests.entities"
+          }
+        ],
+        "placement": "transition",
+        "clearance": "major_label",
+        "risk": "High-profile catalogue; expect a competitive sync fee and a slower clearance.",
+        "confidence": 0.80065325708687,
+        "discovery": false,
+        "trackUnverified": true
+      },
+      {
+        "id": "D7918037-2D25-4990-BC34-4502B136E5AE",
+        "artist": "Goldmund",
+        "artistId": "D7918037-2D25-4990-BC34-4502B136E5AE",
+        "track": "Track TBD — pick from this artist's catalogue",
+        "affinity": 0.7510374626397749,
+        "popularity": 0.9884854085156859,
+        "momentum": 0,
+        "image": "https://images.qloo.com/i/D7918037-2D25-4990-BC34-4502B136E5AE-420x-auto.jpg",
+        "why": [
+          "Audiences who like Nils Frahm also index highly for Goldmund in Qloo's taste graph.",
+          "Qloo attributes the match to 0D8EAFA4-CEEA-44D5-8E1F-26A8A9F49A77 (weight 1.00)."
+        ],
+        "explainability": [
+          {
+            "entity_id": "0D8EAFA4-CEEA-44D5-8E1F-26A8A9F49A77",
+            "score": 1,
+            "signal": "signal.interests.entities"
+          }
+        ],
+        "placement": "title_card",
+        "clearance": "major_label",
+        "risk": "High-profile catalogue; expect a competitive sync fee and a slower clearance.",
+        "confidence": 0.80041498505591,
+        "discovery": false,
+        "trackUnverified": true
+      },
+      {
+        "id": "75AE7DFF-0996-4522-BAEE-064A5CB73FD0",
+        "artist": "Poppy Ackroyd",
+        "artistId": "75AE7DFF-0996-4522-BAEE-064A5CB73FD0",
+        "track": "Track TBD — pick from this artist's catalogue",
+        "affinity": 0.7508357240738892,
+        "popularity": 0.9329702665329742,
+        "momentum": 0,
+        "image": "https://images.qloo.com/i/75AE7DFF-0996-4522-BAEE-064A5CB73FD0-420x-auto.jpg",
+        "why": [
+          "Audiences who like Nils Frahm also index highly for Poppy Ackroyd in Qloo's taste graph.",
+          "Qloo attributes the match to 0D8EAFA4-CEEA-44D5-8E1F-26A8A9F49A77 (weight 1.00)."
+        ],
+        "explainability": [
+          {
+            "entity_id": "0D8EAFA4-CEEA-44D5-8E1F-26A8A9F49A77",
+            "score": 1,
+            "signal": "signal.interests.entities"
+          }
+        ],
+        "placement": "title_card",
+        "clearance": "major_label",
+        "risk": "High-profile catalogue; expect a competitive sync fee and a slower clearance.",
+        "confidence": 0.8003342896295558,
+        "discovery": false,
+        "trackUnverified": true
+      },
+      {
+        "id": "37EA7EEF-A51E-4D54-9728-5BCFEB9B3E85",
+        "artist": "A Winged Victory for the Sullen",
+        "artistId": "37EA7EEF-A51E-4D54-9728-5BCFEB9B3E85",
+        "track": "Track TBD — pick from this artist's catalogue",
+        "affinity": 0.750748111153521,
+        "popularity": 0.9802508699840748,
+        "momentum": 0,
+        "image": "https://images.qloo.com/i/37EA7EEF-A51E-4D54-9728-5BCFEB9B3E85-420x-auto.jpg",
+        "why": [
+          "Audiences who like Nils Frahm also index highly for A Winged Victory for the Sullen in Qloo's taste graph.",
+          "Qloo attributes the match to 0D8EAFA4-CEEA-44D5-8E1F-26A8A9F49A77 (weight 1.00)."
+        ],
+        "explainability": [
+          {
+            "entity_id": "0D8EAFA4-CEEA-44D5-8E1F-26A8A9F49A77",
+            "score": 1,
+            "signal": "signal.interests.entities"
+          }
+        ],
+        "placement": "title_card",
+        "clearance": "major_label",
+        "risk": "High-profile catalogue; expect a competitive sync fee and a slower clearance.",
+        "confidence": 0.8002992444614085,
+        "discovery": false,
+        "trackUnverified": true
+      }
+    ],
+    "sceneParse": {
+      "source": "deterministic",
+      "provider": null,
+      "failureReason": "rate_limited",
+      "failureStatus": 429,
+      "failureProviderCode": "rate_limit_exceeded",
+      "failureMessage": "the provider rate-limited the request"
+    },
+    "baseline": {
+      "cues": [
+        {
+          "artist": "Trent Reznor & Atticus Ross",
+          "track": "The Way It Is (Instrumental)",
+          "why": "Dark, atmospheric electronic textures with a slow, brooding pulse that match the ominous, intimate feel of a contemporary Nordic noir scene."
+        },
+        {
+          "artist": "Hildur Guðnadóttir",
+          "track": "Saman (from the \"Chernobyl\" soundtrack)",
+          "why": "Sparse, haunting strings and low drones create a cold, intimate tension that aligns with the noir aesthetic while remaining modern."
+        },
+        {
+          "artist": "Mogwai",
+          "track": "Take Me Somewhere Nice (Instrumental)",
+          "why": "Cinematic post‑rock with a melancholic melody and subtle crescendo, providing an ominous yet emotionally intimate backdrop suitable for contemporary Nordic noir."
+        }
+      ],
+      "note": "Generated by the LLM with no cultural data. Plausible on the surface, but unverifiable: no affinity, no audience measurement, no momentum.",
+      "source": "llm"
+    },
+    "receipts": [
+      {
+        "endpoint": "GET /search",
+        "label": "Resolve \"Nils Frahm\"",
+        "params": {
+          "query": "Nils Frahm",
+          "types": "urn:entity:movie,urn:entity:tv_show,urn:entity:artist,urn:entity:person",
+          "take": "3"
+        },
+        "status": 200,
+        "ms": 47,
+        "resultCount": 3
+      },
+      {
+        "endpoint": "GET /v2/tags",
+        "label": "Tag \"classical\"",
+        "params": {
+          "filter.query": "classical",
+          "feature.typo_tolerance": "false",
+          "take": "3"
+        },
+        "status": 200,
+        "ms": 88,
+        "resultCount": 3
+      },
+      {
+        "endpoint": "GET /v2/tags",
+        "label": "Tag \"ambient\"",
+        "params": {
+          "filter.query": "ambient",
+          "feature.typo_tolerance": "false",
+          "take": "3"
+        },
+        "status": 200,
+        "ms": 69,
+        "resultCount": 3
+      },
+      {
+        "endpoint": "GET /v2/tags",
+        "label": "Tag \"ominous\"",
+        "params": {
+          "filter.query": "ominous",
+          "feature.typo_tolerance": "false",
+          "take": "3"
+        },
+        "status": 200,
+        "ms": 52,
+        "resultCount": 2
+      },
+      {
+        "endpoint": "GET /v2/tags",
+        "label": "Tag \"noir\"",
+        "params": {
+          "filter.query": "noir",
+          "feature.typo_tolerance": "false",
+          "take": "3"
+        },
+        "status": 200,
+        "ms": 71,
+        "resultCount": 3
+      },
+      {
+        "endpoint": "GET /v2/tags",
+        "label": "Tag \"intimacy\"",
+        "params": {
+          "filter.query": "intimacy",
+          "feature.typo_tolerance": "false",
+          "take": "3"
+        },
+        "status": 200,
+        "ms": 74,
+        "resultCount": 3
+      },
+      {
+        "endpoint": "GET /v2/insights",
+        "label": "Artist affinity (explainability on)",
+        "params": {
+          "filter.type": "urn:entity:artist",
+          "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+          "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:classical\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:ambient\",\"weight\":1},{\"tag\":\"urn:tag:style:qloo:ominous\",\"weight\":1},{\"tag\":\"urn:tag:genre:media:noir\",\"weight\":1},{\"tag\":\"urn:tag:keyword:qloo:intimacy\",\"weight\":1}]",
+          "bias.trends": "high",
+          "filter.release_year.min": "2020",
+          "feature.explainability": "true",
+          "take": "14"
+        },
+        "status": 200,
+        "ms": 4243,
+        "resultCount": 14
+      },
+      {
+        "endpoint": "GET /v2/insights (backfill)",
+        "label": "Cross-domain discovery",
+        "params": {
+          "filter.type": "urn:entity:artist",
+          "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+          "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:classical\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:ambient\",\"weight\":1},{\"tag\":\"urn:tag:style:qloo:ominous\",\"weight\":1},{\"tag\":\"urn:tag:genre:media:noir\",\"weight\":1},{\"tag\":\"urn:tag:keyword:qloo:intimacy\",\"weight\":1}]",
+          "filter.exclude.entities": "44A7D755-C551-440C-9DF7-4B3798164F49,02940707-9635-45DA-B290-243F84C6B910,3691C25A-CE18-44CA-8DEE-A19579FC37E5,D7918037-2D25-4990-BC34-4502B136E5AE,75AE7DFF-0996-4522-BAEE-064A5CB73FD0,37EA7EEF-A51E-4D54-9728-5BCFEB9B3E85,70BE1CE0-6D03-4125-BF8F-F538A9449F86,0704ADB9-6270-4D71-B252-A42D8A4EAA47",
+          "filter.release_year.min": "2020",
+          "take": "6",
+          "backfill.cross_domain.take": "6"
+        },
+        "status": 200,
+        "ms": 4345,
+        "resultCount": 6
+      },
+      {
+        "endpoint": "GET /v2/insights",
+        "label": "Comparables: films",
+        "params": {
+          "filter.type": "urn:entity:movie",
+          "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+          "take": "5"
+        },
+        "status": 200,
+        "ms": 1579,
+        "resultCount": 5
+      },
+      {
+        "endpoint": "GET /v2/insights",
+        "label": "Cross-domain: destinations",
+        "params": {
+          "filter.type": "urn:entity:destination",
+          "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+          "take": "6"
+        },
+        "status": 200,
+        "ms": 1622,
+        "resultCount": 6
+      },
+      {
+        "endpoint": "GET /v2/insights (cast)",
+        "label": "Casting fit: people",
+        "params": {
+          "filter.type": "urn:entity:person",
+          "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+          "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:classical\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:ambient\",\"weight\":1},{\"tag\":\"urn:tag:style:qloo:ominous\",\"weight\":1},{\"tag\":\"urn:tag:genre:media:noir\",\"weight\":1},{\"tag\":\"urn:tag:keyword:qloo:intimacy\",\"weight\":1}]",
+          "take": "10"
+        },
+        "status": 200,
+        "ms": 1017,
+        "resultCount": 10
+      },
+      {
+        "endpoint": "GET /v2/insights (brand)",
+        "label": "Cross-domain: brands",
+        "params": {
+          "filter.type": "urn:entity:brand",
+          "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+          "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:classical\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:ambient\",\"weight\":1},{\"tag\":\"urn:tag:style:qloo:ominous\",\"weight\":1},{\"tag\":\"urn:tag:genre:media:noir\",\"weight\":1},{\"tag\":\"urn:tag:keyword:qloo:intimacy\",\"weight\":1}]",
+          "take": "6"
+        },
+        "status": 200,
+        "ms": 1911,
+        "resultCount": 6
+      },
+      {
+        "endpoint": "GET /v2/insights",
+        "label": "Cross-domain: podcasts",
+        "params": {
+          "filter.type": "urn:entity:podcast",
+          "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+          "take": "6"
+        },
+        "status": 200,
+        "ms": 1977,
+        "resultCount": 6
+      },
+      {
+        "endpoint": "GET /v2/trending",
+        "label": "Artist momentum",
+        "params": {
+          "signal.interests.entities": "44A7D755-C551-440C-9DF7-4B3798164F49",
+          "filter.type": "urn:entity:artist",
+          "filter.start_date": "2024-10-25",
+          "filter.end_date": "2026-10-25",
+          "take": "12"
+        },
+        "status": 200,
+        "ms": 2097,
+        "resultCount": 12
+      },
+      {
+        "endpoint": "GET /v2/insights",
+        "label": "Cross-domain: places",
+        "params": {
+          "filter.type": "urn:entity:place",
+          "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+          "take": "6"
+        },
+        "status": 200,
+        "ms": 2140,
+        "resultCount": 6
+      },
+      {
+        "endpoint": "GET /v2/trending",
+        "label": "Artist momentum",
+        "params": {
+          "signal.interests.entities": "02940707-9635-45DA-B290-243F84C6B910",
+          "filter.type": "urn:entity:artist",
+          "filter.start_date": "2024-10-25",
+          "filter.end_date": "2026-10-25",
+          "take": "12"
+        },
+        "status": 200,
+        "ms": 2157,
+        "resultCount": 12
+      },
+      {
+        "endpoint": "GET /v2/trending",
+        "label": "Artist momentum",
+        "params": {
+          "signal.interests.entities": "3691C25A-CE18-44CA-8DEE-A19579FC37E5",
+          "filter.type": "urn:entity:artist",
+          "filter.start_date": "2024-10-25",
+          "filter.end_date": "2026-10-25",
+          "take": "12"
+        },
+        "status": 200,
+        "ms": 2260,
+        "resultCount": 12
+      },
+      {
+        "endpoint": "GET /v2/trending",
+        "label": "Artist momentum",
+        "params": {
+          "signal.interests.entities": "D7918037-2D25-4990-BC34-4502B136E5AE",
+          "filter.type": "urn:entity:artist",
+          "filter.start_date": "2024-10-25",
+          "filter.end_date": "2026-10-25",
+          "take": "12"
+        },
+        "status": 200,
+        "ms": 2262,
+        "resultCount": 12
+      },
+      {
+        "endpoint": "GET /v2/trending",
+        "label": "Artist momentum",
+        "params": {
+          "signal.interests.entities": "75AE7DFF-0996-4522-BAEE-064A5CB73FD0",
+          "filter.type": "urn:entity:artist",
+          "filter.start_date": "2024-10-25",
+          "filter.end_date": "2026-10-25",
+          "take": "12"
+        },
+        "status": 200,
+        "ms": 2372,
+        "resultCount": 12
+      },
+      {
+        "endpoint": "GET /v2/trending",
+        "label": "Artist momentum",
+        "params": {
+          "signal.interests.entities": "37EA7EEF-A51E-4D54-9728-5BCFEB9B3E85",
+          "filter.type": "urn:entity:artist",
+          "filter.start_date": "2024-10-25",
+          "filter.end_date": "2026-10-25",
+          "take": "12"
+        },
+        "status": 200,
+        "ms": 2375,
+        "resultCount": 12
+      },
+      {
+        "endpoint": "GET /v2/insights",
+        "label": "Comparables: books",
+        "params": {
+          "filter.type": "urn:entity:book",
+          "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+          "take": "5"
+        },
+        "status": 200,
+        "ms": 2411,
+        "resultCount": 5
+      },
+      {
+        "endpoint": "GET /v2/insights",
+        "label": "Comparables: television",
+        "params": {
+          "filter.type": "urn:entity:tv_show",
+          "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+          "take": "5"
+        },
+        "status": 200,
+        "ms": 2491,
+        "resultCount": 5
+      }
+    ],
+    "warnings": [
+      "Scene parsing fell back to the deterministic reader because the provider rate-limited the request (HTTP 429). Track titles are left for you to choose."
+    ],
+    "mode": "live",
+    "llmConfigured": true,
+    "casting": {
+      "audience": "taste profile of Nils Frahm",
+      "candidates": [
+        {
+          "name": "Four Tet",
+          "entityId": "8F50889D-DE6C-4D1C-9972-6D87A1FB9C0F",
+          "affinity": 0.8604891963364634,
+          "popularity": 0.9092529979017405,
+          "crossDomain": false,
+          "image": "https://images.qloo.com/i/8F50889D-DE6C-4D1C-9972-6D87A1FB9C0F-420x-auto.jpg"
+        },
+        {
+          "name": "Thom Yorke",
+          "entityId": "3F5E5342-A006-4C28-93CA-C0A7A13086E2",
+          "affinity": 0.8578551515359745,
+          "popularity": 0.9593557365108012,
+          "crossDomain": false,
+          "image": "https://images.qloo.com/i/3F5E5342-A006-4C28-93CA-C0A7A13086E2-420x-auto.jpg"
+        },
+        {
+          "name": "Dan Snaith",
+          "entityId": "EBD91307-AB5D-486E-81B4-8E48C0BD1597",
+          "affinity": 0.8563402045148146,
+          "popularity": 0.8723921244604864,
+          "crossDomain": false,
+          "image": "https://images.qloo.com/i/EBD91307-AB5D-486E-81B4-8E48C0BD1597-420x-auto.jpg"
+        },
+        {
+          "name": "Jon Hopkins",
+          "entityId": "7C84A9E2-246E-4111-9F93-F065C442DB54",
+          "affinity": 0.8551620167319228,
+          "popularity": 0.8330470423239582,
+          "crossDomain": false,
+          "image": "https://images.qloo.com/i/7C84A9E2-246E-4111-9F93-F065C442DB54-420x-auto.jpg"
+        },
+        {
+          "name": "James Blake",
+          "entityId": "46181CE0-C6B5-4AF3-A9E1-2032F2C050D9",
+          "affinity": 0.8540962274701187,
+          "popularity": 0.9152868527195834,
+          "crossDomain": false,
+          "image": "https://images.qloo.com/i/46181CE0-C6B5-4AF3-A9E1-2032F2C050D9-420x-auto.jpg"
+        },
+        {
+          "name": "Nicolás Jaar",
+          "entityId": "B32E19A5-E7D8-46FC-B325-2076AE2C98F4",
+          "affinity": 0.8525034283259191,
+          "popularity": 0.8402985399158522,
+          "crossDomain": false,
+          "image": "https://images.qloo.com/i/B32E19A5-E7D8-46FC-B325-2076AE2C98F4-420x-auto.jpg"
+        },
+        {
+          "name": "Jonny Greenwood",
+          "entityId": "5BD71B38-A001-46E5-9A98-A1996F3D0A4C",
+          "affinity": 0.848952282195574,
+          "popularity": 0.8339439666887727,
+          "crossDomain": false,
+          "image": "https://images.qloo.com/i/5BD71B38-A001-46E5-9A98-A1996F3D0A4C-420x-auto.jpg"
+        },
+        {
+          "name": "Chilly Gonzales",
+          "entityId": "4ABF132A-E7B6-46C1-B001-893FAAB20BB6",
+          "affinity": 0.8474939178128538,
+          "popularity": 0.7832867657450995,
+          "crossDomain": false,
+          "image": "https://images.qloo.com/i/4ABF132A-E7B6-46C1-B001-893FAAB20BB6-420x-auto.jpg"
+        },
+        {
+          "name": "Nosaj Thing",
+          "entityId": "4367CFE7-EEA0-479F-9FD0-0F3B73C87E36",
+          "affinity": 0.8467435338754302,
+          "popularity": 0.7643208923582044,
+          "crossDomain": false,
+          "image": "https://images.qloo.com/i/4367CFE7-EEA0-479F-9FD0-0F3B73C87E36-420x-auto.jpg"
+        },
+        {
+          "name": "Flying Lotus",
+          "entityId": "880E01B0-E62B-458D-9228-99126AF41A3C",
+          "affinity": 0.8463273951806264,
+          "popularity": 0.9315619530120351,
+          "crossDomain": false,
+          "image": "https://images.qloo.com/i/880E01B0-E62B-458D-9228-99126AF41A3C-420x-auto.jpg"
+        },
+        {
+          "name": "Sonos",
+          "entityId": "9847B888-65A3-404C-82DB-80F37DB5DF59",
+          "affinity": 0.8644645775254032,
+          "popularity": 0.9486108050380566,
+          "crossDomain": true,
+          "image": "https://images.qloo.com/i/9847B888-65A3-404C-82DB-80F37DB5DF59-420x-auto.jpg"
+        },
+        {
+          "name": "Bang & Olufsen",
+          "entityId": "854D6053-16C7-4A75-B69B-04179609B10B",
+          "affinity": 0.8603236695643696,
+          "popularity": 0.9329304470173416,
+          "crossDomain": true,
+          "image": "https://images.qloo.com/i/854D6053-16C7-4A75-B69B-04179609B10B-420x-auto.jpg"
+        },
+        {
+          "name": "Bowers & Wilkins",
+          "entityId": "AB3B8B05-FA18-481C-8C9A-A4B3F49051C2",
+          "affinity": 0.8547772265462013,
+          "popularity": 0.8596650336492008,
+          "crossDomain": true,
+          "image": "https://images.qloo.com/i/AB3B8B05-FA18-481C-8C9A-A4B3F49051C2-420x-auto.jpg"
+        },
+        {
+          "name": "Harman Kardon",
+          "entityId": "026450BE-3C68-4D02-B00B-B6873E7794D4",
+          "affinity": 0.8497538914604751,
+          "popularity": 0.8717600989981522,
+          "crossDomain": true,
+          "image": "https://images.qloo.com/i/026450BE-3C68-4D02-B00B-B6873E7794D4-420x-auto.jpg"
+        },
+        {
+          "name": "Devialet",
+          "entityId": "FCBAD8B7-D1AB-41D9-84EE-CBD6A32CD2DB",
+          "affinity": 0.8432885559367239,
+          "popularity": 0.8203624281670086,
+          "crossDomain": true,
+          "image": "https://images.qloo.com/i/FCBAD8B7-D1AB-41D9-84EE-CBD6A32CD2DB-420x-auto.jpg"
+        },
+        {
+          "name": "Urbanears",
+          "entityId": "11EA72EF-3C12-44E7-AAD6-699560C23507",
+          "affinity": 0.8404079461443361,
+          "popularity": 0.6588208370768422,
+          "crossDomain": true,
+          "image": "https://images.qloo.com/i/11EA72EF-3C12-44E7-AAD6-699560C23507-420x-auto.jpg"
+        }
+      ],
+      "receipts": [
+        {
+          "endpoint": "GET /search",
+          "label": "Resolve \"Nils Frahm\"",
+          "params": {
+            "query": "Nils Frahm",
+            "types": "urn:entity:movie,urn:entity:tv_show,urn:entity:artist,urn:entity:person",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 47,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"classical\"",
+          "params": {
+            "filter.query": "classical",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 88,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"ambient\"",
+          "params": {
+            "filter.query": "ambient",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 69,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"ominous\"",
+          "params": {
+            "filter.query": "ominous",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 52,
+          "resultCount": 2
+        },
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"noir\"",
+          "params": {
+            "filter.query": "noir",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 71,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"intimacy\"",
+          "params": {
+            "filter.query": "intimacy",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 74,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Artist affinity (explainability on)",
+          "params": {
+            "filter.type": "urn:entity:artist",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:classical\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:ambient\",\"weight\":1},{\"tag\":\"urn:tag:style:qloo:ominous\",\"weight\":1},{\"tag\":\"urn:tag:genre:media:noir\",\"weight\":1},{\"tag\":\"urn:tag:keyword:qloo:intimacy\",\"weight\":1}]",
+            "bias.trends": "high",
+            "filter.release_year.min": "2020",
+            "feature.explainability": "true",
+            "take": "14"
+          },
+          "status": 200,
+          "ms": 4243,
+          "resultCount": 14
+        },
+        {
+          "endpoint": "GET /v2/insights (backfill)",
+          "label": "Cross-domain discovery",
+          "params": {
+            "filter.type": "urn:entity:artist",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:classical\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:ambient\",\"weight\":1},{\"tag\":\"urn:tag:style:qloo:ominous\",\"weight\":1},{\"tag\":\"urn:tag:genre:media:noir\",\"weight\":1},{\"tag\":\"urn:tag:keyword:qloo:intimacy\",\"weight\":1}]",
+            "filter.exclude.entities": "44A7D755-C551-440C-9DF7-4B3798164F49,02940707-9635-45DA-B290-243F84C6B910,3691C25A-CE18-44CA-8DEE-A19579FC37E5,D7918037-2D25-4990-BC34-4502B136E5AE,75AE7DFF-0996-4522-BAEE-064A5CB73FD0,37EA7EEF-A51E-4D54-9728-5BCFEB9B3E85,70BE1CE0-6D03-4125-BF8F-F538A9449F86,0704ADB9-6270-4D71-B252-A42D8A4EAA47",
+            "filter.release_year.min": "2020",
+            "take": "6",
+            "backfill.cross_domain.take": "6"
+          },
+          "status": 200,
+          "ms": 4345,
+          "resultCount": 6
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Comparables: films",
+          "params": {
+            "filter.type": "urn:entity:movie",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "take": "5"
+          },
+          "status": 200,
+          "ms": 1579,
+          "resultCount": 5
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Cross-domain: destinations",
+          "params": {
+            "filter.type": "urn:entity:destination",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "take": "6"
+          },
+          "status": 200,
+          "ms": 1622,
+          "resultCount": 6
+        },
+        {
+          "endpoint": "GET /v2/insights (cast)",
+          "label": "Casting fit: people",
+          "params": {
+            "filter.type": "urn:entity:person",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:classical\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:ambient\",\"weight\":1},{\"tag\":\"urn:tag:style:qloo:ominous\",\"weight\":1},{\"tag\":\"urn:tag:genre:media:noir\",\"weight\":1},{\"tag\":\"urn:tag:keyword:qloo:intimacy\",\"weight\":1}]",
+            "take": "10"
+          },
+          "status": 200,
+          "ms": 1017,
+          "resultCount": 10
+        },
+        {
+          "endpoint": "GET /v2/insights (brand)",
+          "label": "Cross-domain: brands",
+          "params": {
+            "filter.type": "urn:entity:brand",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:classical\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:ambient\",\"weight\":1},{\"tag\":\"urn:tag:style:qloo:ominous\",\"weight\":1},{\"tag\":\"urn:tag:genre:media:noir\",\"weight\":1},{\"tag\":\"urn:tag:keyword:qloo:intimacy\",\"weight\":1}]",
+            "take": "6"
+          },
+          "status": 200,
+          "ms": 1911,
+          "resultCount": 6
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Cross-domain: podcasts",
+          "params": {
+            "filter.type": "urn:entity:podcast",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "take": "6"
+          },
+          "status": 200,
+          "ms": 1977,
+          "resultCount": 6
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "44A7D755-C551-440C-9DF7-4B3798164F49",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 2097,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Cross-domain: places",
+          "params": {
+            "filter.type": "urn:entity:place",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "take": "6"
+          },
+          "status": 200,
+          "ms": 2140,
+          "resultCount": 6
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "02940707-9635-45DA-B290-243F84C6B910",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 2157,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "3691C25A-CE18-44CA-8DEE-A19579FC37E5",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 2260,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "D7918037-2D25-4990-BC34-4502B136E5AE",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 2262,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "75AE7DFF-0996-4522-BAEE-064A5CB73FD0",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 2372,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "37EA7EEF-A51E-4D54-9728-5BCFEB9B3E85",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 2375,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Comparables: books",
+          "params": {
+            "filter.type": "urn:entity:book",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "take": "5"
+          },
+          "status": 200,
+          "ms": 2411,
+          "resultCount": 5
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Comparables: television",
+          "params": {
+            "filter.type": "urn:entity:tv_show",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "take": "5"
+          },
+          "status": 200,
+          "ms": 2491,
+          "resultCount": 5
+        }
+      ],
+      "warnings": []
+    },
+    "audienceBrief": {
+      "available": true,
+      "evidence": [
+        {
+          "anchor": "Nils Frahm",
+          "entityId": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+          "entityName": "Nils Frahm",
+          "entityType": "urn:entity:artist",
+          "audienceIdentity": "Listeners who prefer introspective, textural soundscapes and careful, instrument-focused listening that values sonic detail and emotional subtlety."
+        }
+      ],
+      "interpretation": "One anchor carries a Qloo audience description, so this is that entity's measured audience rather than a profile of the scene.",
+      "anchorsWithoutEvidence": [],
+      "anchorsUnresolved": [],
+      "noAnchors": false
+    },
+    "comparables": {
+      "groups": [
+        {
+          "domain": "movie",
+          "label": "Films",
+          "items": [
+            {
+              "name": "Phantom Thread",
+              "entityId": "C5931DB9-526D-47C4-8157-6D6E6FDFAD0B",
+              "domain": "movie",
+              "affinity": 0.8552801599955716,
+              "popularity": 0.9928292187736236,
+              "releaseYear": 2017,
+              "image": "https://images.qloo.com/i/C5931DB9-526D-47C4-8157-6D6E6FDFAD0B-420x-auto.jpg"
+            },
+            {
+              "name": "The Shape of Water",
+              "entityId": "B47E7D07-C346-4B0C-87FB-F36CE4551597",
+              "domain": "movie",
+              "affinity": 0.8551252613515556,
+              "popularity": 0.9963822112788613,
+              "releaseYear": 2017,
+              "image": "https://images.qloo.com/i/B47E7D07-C346-4B0C-87FB-F36CE4551597-420x-auto.jpg"
+            },
+            {
+              "name": "Roma",
+              "entityId": "FB052F84-01CF-48BB-A30A-51C45F183777",
+              "domain": "movie",
+              "affinity": 0.8541575383276488,
+              "popularity": 0.9912093133760989,
+              "releaseYear": 2018,
+              "image": "https://images.qloo.com/i/FB052F84-01CF-48BB-A30A-51C45F183777-420x-auto.jpg"
+            },
+            {
+              "name": "Lady Bird",
+              "entityId": "4BE414CF-375F-4566-AA66-9AC6150A6B7F",
+              "domain": "movie",
+              "affinity": 0.8508102063329203,
+              "popularity": 0.9983692952331584,
+              "releaseYear": 2017,
+              "image": "https://images.qloo.com/i/4BE414CF-375F-4566-AA66-9AC6150A6B7F-420x-auto.jpg"
+            },
+            {
+              "name": "Moonlight",
+              "entityId": "2955F3C4-36AB-49F3-A818-3597F35EF46C",
+              "domain": "movie",
+              "affinity": 0.8485559554002744,
+              "popularity": 0.9974837469491782,
+              "releaseYear": 2016,
+              "image": "https://images.qloo.com/i/2955F3C4-36AB-49F3-A818-3597F35EF46C-420x-auto.jpg"
+            }
+          ]
+        },
+        {
+          "domain": "tv_show",
+          "label": "Television",
+          "items": [
+            {
+              "name": "The OA",
+              "entityId": "06520C22-07E8-47C1-AC4E-B643557BE79F",
+              "domain": "tv_show",
+              "affinity": 0.8766862623730637,
+              "popularity": 0.9831793098863107,
+              "releaseYear": 2016,
+              "image": "https://images.qloo.com/i/06520C22-07E8-47C1-AC4E-B643557BE79F-420x-auto.jpg"
+            },
+            {
+              "name": "Black Mirror",
+              "entityId": "B36C968C-63BF-49C2-A031-3974337D9ABB",
+              "domain": "tv_show",
+              "affinity": 0.8634355465733142,
+              "popularity": 0.9994681204707134,
+              "releaseYear": 2011,
+              "image": "https://images.qloo.com/i/B36C968C-63BF-49C2-A031-3974337D9ABB-420x-auto.jpg"
+            },
+            {
+              "name": "Travelers",
+              "entityId": "194F9B37-5B74-42DF-8F41-5C7CAC182C0D",
+              "domain": "tv_show",
+              "affinity": 0.8617726306727619,
+              "popularity": 0.9637657070673492,
+              "releaseYear": 2016,
+              "image": "https://images.qloo.com/i/194F9B37-5B74-42DF-8F41-5C7CAC182C0D-420x-auto.jpg"
+            },
+            {
+              "name": "Humans",
+              "entityId": "5B305BA6-94B6-4988-BDB6-6FF5E92CC4C7",
+              "domain": "tv_show",
+              "affinity": 0.8610834340456174,
+              "popularity": 0.9610398244797553,
+              "releaseYear": 2015,
+              "image": "https://images.qloo.com/i/5B305BA6-94B6-4988-BDB6-6FF5E92CC4C7-420x-auto.jpg"
+            },
+            {
+              "name": "Westworld",
+              "entityId": "2318D353-B748-479B-A485-157A00D636CD",
+              "domain": "tv_show",
+              "affinity": 0.8594375181729981,
+              "popularity": 0.9990692108237484,
+              "releaseYear": 2016,
+              "image": "https://images.qloo.com/i/2318D353-B748-479B-A485-157A00D636CD-420x-auto.jpg"
+            }
+          ]
+        },
+        {
+          "domain": "book",
+          "label": "Books",
+          "items": [
+            {
+              "name": "One Piece, Vol. 87: Bittersweet",
+              "entityId": "FBDC2FE5-0789-4310-B052-4496711E2909",
+              "domain": "book",
+              "affinity": 0.847891131157971,
+              "popularity": 0.925032980184689,
+              "image": "https://images.qloo.com/i/FBDC2FE5-0789-4310-B052-4496711E2909-420x-auto.jpg"
+            },
+            {
+              "name": "One Piece, Volume 62: Adventure on Fish-Man Island",
+              "entityId": "6A2318F7-FDDA-4FCE-8576-A8942E79CB42",
+              "domain": "book",
+              "affinity": 0.8467208351908369,
+              "popularity": 0.8313556555916713,
+              "image": "https://images.qloo.com/i/6A2318F7-FDDA-4FCE-8576-A8942E79CB42-420x-auto.jpg"
+            },
+            {
+              "name": "One Piece, Volume 66: The Road Toward the Sun",
+              "entityId": "50CCF208-DE3C-49F7-998E-60FF44A958D5",
+              "domain": "book",
+              "affinity": 0.8457308768263855,
+              "popularity": 0.9018890505786833,
+              "image": "https://images.qloo.com/i/50CCF208-DE3C-49F7-998E-60FF44A958D5-420x-auto.jpg"
+            },
+            {
+              "name": "One Piece, Volume 43: Legend of a Hero",
+              "entityId": "92E76E7E-C5F8-4E5C-BB2B-9D7716F45465",
+              "domain": "book",
+              "affinity": 0.8428633222912995,
+              "popularity": 0.9208951570128793,
+              "image": "https://images.qloo.com/i/92E76E7E-C5F8-4E5C-BB2B-9D7716F45465-420x-auto.jpg"
+            },
+            {
+              "name": "One Piece, Volume 30: Capriccio",
+              "entityId": "A01BF4F1-363F-4BDF-9F62-0C7BBE94E167",
+              "domain": "book",
+              "affinity": 0.8414231252563567,
+              "popularity": 0.9061934746834582,
+              "image": "https://images.qloo.com/i/A01BF4F1-363F-4BDF-9F62-0C7BBE94E167-420x-auto.jpg"
+            }
+          ]
+        }
+      ],
+      "emptyDomains": [],
+      "skippedDomains": [],
+      "receipts": [
+        {
+          "endpoint": "GET /search",
+          "label": "Resolve \"Nils Frahm\"",
+          "params": {
+            "query": "Nils Frahm",
+            "types": "urn:entity:movie,urn:entity:tv_show,urn:entity:artist,urn:entity:person",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 47,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"classical\"",
+          "params": {
+            "filter.query": "classical",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 88,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"ambient\"",
+          "params": {
+            "filter.query": "ambient",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 69,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"ominous\"",
+          "params": {
+            "filter.query": "ominous",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 52,
+          "resultCount": 2
+        },
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"noir\"",
+          "params": {
+            "filter.query": "noir",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 71,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"intimacy\"",
+          "params": {
+            "filter.query": "intimacy",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 74,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Artist affinity (explainability on)",
+          "params": {
+            "filter.type": "urn:entity:artist",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:classical\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:ambient\",\"weight\":1},{\"tag\":\"urn:tag:style:qloo:ominous\",\"weight\":1},{\"tag\":\"urn:tag:genre:media:noir\",\"weight\":1},{\"tag\":\"urn:tag:keyword:qloo:intimacy\",\"weight\":1}]",
+            "bias.trends": "high",
+            "filter.release_year.min": "2020",
+            "feature.explainability": "true",
+            "take": "14"
+          },
+          "status": 200,
+          "ms": 4243,
+          "resultCount": 14
+        },
+        {
+          "endpoint": "GET /v2/insights (backfill)",
+          "label": "Cross-domain discovery",
+          "params": {
+            "filter.type": "urn:entity:artist",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:classical\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:ambient\",\"weight\":1},{\"tag\":\"urn:tag:style:qloo:ominous\",\"weight\":1},{\"tag\":\"urn:tag:genre:media:noir\",\"weight\":1},{\"tag\":\"urn:tag:keyword:qloo:intimacy\",\"weight\":1}]",
+            "filter.exclude.entities": "44A7D755-C551-440C-9DF7-4B3798164F49,02940707-9635-45DA-B290-243F84C6B910,3691C25A-CE18-44CA-8DEE-A19579FC37E5,D7918037-2D25-4990-BC34-4502B136E5AE,75AE7DFF-0996-4522-BAEE-064A5CB73FD0,37EA7EEF-A51E-4D54-9728-5BCFEB9B3E85,70BE1CE0-6D03-4125-BF8F-F538A9449F86,0704ADB9-6270-4D71-B252-A42D8A4EAA47",
+            "filter.release_year.min": "2020",
+            "take": "6",
+            "backfill.cross_domain.take": "6"
+          },
+          "status": 200,
+          "ms": 4345,
+          "resultCount": 6
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Comparables: films",
+          "params": {
+            "filter.type": "urn:entity:movie",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "take": "5"
+          },
+          "status": 200,
+          "ms": 1579,
+          "resultCount": 5
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Cross-domain: destinations",
+          "params": {
+            "filter.type": "urn:entity:destination",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "take": "6"
+          },
+          "status": 200,
+          "ms": 1622,
+          "resultCount": 6
+        },
+        {
+          "endpoint": "GET /v2/insights (cast)",
+          "label": "Casting fit: people",
+          "params": {
+            "filter.type": "urn:entity:person",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:classical\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:ambient\",\"weight\":1},{\"tag\":\"urn:tag:style:qloo:ominous\",\"weight\":1},{\"tag\":\"urn:tag:genre:media:noir\",\"weight\":1},{\"tag\":\"urn:tag:keyword:qloo:intimacy\",\"weight\":1}]",
+            "take": "10"
+          },
+          "status": 200,
+          "ms": 1017,
+          "resultCount": 10
+        },
+        {
+          "endpoint": "GET /v2/insights (brand)",
+          "label": "Cross-domain: brands",
+          "params": {
+            "filter.type": "urn:entity:brand",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:classical\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:ambient\",\"weight\":1},{\"tag\":\"urn:tag:style:qloo:ominous\",\"weight\":1},{\"tag\":\"urn:tag:genre:media:noir\",\"weight\":1},{\"tag\":\"urn:tag:keyword:qloo:intimacy\",\"weight\":1}]",
+            "take": "6"
+          },
+          "status": 200,
+          "ms": 1911,
+          "resultCount": 6
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Cross-domain: podcasts",
+          "params": {
+            "filter.type": "urn:entity:podcast",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "take": "6"
+          },
+          "status": 200,
+          "ms": 1977,
+          "resultCount": 6
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "44A7D755-C551-440C-9DF7-4B3798164F49",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 2097,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Cross-domain: places",
+          "params": {
+            "filter.type": "urn:entity:place",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "take": "6"
+          },
+          "status": 200,
+          "ms": 2140,
+          "resultCount": 6
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "02940707-9635-45DA-B290-243F84C6B910",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 2157,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "3691C25A-CE18-44CA-8DEE-A19579FC37E5",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 2260,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "D7918037-2D25-4990-BC34-4502B136E5AE",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 2262,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "75AE7DFF-0996-4522-BAEE-064A5CB73FD0",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 2372,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "37EA7EEF-A51E-4D54-9728-5BCFEB9B3E85",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 2375,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Comparables: books",
+          "params": {
+            "filter.type": "urn:entity:book",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "take": "5"
+          },
+          "status": 200,
+          "ms": 2411,
+          "resultCount": 5
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Comparables: television",
+          "params": {
+            "filter.type": "urn:entity:tv_show",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "take": "5"
+          },
+          "status": 200,
+          "ms": 2491,
+          "resultCount": 5
+        }
+      ],
+      "warnings": []
+    },
+    "tasteMap": {
+      "groups": [
+        {
+          "domain": "destination",
+          "label": "Destinations",
+          "items": [
+            {
+              "name": "Canterbury",
+              "entityId": "448C99A2-59C5-4A5D-9577-961A02562228",
+              "domain": "destination",
+              "affinity": 0.933133021227231,
+              "affinitySource": "query",
+              "popularity": 0.46917497733454216,
+              "attributedAnchors": [
+                "Nils Frahm"
+              ]
+            },
+            {
+              "name": "Eastbourne",
+              "entityId": "0994E8A0-AC2B-4011-84A1-0B7F4B87FD85",
+              "domain": "destination",
+              "affinity": 0.9293100814229248,
+              "affinitySource": "query",
+              "popularity": 0.027651858567543066,
+              "attributedAnchors": [
+                "Nils Frahm"
+              ]
+            },
+            {
+              "name": "Cambridge",
+              "entityId": "331F9A0C-3CC2-4B90-BC91-E851B2CBEE59",
+              "domain": "destination",
+              "affinity": 0.9285967606281742,
+              "affinitySource": "query",
+              "popularity": 0.8250226654578422,
+              "attributedAnchors": [
+                "Nils Frahm"
+              ]
+            },
+            {
+              "name": "Brighton",
+              "entityId": "5B3ECB84-0C63-43D3-B194-4718C664D9A8",
+              "domain": "destination",
+              "affinity": 0.9274509683789128,
+              "affinitySource": "query",
+              "popularity": 0.942429737080689,
+              "attributedAnchors": [
+                "Nils Frahm"
+              ]
+            },
+            {
+              "name": "Rye",
+              "entityId": "EFD3989E-4F2E-4F08-B814-0F95C0CF11BD",
+              "domain": "destination",
+              "affinity": 0.9272093762181719,
+              "affinitySource": "query",
+              "popularity": 0.34043517679057117,
+              "attributedAnchors": [
+                "Nils Frahm"
+              ]
+            },
+            {
+              "name": "Margate",
+              "entityId": "74379ED1-0099-428A-886B-EB3E0A9C36DE",
+              "domain": "destination",
+              "affinity": 0.9257243435124415,
+              "affinitySource": "query",
+              "popularity": 0.4220308250226655,
+              "attributedAnchors": [
+                "Nils Frahm"
+              ]
+            }
+          ]
+        },
+        {
+          "domain": "podcast",
+          "label": "Podcasts",
+          "items": [
+            {
+              "name": "Song Exploder",
+              "entityId": "D95B20A8-0CEA-4BDC-8074-60A303FA1980",
+              "domain": "podcast",
+              "affinity": 0.9696328088295078,
+              "affinitySource": "query",
+              "popularity": 0.9780580150851146,
+              "image": "https://images.qloo.com/i/D95B20A8-0CEA-4BDC-8074-60A303FA1980-420x-auto.jpg",
+              "attributedAnchors": [
+                "Nils Frahm"
+              ]
+            },
+            {
+              "name": "99% Invisible",
+              "entityId": "1B466B0E-323A-4EFD-A314-8737F58F1E1B",
+              "domain": "podcast",
+              "affinity": 0.9552245791622433,
+              "affinitySource": "query",
+              "popularity": 0.9984199385862922,
+              "image": "https://images.qloo.com/i/1B466B0E-323A-4EFD-A314-8737F58F1E1B-420x-auto.jpg",
+              "attributedAnchors": [
+                "Nils Frahm"
+              ]
+            },
+            {
+              "name": "Radiolab",
+              "entityId": "B4D6B6FD-7146-4E1C-AE48-B8EBD2BB71DA",
+              "domain": "podcast",
+              "affinity": 0.9459367280573461,
+              "affinitySource": "query",
+              "popularity": 0.9988671257788511,
+              "image": "https://images.qloo.com/i/B4D6B6FD-7146-4E1C-AE48-B8EBD2BB71DA-420x-auto.jpg",
+              "attributedAnchors": [
+                "Nils Frahm"
+              ]
+            },
+            {
+              "name": "the memory palace",
+              "entityId": "87EAEE3F-8F2D-4478-AB1A-E803F7BF69D0",
+              "domain": "podcast",
+              "affinity": 0.9290806451545681,
+              "affinitySource": "query",
+              "popularity": 0.9912351310258474,
+              "image": "https://images.qloo.com/i/87EAEE3F-8F2D-4478-AB1A-E803F7BF69D0-420x-auto.jpg",
+              "attributedAnchors": [
+                "Nils Frahm"
+              ]
+            },
+            {
+              "name": "Freakonomics Radio",
+              "entityId": "B3E6D9CD-28AE-4ABE-8592-C8E2949657AD",
+              "domain": "podcast",
+              "affinity": 0.9222803942084106,
+              "affinitySource": "query",
+              "popularity": 0.9967802522135766,
+              "image": "https://images.qloo.com/i/B3E6D9CD-28AE-4ABE-8592-C8E2949657AD-420x-auto.jpg",
+              "attributedAnchors": [
+                "Nils Frahm"
+              ]
+            },
+            {
+              "name": "Love and Radio",
+              "entityId": "B683E01D-FBF2-4869-988A-F084C5146259",
+              "domain": "podcast",
+              "affinity": 0.9175373701615711,
+              "affinitySource": "query",
+              "popularity": 0.9686372715618758,
+              "image": "https://images.qloo.com/i/B683E01D-FBF2-4869-988A-F084C5146259-420x-auto.jpg",
+              "attributedAnchors": [
+                "Nils Frahm"
+              ]
+            }
+          ]
+        },
+        {
+          "domain": "place",
+          "label": "Places",
+          "items": [
+            {
+              "name": "Peggy Guggenheim Collection",
+              "entityId": "49B073B6-8E03-4E37-A994-D0C8761BD3DF",
+              "domain": "place",
+              "affinity": 0.9406758303031443,
+              "affinitySource": "query",
+              "popularity": 0.9996835185604106,
+              "image": "https://images.qloo.com/i/49B073B6-8E03-4E37-A994-D0C8761BD3DF-420x-auto.jpg",
+              "attributedAnchors": [
+                "Nils Frahm"
+              ]
+            },
+            {
+              "name": "Peggy Guggenheim Collection",
+              "entityId": "104C5DED-1DCC-41AA-A3F8-A1CF323EF558",
+              "domain": "place",
+              "affinity": 0.9363730764588906,
+              "affinitySource": "query",
+              "popularity": 0.9996004979010817,
+              "image": "https://images.qloo.com/i/104C5DED-1DCC-41AA-A3F8-A1CF323EF558-420x-auto.jpg",
+              "attributedAnchors": [
+                "Nils Frahm"
+              ]
+            },
+            {
+              "name": "The Wall Museum",
+              "entityId": "32EC682B-DD31-44CA-8E07-430AD643F0E4",
+              "domain": "place",
+              "affinity": 0.9307474424881458,
+              "affinitySource": "query",
+              "popularity": 0.9983516591688053,
+              "image": "https://images.qloo.com/i/32EC682B-DD31-44CA-8E07-430AD643F0E4-420x-auto.jpg",
+              "attributedAnchors": [
+                "Nils Frahm"
+              ]
+            },
+            {
+              "name": "Sigmund Freud Museum",
+              "entityId": "E5CBD5F7-B29C-48F7-A488-CE71EF9C4FDE",
+              "domain": "place",
+              "affinity": 0.9303714558629561,
+              "affinitySource": "query",
+              "popularity": 0.9960703554584319,
+              "image": "https://images.qloo.com/i/E5CBD5F7-B29C-48F7-A488-CE71EF9C4FDE-420x-auto.jpg",
+              "attributedAnchors": [
+                "Nils Frahm"
+              ]
+            },
+            {
+              "name": "Mies van der Rohe Pavilion",
+              "entityId": "6656AF8D-8FC9-4146-975A-88F4E079A84F",
+              "domain": "place",
+              "affinity": 0.9298282908637543,
+              "affinitySource": "query",
+              "popularity": 0.9900024181856476,
+              "image": "https://images.qloo.com/i/6656AF8D-8FC9-4146-975A-88F4E079A84F-420x-auto.jpg",
+              "attributedAnchors": [
+                "Nils Frahm"
+              ]
+            },
+            {
+              "name": "Galleria Borghese",
+              "entityId": "5CF039EF-5FB9-4051-BDDF-7EB15DFDC72C",
+              "domain": "place",
+              "affinity": 0.9297609949862733,
+              "affinitySource": "query",
+              "popularity": 0.9997901267448732,
+              "image": "https://images.qloo.com/i/5CF039EF-5FB9-4051-BDDF-7EB15DFDC72C-420x-auto.jpg",
+              "attributedAnchors": [
+                "Nils Frahm"
+              ]
+            }
+          ]
+        }
+      ],
+      "emptyDomains": [],
+      "failedDomains": [],
+      "skippedDomains": [],
+      "anchors": [
+        {
+          "name": "Nils Frahm",
+          "entityId": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77"
+        }
+      ],
+      "receipts": [
+        {
+          "endpoint": "GET /search",
+          "label": "Resolve \"Nils Frahm\"",
+          "params": {
+            "query": "Nils Frahm",
+            "types": "urn:entity:movie,urn:entity:tv_show,urn:entity:artist,urn:entity:person",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 47,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"classical\"",
+          "params": {
+            "filter.query": "classical",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 88,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"ambient\"",
+          "params": {
+            "filter.query": "ambient",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 69,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"ominous\"",
+          "params": {
+            "filter.query": "ominous",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 52,
+          "resultCount": 2
+        },
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"noir\"",
+          "params": {
+            "filter.query": "noir",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 71,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"intimacy\"",
+          "params": {
+            "filter.query": "intimacy",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 74,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Artist affinity (explainability on)",
+          "params": {
+            "filter.type": "urn:entity:artist",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:classical\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:ambient\",\"weight\":1},{\"tag\":\"urn:tag:style:qloo:ominous\",\"weight\":1},{\"tag\":\"urn:tag:genre:media:noir\",\"weight\":1},{\"tag\":\"urn:tag:keyword:qloo:intimacy\",\"weight\":1}]",
+            "bias.trends": "high",
+            "filter.release_year.min": "2020",
+            "feature.explainability": "true",
+            "take": "14"
+          },
+          "status": 200,
+          "ms": 4243,
+          "resultCount": 14
+        },
+        {
+          "endpoint": "GET /v2/insights (backfill)",
+          "label": "Cross-domain discovery",
+          "params": {
+            "filter.type": "urn:entity:artist",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:classical\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:ambient\",\"weight\":1},{\"tag\":\"urn:tag:style:qloo:ominous\",\"weight\":1},{\"tag\":\"urn:tag:genre:media:noir\",\"weight\":1},{\"tag\":\"urn:tag:keyword:qloo:intimacy\",\"weight\":1}]",
+            "filter.exclude.entities": "44A7D755-C551-440C-9DF7-4B3798164F49,02940707-9635-45DA-B290-243F84C6B910,3691C25A-CE18-44CA-8DEE-A19579FC37E5,D7918037-2D25-4990-BC34-4502B136E5AE,75AE7DFF-0996-4522-BAEE-064A5CB73FD0,37EA7EEF-A51E-4D54-9728-5BCFEB9B3E85,70BE1CE0-6D03-4125-BF8F-F538A9449F86,0704ADB9-6270-4D71-B252-A42D8A4EAA47",
+            "filter.release_year.min": "2020",
+            "take": "6",
+            "backfill.cross_domain.take": "6"
+          },
+          "status": 200,
+          "ms": 4345,
+          "resultCount": 6
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Comparables: films",
+          "params": {
+            "filter.type": "urn:entity:movie",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "take": "5"
+          },
+          "status": 200,
+          "ms": 1579,
+          "resultCount": 5
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Cross-domain: destinations",
+          "params": {
+            "filter.type": "urn:entity:destination",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "take": "6"
+          },
+          "status": 200,
+          "ms": 1622,
+          "resultCount": 6
+        },
+        {
+          "endpoint": "GET /v2/insights (cast)",
+          "label": "Casting fit: people",
+          "params": {
+            "filter.type": "urn:entity:person",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:classical\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:ambient\",\"weight\":1},{\"tag\":\"urn:tag:style:qloo:ominous\",\"weight\":1},{\"tag\":\"urn:tag:genre:media:noir\",\"weight\":1},{\"tag\":\"urn:tag:keyword:qloo:intimacy\",\"weight\":1}]",
+            "take": "10"
+          },
+          "status": 200,
+          "ms": 1017,
+          "resultCount": 10
+        },
+        {
+          "endpoint": "GET /v2/insights (brand)",
+          "label": "Cross-domain: brands",
+          "params": {
+            "filter.type": "urn:entity:brand",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:classical\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:ambient\",\"weight\":1},{\"tag\":\"urn:tag:style:qloo:ominous\",\"weight\":1},{\"tag\":\"urn:tag:genre:media:noir\",\"weight\":1},{\"tag\":\"urn:tag:keyword:qloo:intimacy\",\"weight\":1}]",
+            "take": "6"
+          },
+          "status": 200,
+          "ms": 1911,
+          "resultCount": 6
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Cross-domain: podcasts",
+          "params": {
+            "filter.type": "urn:entity:podcast",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "take": "6"
+          },
+          "status": 200,
+          "ms": 1977,
+          "resultCount": 6
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "44A7D755-C551-440C-9DF7-4B3798164F49",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 2097,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Cross-domain: places",
+          "params": {
+            "filter.type": "urn:entity:place",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "take": "6"
+          },
+          "status": 200,
+          "ms": 2140,
+          "resultCount": 6
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "02940707-9635-45DA-B290-243F84C6B910",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 2157,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "3691C25A-CE18-44CA-8DEE-A19579FC37E5",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 2260,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "D7918037-2D25-4990-BC34-4502B136E5AE",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 2262,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "75AE7DFF-0996-4522-BAEE-064A5CB73FD0",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 2372,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "37EA7EEF-A51E-4D54-9728-5BCFEB9B3E85",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 2375,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Comparables: books",
+          "params": {
+            "filter.type": "urn:entity:book",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "take": "5"
+          },
+          "status": 200,
+          "ms": 2411,
+          "resultCount": 5
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Comparables: television",
+          "params": {
+            "filter.type": "urn:entity:tv_show",
+            "signal.interests.entities": "0d8eafa4-ceea-44d5-8e1f-26a8a9f49a77",
+            "take": "5"
+          },
+          "status": 200,
+          "ms": 2491,
+          "resultCount": 5
+        }
+      ],
+      "warnings": []
+    },
+    "tasteGap": {
+      "original": {
+        "index": 89.51612903225806,
+        "coveredTags": 111,
+        "vocabularySize": 124,
+        "redundancy": 0.28495679981059746,
+        "mostSimilarPair": {
+          "a": "Federico Albanese",
+          "b": "Goldmund",
+          "overlap": 0.4230769230769231
+        },
+        "gaps": [
+          {
+            "tag": "5",
+            "reachableBy": [
+              "Peter Broderick",
+              "Greg Haines"
+            ]
+          },
+          {
+            "tag": "Aphex Twin",
+            "reachableBy": [
+              "Keith Kenniff",
+              "Ben Lukas Boysen"
+            ]
+          },
+          {
+            "tag": "Contemporary",
+            "reachableBy": [
+              "Joep Beving",
+              "Niklas Paschburg"
+            ]
+          },
+          {
+            "tag": "Electronic",
+            "reachableBy": [
+              "Max Richter",
+              "Niklas Paschburg"
+            ]
+          },
+          {
+            "tag": "Existentialism",
+            "reachableBy": [
+              "Peter Broderick",
+              "Max Richter"
+            ]
+          },
+          {
+            "tag": "Introspective",
+            "reachableBy": [
+              "Max Richter",
+              "Joep Beving"
+            ]
+          },
+          {
+            "tag": "Introspective",
+            "reachableBy": [
+              "Peter Broderick",
+              "Max Richter"
+            ]
+          },
+          {
+            "tag": "John Cage",
+            "reachableBy": [
+              "Peter Broderick",
+              "Max Richter"
+            ]
+          },
+          {
+            "tag": "Melodic",
+            "reachableBy": [
+              "Joep Beving",
+              "Sebastian Plano"
+            ]
+          },
+          {
+            "tag": "Melodic",
+            "reachableBy": [
+              "Joep Beving",
+              "Sebastian Plano"
+            ]
+          },
+          {
+            "tag": "Steve Reich",
+            "reachableBy": [
+              "Max Richter",
+              "Greg Haines"
+            ]
+          },
+          {
+            "tag": "Electronic",
+            "reachableBy": [
+              "Max Richter",
+              "Keith Kenniff",
+              "Ben Lukas Boysen"
+            ]
+          },
+          {
+            "tag": "Minimalism",
+            "reachableBy": [
+              "Max Richter",
+              "Greg Haines",
+              "Joep Beving"
+            ]
+          }
+        ],
+        "poolSize": 14,
+        "entitiesMeasured": 6,
+        "audit": {
+          "numerator": 111,
+          "denominator": 124,
+          "score": 89.51612903225806,
+          "coveredDimensions": [
+            "urn:tag:artist:qloo:ambient",
+            "urn:tag:artist:qloo:atmospheric",
+            "urn:tag:artist:qloo:cinematic",
+            "urn:tag:artist:qloo:contemplative",
+            "urn:tag:artist:qloo:contemporary",
+            "urn:tag:artist:qloo:delicate",
+            "urn:tag:artist:qloo:emotional",
+            "urn:tag:artist:qloo:emotive",
+            "urn:tag:artist:qloo:ethereal",
+            "urn:tag:artist:qloo:experimental",
+            "urn:tag:artist:qloo:innovative",
+            "urn:tag:artist:qloo:instrumental",
+            "urn:tag:artist:qloo:intricate",
+            "urn:tag:artist:qloo:melancholic",
+            "urn:tag:artist:qloo:minimalist",
+            "urn:tag:artist:qloo:minimalistic",
+            "urn:tag:audience:qloo:appreciative",
+            "urn:tag:audience:qloo:calm",
+            "urn:tag:audience:qloo:contemplative",
+            "urn:tag:audience:qloo:cultured",
+            "urn:tag:audience:qloo:devoted",
+            "urn:tag:audience:qloo:introspective",
+            "urn:tag:audience:qloo:open_minded",
+            "urn:tag:audience:qloo:reflective",
+            "urn:tag:audience:qloo:thoughtful",
+            "urn:tag:complexity_scale:qloo:6",
+            "urn:tag:genre:music:ambient",
+            "urn:tag:genre:music:contemporary_classical",
+            "urn:tag:genre:music:minimalism",
+            "urn:tag:genre:music:modern_classical",
+            "urn:tag:genre:music:neoclassical",
+            "urn:tag:genre:music:piano",
+            "urn:tag:genre:music:post_classical",
+            "urn:tag:genre:qloo:ambient",
+            "urn:tag:genre:qloo:classical",
+            "urn:tag:genre:qloo:contemporary_classical",
+            "urn:tag:genre:qloo:instrumental",
+            "urn:tag:genre:qloo:modern_classical",
+            "urn:tag:genre:qloo:neo_classical",
+            "urn:tag:genre:qloo:neoclassical",
+            "urn:tag:influence:qloo:ambient",
+            "urn:tag:influence:qloo:contemporary_classical",
+            "urn:tag:influence:qloo:electronic",
+            "urn:tag:influence:qloo:minimalism",
+            "urn:tag:influence:qloo:modern_classical",
+            "urn:tag:influence:qloo:neoclassical",
+            "urn:tag:influenced_by:qloo:arvo_part",
+            "urn:tag:influenced_by:qloo:brian_eno",
+            "urn:tag:influenced_by:qloo:erik_satie",
+            "urn:tag:influenced_by:qloo:ludovico_einaudi",
+            "urn:tag:influenced_by:qloo:max_richter",
+            "urn:tag:influenced_by:qloo:philip_glass",
+            "urn:tag:instrument:qloo:cello",
+            "urn:tag:instrument:qloo:drums",
+            "urn:tag:instrument:qloo:electronics",
+            "urn:tag:instrument:qloo:guitar",
+            "urn:tag:instrument:qloo:keyboard",
+            "urn:tag:instrument:qloo:piano",
+            "urn:tag:instrument:qloo:sampler",
+            "urn:tag:instrument:qloo:strings",
+            "urn:tag:instrument:qloo:synthesizer",
+            "urn:tag:instrument:qloo:synthesizers",
+            "urn:tag:instrument:qloo:violin",
+            "urn:tag:music:qloo:ambient",
+            "urn:tag:music:qloo:atmospheric",
+            "urn:tag:music:qloo:cinematic",
+            "urn:tag:music:qloo:contemporary",
+            "urn:tag:music:qloo:delicate",
+            "urn:tag:music:qloo:emotional",
+            "urn:tag:music:qloo:emotive",
+            "urn:tag:music:qloo:ethereal",
+            "urn:tag:music:qloo:experimental",
+            "urn:tag:music:qloo:instrumental",
+            "urn:tag:music:qloo:intricate",
+            "urn:tag:music:qloo:lush",
+            "urn:tag:music:qloo:melancholic",
+            "urn:tag:music:qloo:minimalist",
+            "urn:tag:music:qloo:minimalistic",
+            "urn:tag:obscurity:qloo:3",
+            "urn:tag:obscurity:qloo:4",
+            "urn:tag:style:qloo:ambient",
+            "urn:tag:style:qloo:ambient_minimalism",
+            "urn:tag:style:qloo:ambient_soundscape",
+            "urn:tag:style:qloo:atmospheric",
+            "urn:tag:style:qloo:cinematic",
+            "urn:tag:style:qloo:cinematic_soundscape",
+            "urn:tag:style:qloo:contemporary_classical",
+            "urn:tag:style:qloo:emotive_composition",
+            "urn:tag:style:qloo:expressive",
+            "urn:tag:style:qloo:immersive",
+            "urn:tag:style:qloo:intimate",
+            "urn:tag:style:qloo:minimalist",
+            "urn:tag:style:qloo:minimalist_piano",
+            "urn:tag:style:qloo:neo_classical",
+            "urn:tag:style:qloo:neoclassical",
+            "urn:tag:style:qloo:reflective",
+            "urn:tag:style:qloo:subtle",
+            "urn:tag:subgenre:qloo:ambient",
+            "urn:tag:subgenre:qloo:electronic",
+            "urn:tag:subgenre:qloo:experimental",
+            "urn:tag:subgenre:qloo:minimalism",
+            "urn:tag:subgenre:qloo:modern_classical",
+            "urn:tag:subgenre:qloo:post_rock",
+            "urn:tag:subgenre:qloo:soundtrack",
+            "urn:tag:theme:qloo:introspection",
+            "urn:tag:theme:qloo:loss",
+            "urn:tag:theme:qloo:love",
+            "urn:tag:theme:qloo:melancholy",
+            "urn:tag:theme:qloo:memory",
+            "urn:tag:theme:qloo:nature",
+            "urn:tag:theme:qloo:nostalgia"
+          ],
+          "uncoveredDimensions": [
+            "urn:tag:artist:qloo:introspective",
+            "urn:tag:artist:qloo:melodic",
+            "urn:tag:genre:music:electronic",
+            "urn:tag:genre:qloo:electronic",
+            "urn:tag:genre:qloo:minimalism",
+            "urn:tag:influenced_by:qloo:aphex_twin",
+            "urn:tag:influenced_by:qloo:john_cage",
+            "urn:tag:influenced_by:qloo:steve_reich",
+            "urn:tag:music:qloo:introspective",
+            "urn:tag:music:qloo:melodic",
+            "urn:tag:obscurity:qloo:5",
+            "urn:tag:style:qloo:contemporary",
+            "urn:tag:theme:qloo:existentialism"
+          ],
+          "redundancy": 0.28495679981059746,
+          "mostSimilarPair": {
+            "a": "Federico Albanese",
+            "b": "Goldmund",
+            "overlap": 0.4230769230769231
+          },
+          "warnings": [],
+          "valid": true,
+          "poolSize": 14,
+          "entitiesMeasured": 6,
+          "weightsUsed": "equal"
+        }
+      },
+      "revised": {
+        "entities": [
+          {
+            "entityId": "44A7D755-C551-440C-9DF7-4B3798164F49",
+            "name": "Federico Albanese",
+            "affinity": 0.7528675202298813,
+            "affinitySource": "query",
+            "backfill": false,
+            "tags": [
+              "urn:tag:style:qloo:cinematic_piano",
+              "urn:tag:style:qloo:ambient_minimalism",
+              "urn:tag:genre:qloo:contemporary_classical",
+              "urn:tag:style:qloo:subtle",
+              "urn:tag:music:qloo:minimalist",
+              "urn:tag:music:qloo:cinematic",
+              "urn:tag:style:qloo:contemporary_classical",
+              "urn:tag:influenced_by:qloo:philip_glass",
+              "urn:tag:artist:qloo:cinematic",
+              "urn:tag:subgenre:qloo:minimalism",
+              "urn:tag:influence:qloo:neoclassical",
+              "urn:tag:instrument:qloo:synthesizer",
+              "urn:tag:genre:music:neoclassical",
+              "urn:tag:genre:music:post_classical",
+              "urn:tag:artist:qloo:contemplative",
+              "urn:tag:audience:qloo:appreciative",
+              "urn:tag:audience:qloo:contemplative",
+              "urn:tag:genre:music:contemporary_classical",
+              "urn:tag:music:qloo:emotional",
+              "urn:tag:genre:qloo:neoclassical",
+              "urn:tag:instrument:qloo:piano",
+              "urn:tag:style:qloo:expressive",
+              "urn:tag:artist:qloo:minimalist",
+              "urn:tag:influence:qloo:ambient",
+              "urn:tag:genre:music:piano",
+              "urn:tag:genre:qloo:ambient",
+              "urn:tag:subgenre:qloo:modern_classical",
+              "urn:tag:influenced_by:qloo:max_richter",
+              "urn:tag:genre:music:modern_classical",
+              "urn:tag:artist:qloo:emotional",
+              "urn:tag:influence:qloo:contemporary_classical",
+              "urn:tag:influenced_by:qloo:ludovico_einaudi",
+              "urn:tag:style:qloo:intimate",
+              "urn:tag:music:qloo:atmospheric",
+              "urn:tag:style:qloo:neoclassical",
+              "urn:tag:obscurity:qloo:4",
+              "urn:tag:audience:qloo:introspective",
+              "urn:tag:style:qloo:modern_classical",
+              "urn:tag:artist:qloo:evocative",
+              "urn:tag:music:qloo:evocative"
+            ],
+            "tagNames": {
+              "urn:tag:style:qloo:cinematic_piano": "Cinematic Piano",
+              "urn:tag:style:qloo:ambient_minimalism": "Ambient Minimalism",
+              "urn:tag:genre:qloo:contemporary_classical": "Contemporary Classical",
+              "urn:tag:style:qloo:subtle": "Subtle",
+              "urn:tag:music:qloo:minimalist": "Minimalist",
+              "urn:tag:music:qloo:cinematic": "Cinematic",
+              "urn:tag:style:qloo:contemporary_classical": "Contemporary Classical",
+              "urn:tag:influenced_by:qloo:philip_glass": "Philip Glass",
+              "urn:tag:artist:qloo:cinematic": "Cinematic",
+              "urn:tag:subgenre:qloo:minimalism": "Minimalism",
+              "urn:tag:influence:qloo:neoclassical": "Neoclassical",
+              "urn:tag:instrument:qloo:synthesizer": "Synthesizer",
+              "urn:tag:genre:music:neoclassical": "Neoclassical",
+              "urn:tag:genre:music:post_classical": "Post Classical",
+              "urn:tag:artist:qloo:contemplative": "Contemplative",
+              "urn:tag:audience:qloo:appreciative": "Appreciative",
+              "urn:tag:audience:qloo:contemplative": "Contemplative",
+              "urn:tag:genre:music:contemporary_classical": "Contemporary Classical",
+              "urn:tag:music:qloo:emotional": "Emotional",
+              "urn:tag:genre:qloo:neoclassical": "Neoclassical",
+              "urn:tag:instrument:qloo:piano": "Piano",
+              "urn:tag:style:qloo:expressive": "Expressive",
+              "urn:tag:artist:qloo:minimalist": "Minimalist",
+              "urn:tag:influence:qloo:ambient": "Ambient",
+              "urn:tag:genre:music:piano": "Piano",
+              "urn:tag:genre:qloo:ambient": "Ambient",
+              "urn:tag:subgenre:qloo:modern_classical": "Modern Classical",
+              "urn:tag:influenced_by:qloo:max_richter": "Max Richter",
+              "urn:tag:genre:music:modern_classical": "Modern Classical",
+              "urn:tag:artist:qloo:emotional": "Emotional",
+              "urn:tag:influence:qloo:contemporary_classical": "Contemporary Classical",
+              "urn:tag:influenced_by:qloo:ludovico_einaudi": "Ludovico Einaudi",
+              "urn:tag:style:qloo:intimate": "Intimate",
+              "urn:tag:music:qloo:atmospheric": "Atmospheric",
+              "urn:tag:style:qloo:neoclassical": "Neoclassical",
+              "urn:tag:obscurity:qloo:4": "4",
+              "urn:tag:audience:qloo:introspective": "Introspective",
+              "urn:tag:style:qloo:modern_classical": "Modern Classical",
+              "urn:tag:artist:qloo:evocative": "Evocative",
+              "urn:tag:music:qloo:evocative": "Evocative"
+            }
+          },
+          {
+            "entityId": "02940707-9635-45DA-B290-243F84C6B910",
+            "name": "Ólafur Arnalds",
+            "affinity": 0.7524329962697127,
+            "affinitySource": "query",
+            "backfill": false,
+            "tags": [
+              "urn:tag:audience:qloo:devoted",
+              "urn:tag:style:qloo:minimalist",
+              "urn:tag:influenced_by:qloo:max_richter",
+              "urn:tag:instrument:qloo:synthesizers",
+              "urn:tag:theme:qloo:introspection",
+              "urn:tag:influence:qloo:neo_classical",
+              "urn:tag:theme:qloo:emotions",
+              "urn:tag:theme:qloo:melancholy",
+              "urn:tag:style:qloo:minimalistic",
+              "urn:tag:genre:qloo:ambient",
+              "urn:tag:style:qloo:expressive",
+              "urn:tag:style:qloo:atmospheric",
+              "urn:tag:influenced_by:qloo:sigur_ros",
+              "urn:tag:artist:qloo:minimalistic",
+              "urn:tag:audience:qloo:reflective",
+              "urn:tag:influence:qloo:contemporary_classical",
+              "urn:tag:music:qloo:minimalistic",
+              "urn:tag:artist:qloo:atmospheric",
+              "urn:tag:theme:qloo:nature",
+              "urn:tag:artist:qloo:cinematic",
+              "urn:tag:style:qloo:cinematic",
+              "urn:tag:influenced_by:qloo:brian_eno",
+              "urn:tag:genre:qloo:neo_classical",
+              "urn:tag:influence:qloo:electronic",
+              "urn:tag:instrument:qloo:drums",
+              "urn:tag:subgenre:qloo:electronic",
+              "urn:tag:subgenre:qloo:minimalism",
+              "urn:tag:instrument:qloo:loops",
+              "urn:tag:artist:qloo:emotive",
+              "urn:tag:style:qloo:intimate",
+              "urn:tag:audience:qloo:introspective",
+              "urn:tag:subgenre:qloo:post_rock",
+              "urn:tag:audience:qloo:appreciative",
+              "urn:tag:music:qloo:cinematic",
+              "urn:tag:style:qloo:neo_classical",
+              "urn:tag:obscurity:qloo:3",
+              "urn:tag:style:qloo:ambient",
+              "urn:tag:instrument:qloo:strings",
+              "urn:tag:instrument:qloo:piano",
+              "urn:tag:influenced_by:qloo:philip_glass",
+              "urn:tag:music:qloo:atmospheric",
+              "urn:tag:influence:qloo:ambient",
+              "urn:tag:style:qloo:electronic_infused",
+              "urn:tag:genre:qloo:contemporary_classical",
+              "urn:tag:artist:qloo:innovative",
+              "urn:tag:audience:qloo:cultured",
+              "urn:tag:audience:qloo:atmosphere_seeking",
+              "urn:tag:audience:qloo:emotionally_attuned",
+              "urn:tag:music:qloo:minimalist",
+              "urn:tag:music:qloo:ethereal",
+              "urn:tag:music:qloo:melancholic",
+              "urn:tag:music:qloo:textural",
+              "urn:tag:music:qloo:lush",
+              "urn:tag:music:qloo:intimate",
+              "urn:tag:style:qloo:immersive",
+              "urn:tag:style:qloo:precise",
+              "urn:tag:style:qloo:minimal",
+              "urn:tag:style:qloo:emotive",
+              "urn:tag:style:qloo:interactive",
+              "urn:tag:artist:qloo:minimal",
+              "urn:tag:artist:qloo:melancholic",
+              "urn:tag:artist:qloo:ethereal",
+              "urn:tag:artist:qloo:intimate",
+              "urn:tag:artist:qloo:textural",
+              "urn:tag:complexity_scale:qloo:6",
+              "urn:tag:style:qloo:neo_classical_piano_based",
+              "urn:tag:style:qloo:ambient_chamber_music",
+              "urn:tag:style:qloo:electro_acoustic_minimalism",
+              "urn:tag:style:qloo:cinematic_post_classical",
+              "urn:tag:style:qloo:loop_driven_minimalism",
+              "urn:tag:influence:qloo:post_classical",
+              "urn:tag:influence:qloo:electro_acoustic",
+              "urn:tag:influenced_by:qloo:arvo_part",
+              "urn:tag:influenced_by:qloo:ryuichi_sakamoto",
+              "urn:tag:influenced_by:qloo:icelandic_post_rock_tradition",
+              "urn:tag:instrument:qloo:violin",
+              "urn:tag:instrument:qloo:cello",
+              "urn:tag:instrument:qloo:guitar",
+              "urn:tag:instrument:qloo:synthesizer",
+              "urn:tag:instrument:qloo:electronics",
+              "urn:tag:instrument:qloo:percussion",
+              "urn:tag:instrument:qloo:sampler",
+              "urn:tag:instrument:qloo:programming",
+              "urn:tag:theme:qloo:loss",
+              "urn:tag:theme:qloo:nostalgia",
+              "urn:tag:theme:qloo:isolation",
+              "urn:tag:theme:qloo:memory",
+              "urn:tag:theme:qloo:love",
+              "urn:tag:genre:qloo:classical",
+              "urn:tag:genre:qloo:instrumental",
+              "urn:tag:subgenre:qloo:minimal",
+              "urn:tag:subgenre:qloo:soundtrack",
+              "urn:tag:subgenre:qloo:chamber_music",
+              "urn:tag:subgenre:qloo:ambient_pop"
+            ],
+            "tagNames": {
+              "urn:tag:audience:qloo:devoted": "Devoted",
+              "urn:tag:style:qloo:minimalist": "Minimalist",
+              "urn:tag:influenced_by:qloo:max_richter": "Max Richter",
+              "urn:tag:instrument:qloo:synthesizers": "Synthesizers",
+              "urn:tag:theme:qloo:introspection": "Introspection",
+              "urn:tag:influence:qloo:neo_classical": "Neo-Classical",
+              "urn:tag:theme:qloo:emotions": "Emotions",
+              "urn:tag:theme:qloo:melancholy": "Melancholy",
+              "urn:tag:style:qloo:minimalistic": "Minimalistic",
+              "urn:tag:genre:qloo:ambient": "Ambient",
+              "urn:tag:style:qloo:expressive": "Expressive",
+              "urn:tag:style:qloo:atmospheric": "Atmospheric",
+              "urn:tag:influenced_by:qloo:sigur_ros": "Sigur Ros",
+              "urn:tag:artist:qloo:minimalistic": "Minimalistic",
+              "urn:tag:audience:qloo:reflective": "Reflective",
+              "urn:tag:influence:qloo:contemporary_classical": "Contemporary Classical",
+              "urn:tag:music:qloo:minimalistic": "Minimalistic",
+              "urn:tag:artist:qloo:atmospheric": "Atmospheric",
+              "urn:tag:theme:qloo:nature": "Nature",
+              "urn:tag:artist:qloo:cinematic": "Cinematic",
+              "urn:tag:style:qloo:cinematic": "Cinematic",
+              "urn:tag:influenced_by:qloo:brian_eno": "Brian Eno",
+              "urn:tag:genre:qloo:neo_classical": "Neo-Classical",
+              "urn:tag:influence:qloo:electronic": "Electronic",
+              "urn:tag:instrument:qloo:drums": "Drums",
+              "urn:tag:subgenre:qloo:electronic": "Electronic",
+              "urn:tag:subgenre:qloo:minimalism": "Minimalism",
+              "urn:tag:instrument:qloo:loops": "Loops",
+              "urn:tag:artist:qloo:emotive": "Emotive",
+              "urn:tag:style:qloo:intimate": "Intimate",
+              "urn:tag:audience:qloo:introspective": "Introspective",
+              "urn:tag:subgenre:qloo:post_rock": "Post Rock",
+              "urn:tag:audience:qloo:appreciative": "Appreciative",
+              "urn:tag:music:qloo:cinematic": "Cinematic",
+              "urn:tag:style:qloo:neo_classical": "Neo-Classical",
+              "urn:tag:obscurity:qloo:3": "3",
+              "urn:tag:style:qloo:ambient": "Ambient",
+              "urn:tag:instrument:qloo:strings": "Strings",
+              "urn:tag:instrument:qloo:piano": "Piano",
+              "urn:tag:influenced_by:qloo:philip_glass": "Philip Glass",
+              "urn:tag:music:qloo:atmospheric": "Atmospheric",
+              "urn:tag:influence:qloo:ambient": "Ambient",
+              "urn:tag:style:qloo:electronic_infused": "Electronic Infused",
+              "urn:tag:genre:qloo:contemporary_classical": "Contemporary Classical",
+              "urn:tag:artist:qloo:innovative": "Innovative",
+              "urn:tag:audience:qloo:cultured": "Cultured",
+              "urn:tag:audience:qloo:atmosphere_seeking": "Atmosphere-Seeking",
+              "urn:tag:audience:qloo:emotionally_attuned": "Emotionally Attuned",
+              "urn:tag:music:qloo:minimalist": "Minimalist",
+              "urn:tag:music:qloo:ethereal": "Ethereal",
+              "urn:tag:music:qloo:melancholic": "Melancholic",
+              "urn:tag:music:qloo:textural": "Textural",
+              "urn:tag:music:qloo:lush": "Lush",
+              "urn:tag:music:qloo:intimate": "Intimate",
+              "urn:tag:style:qloo:immersive": "Immersive",
+              "urn:tag:style:qloo:precise": "Precise",
+              "urn:tag:style:qloo:minimal": "Minimal",
+              "urn:tag:style:qloo:emotive": "Emotive",
+              "urn:tag:style:qloo:interactive": "Interactive",
+              "urn:tag:artist:qloo:minimal": "Minimal",
+              "urn:tag:artist:qloo:melancholic": "Melancholic",
+              "urn:tag:artist:qloo:ethereal": "Ethereal",
+              "urn:tag:artist:qloo:intimate": "Intimate",
+              "urn:tag:artist:qloo:textural": "Textural",
+              "urn:tag:complexity_scale:qloo:6": "6",
+              "urn:tag:style:qloo:neo_classical_piano_based": "Neo-Classical Piano-Based",
+              "urn:tag:style:qloo:ambient_chamber_music": "Ambient Chamber Music",
+              "urn:tag:style:qloo:electro_acoustic_minimalism": "Electro-Acoustic Minimalism",
+              "urn:tag:style:qloo:cinematic_post_classical": "Cinematic Post-Classical",
+              "urn:tag:style:qloo:loop_driven_minimalism": "Loop-Driven Minimalism",
+              "urn:tag:influence:qloo:post_classical": "Post-Classical",
+              "urn:tag:influence:qloo:electro_acoustic": "Electro-Acoustic",
+              "urn:tag:influenced_by:qloo:arvo_part": "Arvo Pärt",
+              "urn:tag:influenced_by:qloo:ryuichi_sakamoto": "Ryuichi Sakamoto",
+              "urn:tag:influenced_by:qloo:icelandic_post_rock_tradition": "Icelandic Post-Rock Tradition",
+              "urn:tag:instrument:qloo:violin": "Violin",
+              "urn:tag:instrument:qloo:cello": "Cello",
+              "urn:tag:instrument:qloo:guitar": "Guitar",
+              "urn:tag:instrument:qloo:synthesizer": "Synthesizer",
+              "urn:tag:instrument:qloo:electronics": "Electronics",
+              "urn:tag:instrument:qloo:percussion": "Percussion",
+              "urn:tag:instrument:qloo:sampler": "Sampler",
+              "urn:tag:instrument:qloo:programming": "Programming",
+              "urn:tag:theme:qloo:loss": "Loss",
+              "urn:tag:theme:qloo:nostalgia": "Nostalgia",
+              "urn:tag:theme:qloo:isolation": "Isolation",
+              "urn:tag:theme:qloo:memory": "Memory",
+              "urn:tag:theme:qloo:love": "Love",
+              "urn:tag:genre:qloo:classical": "Classical",
+              "urn:tag:genre:qloo:instrumental": "Instrumental",
+              "urn:tag:subgenre:qloo:minimal": "Minimal",
+              "urn:tag:subgenre:qloo:soundtrack": "Soundtrack",
+              "urn:tag:subgenre:qloo:chamber_music": "Chamber Music",
+              "urn:tag:subgenre:qloo:ambient_pop": "Ambient Pop"
+            }
+          },
+          {
+            "entityId": "70BE1CE0-6D03-4125-BF8F-F538A9449F86",
+            "name": "Peter Broderick",
+            "affinity": 0.7505056267755567,
+            "affinitySource": "query",
+            "backfill": false,
+            "tags": [
+              "urn:tag:instrument:qloo:cello",
+              "urn:tag:influence:qloo:neoclassical",
+              "urn:tag:influenced_by:qloo:erik_satie",
+              "urn:tag:style:qloo:minimalist",
+              "urn:tag:style:qloo:experimental_minimalism",
+              "urn:tag:artist:qloo:emotive",
+              "urn:tag:instrument:qloo:guitar",
+              "urn:tag:genre:qloo:folk",
+              "urn:tag:instrument:qloo:flute",
+              "urn:tag:genre:qloo:indie_folk",
+              "urn:tag:style:qloo:atmospheric",
+              "urn:tag:artist:qloo:contemporary",
+              "urn:tag:artist:qloo:delicate",
+              "urn:tag:artist:qloo:experimental",
+              "urn:tag:genre:music:modern_classic",
+              "urn:tag:audience:qloo:introspective",
+              "urn:tag:music:qloo:experimental",
+              "urn:tag:instrument:qloo:violin",
+              "urn:tag:style:qloo:ambient_chamber",
+              "urn:tag:influenced_by:qloo:nick_drake",
+              "urn:tag:influenced_by:qloo:john_cage",
+              "urn:tag:genre:qloo:contemporary_classical",
+              "urn:tag:artist:qloo:multi_instrumentalist",
+              "urn:tag:subgenre:qloo:experimental",
+              "urn:tag:genre:music:piano",
+              "urn:tag:genre:music:ambient",
+              "urn:tag:influenced_by:qloo:brian_eno",
+              "urn:tag:audience:qloo:open_minded",
+              "urn:tag:theme:qloo:love",
+              "urn:tag:influence:qloo:experimental_folk",
+              "urn:tag:audience:qloo:thoughtful",
+              "urn:tag:theme:qloo:melancholy",
+              "urn:tag:style:qloo:introspective_soundscape",
+              "urn:tag:subgenre:qloo:neoclassical",
+              "urn:tag:style:qloo:intimate",
+              "urn:tag:genre:music:minimalism",
+              "urn:tag:theme:qloo:nature",
+              "urn:tag:subgenre:qloo:ambient",
+              "urn:tag:instrument:qloo:piano",
+              "urn:tag:music:qloo:atmospheric",
+              "urn:tag:obscurity:qloo:5",
+              "urn:tag:style:qloo:neoclassical_folk",
+              "urn:tag:theme:qloo:introspection",
+              "urn:tag:influence:qloo:ambient_folk",
+              "urn:tag:style:qloo:expressive",
+              "urn:tag:style:qloo:contemporary_acoustic",
+              "urn:tag:genre:music:contemporary_classical",
+              "urn:tag:instrument:qloo:vocals",
+              "urn:tag:theme:qloo:existentialism",
+              "urn:tag:audience:qloo:artistic",
+              "urn:tag:audience:qloo:appreciative",
+              "urn:tag:music:qloo:emotive",
+              "urn:tag:music:qloo:delicate",
+              "urn:tag:music:qloo:introspective"
+            ],
+            "tagNames": {
+              "urn:tag:instrument:qloo:cello": "Cello",
+              "urn:tag:influence:qloo:neoclassical": "Neoclassical",
+              "urn:tag:influenced_by:qloo:erik_satie": "Erik Satie",
+              "urn:tag:style:qloo:minimalist": "Minimalist",
+              "urn:tag:style:qloo:experimental_minimalism": "Experimental Minimalism",
+              "urn:tag:artist:qloo:emotive": "Emotive",
+              "urn:tag:instrument:qloo:guitar": "Guitar",
+              "urn:tag:genre:qloo:folk": "Folk",
+              "urn:tag:instrument:qloo:flute": "Flute",
+              "urn:tag:genre:qloo:indie_folk": "Indie Folk",
+              "urn:tag:style:qloo:atmospheric": "Atmospheric",
+              "urn:tag:artist:qloo:contemporary": "Contemporary",
+              "urn:tag:artist:qloo:delicate": "Delicate",
+              "urn:tag:artist:qloo:experimental": "Experimental",
+              "urn:tag:genre:music:modern_classic": "Modern Classic",
+              "urn:tag:audience:qloo:introspective": "Introspective",
+              "urn:tag:music:qloo:experimental": "Experimental",
+              "urn:tag:instrument:qloo:violin": "Violin",
+              "urn:tag:style:qloo:ambient_chamber": "Ambient Chamber",
+              "urn:tag:influenced_by:qloo:nick_drake": "Nick Drake",
+              "urn:tag:influenced_by:qloo:john_cage": "John Cage",
+              "urn:tag:genre:qloo:contemporary_classical": "Contemporary Classical",
+              "urn:tag:artist:qloo:multi_instrumentalist": "Multi-Instrumentalist",
+              "urn:tag:subgenre:qloo:experimental": "Experimental",
+              "urn:tag:genre:music:piano": "Piano",
+              "urn:tag:genre:music:ambient": "Ambient",
+              "urn:tag:influenced_by:qloo:brian_eno": "Brian Eno",
+              "urn:tag:audience:qloo:open_minded": "Open-Minded",
+              "urn:tag:theme:qloo:love": "Love",
+              "urn:tag:influence:qloo:experimental_folk": "Experimental Folk",
+              "urn:tag:audience:qloo:thoughtful": "Thoughtful",
+              "urn:tag:theme:qloo:melancholy": "Melancholy",
+              "urn:tag:style:qloo:introspective_soundscape": "Introspective Soundscape",
+              "urn:tag:subgenre:qloo:neoclassical": "Neoclassical",
+              "urn:tag:style:qloo:intimate": "Intimate",
+              "urn:tag:genre:music:minimalism": "Minimalism",
+              "urn:tag:theme:qloo:nature": "Nature",
+              "urn:tag:subgenre:qloo:ambient": "Ambient",
+              "urn:tag:instrument:qloo:piano": "Piano",
+              "urn:tag:music:qloo:atmospheric": "Atmospheric",
+              "urn:tag:obscurity:qloo:5": "5",
+              "urn:tag:style:qloo:neoclassical_folk": "Neoclassical Folk",
+              "urn:tag:theme:qloo:introspection": "Introspection",
+              "urn:tag:influence:qloo:ambient_folk": "Ambient Folk",
+              "urn:tag:style:qloo:expressive": "Expressive",
+              "urn:tag:style:qloo:contemporary_acoustic": "Contemporary Acoustic",
+              "urn:tag:genre:music:contemporary_classical": "Contemporary Classical",
+              "urn:tag:instrument:qloo:vocals": "Vocals",
+              "urn:tag:theme:qloo:existentialism": "Existentialism",
+              "urn:tag:audience:qloo:artistic": "Artistic",
+              "urn:tag:audience:qloo:appreciative": "Appreciative",
+              "urn:tag:music:qloo:emotive": "Emotive",
+              "urn:tag:music:qloo:delicate": "Delicate",
+              "urn:tag:music:qloo:introspective": "Introspective"
+            }
+          },
+          {
+            "entityId": "3691C25A-CE18-44CA-8DEE-A19579FC37E5",
+            "name": "Luke Howard",
+            "affinity": 0.7516331427171747,
+            "affinitySource": "query",
+            "backfill": false,
+            "tags": [
+              "urn:tag:influence:qloo:ambient",
+              "urn:tag:genre:qloo:instrumental",
+              "urn:tag:style:qloo:minimalist_piano",
+              "urn:tag:audience:qloo:calm",
+              "urn:tag:influence:qloo:minimalism",
+              "urn:tag:audience:qloo:thoughtful",
+              "urn:tag:obscurity:qloo:4",
+              "urn:tag:genre:music:modern_classical",
+              "urn:tag:artist:qloo:contemporary",
+              "urn:tag:artist:qloo:instrumental",
+              "urn:tag:influenced_by:qloo:philip_glass",
+              "urn:tag:music:qloo:instrumental",
+              "urn:tag:influence:qloo:contemporary_classical",
+              "urn:tag:artist:qloo:atmospheric",
+              "urn:tag:music:qloo:contemporary",
+              "urn:tag:artist:qloo:minimalistic",
+              "urn:tag:genre:music:neoclassical",
+              "urn:tag:genre:music:piano",
+              "urn:tag:style:qloo:expressive",
+              "urn:tag:audience:qloo:reflective",
+              "urn:tag:audience:qloo:appreciative",
+              "urn:tag:music:qloo:minimalistic",
+              "urn:tag:artist:qloo:emotive",
+              "urn:tag:genre:qloo:modern_classical",
+              "urn:tag:subgenre:qloo:ambient",
+              "urn:tag:style:qloo:intimate",
+              "urn:tag:style:qloo:ambient_soundscape",
+              "urn:tag:influenced_by:qloo:ludovico_einaudi",
+              "urn:tag:style:qloo:reflective",
+              "urn:tag:genre:qloo:contemporary_classical",
+              "urn:tag:music:qloo:atmospheric",
+              "urn:tag:instrument:qloo:piano",
+              "urn:tag:style:qloo:instrumental_storytelling",
+              "urn:tag:subgenre:qloo:post_rock",
+              "urn:tag:genre:music:contemporary_classical",
+              "urn:tag:influenced_by:qloo:max_richter",
+              "urn:tag:style:qloo:contemporary_classical",
+              "urn:tag:subgenre:qloo:minimalism",
+              "urn:tag:style:qloo:emotive_composition",
+              "urn:tag:music:qloo:emotive"
+            ],
+            "tagNames": {
+              "urn:tag:influence:qloo:ambient": "Ambient",
+              "urn:tag:genre:qloo:instrumental": "Instrumental",
+              "urn:tag:style:qloo:minimalist_piano": "Minimalist Piano",
+              "urn:tag:audience:qloo:calm": "Calm",
+              "urn:tag:influence:qloo:minimalism": "Minimalism",
+              "urn:tag:audience:qloo:thoughtful": "Thoughtful",
+              "urn:tag:obscurity:qloo:4": "4",
+              "urn:tag:genre:music:modern_classical": "Modern Classical",
+              "urn:tag:artist:qloo:contemporary": "Contemporary",
+              "urn:tag:artist:qloo:instrumental": "Instrumental",
+              "urn:tag:influenced_by:qloo:philip_glass": "Philip Glass",
+              "urn:tag:music:qloo:instrumental": "Instrumental",
+              "urn:tag:influence:qloo:contemporary_classical": "Contemporary Classical",
+              "urn:tag:artist:qloo:atmospheric": "Atmospheric",
+              "urn:tag:music:qloo:contemporary": "Contemporary",
+              "urn:tag:artist:qloo:minimalistic": "Minimalistic",
+              "urn:tag:genre:music:neoclassical": "Neoclassical",
+              "urn:tag:genre:music:piano": "Piano",
+              "urn:tag:style:qloo:expressive": "Expressive",
+              "urn:tag:audience:qloo:reflective": "Reflective",
+              "urn:tag:audience:qloo:appreciative": "Appreciative",
+              "urn:tag:music:qloo:minimalistic": "Minimalistic",
+              "urn:tag:artist:qloo:emotive": "Emotive",
+              "urn:tag:genre:qloo:modern_classical": "Modern Classical",
+              "urn:tag:subgenre:qloo:ambient": "Ambient",
+              "urn:tag:style:qloo:intimate": "Intimate",
+              "urn:tag:style:qloo:ambient_soundscape": "Ambient Soundscape",
+              "urn:tag:influenced_by:qloo:ludovico_einaudi": "Ludovico Einaudi",
+              "urn:tag:style:qloo:reflective": "Reflective",
+              "urn:tag:genre:qloo:contemporary_classical": "Contemporary Classical",
+              "urn:tag:music:qloo:atmospheric": "Atmospheric",
+              "urn:tag:instrument:qloo:piano": "Piano",
+              "urn:tag:style:qloo:instrumental_storytelling": "Instrumental Storytelling",
+              "urn:tag:subgenre:qloo:post_rock": "Post Rock",
+              "urn:tag:genre:music:contemporary_classical": "Contemporary Classical",
+              "urn:tag:influenced_by:qloo:max_richter": "Max Richter",
+              "urn:tag:style:qloo:contemporary_classical": "Contemporary Classical",
+              "urn:tag:subgenre:qloo:minimalism": "Minimalism",
+              "urn:tag:style:qloo:emotive_composition": "Emotive Composition",
+              "urn:tag:music:qloo:emotive": "Emotive"
+            }
+          },
+          {
+            "entityId": "0704ADB9-6270-4D71-B252-A42D8A4EAA47",
+            "name": "Max Richter",
+            "affinity": 0.7502530949599262,
+            "affinitySource": "query",
+            "backfill": false,
+            "tags": [
+              "urn:tag:genre:music:neoclassical",
+              "urn:tag:artist:qloo:innovative",
+              "urn:tag:influence:qloo:contemporary_classical",
+              "urn:tag:artist:qloo:atmospheric",
+              "urn:tag:genre:music:electronic",
+              "urn:tag:music:qloo:atmospheric",
+              "urn:tag:instrument:qloo:electronics",
+              "urn:tag:genre:music:ambient",
+              "urn:tag:audience:qloo:thoughtful",
+              "urn:tag:audience:qloo:introspective",
+              "urn:tag:artist:qloo:minimalist",
+              "urn:tag:influence:qloo:ambient",
+              "urn:tag:theme:qloo:memory",
+              "urn:tag:genre:music:contemporary_classical",
+              "urn:tag:subgenre:qloo:electronic",
+              "urn:tag:style:qloo:contemporary_classical",
+              "urn:tag:subgenre:qloo:ambient",
+              "urn:tag:influenced_by:qloo:arvo_part",
+              "urn:tag:style:qloo:reflective",
+              "urn:tag:artist:qloo:emotive",
+              "urn:tag:audience:qloo:cultured",
+              "urn:tag:style:qloo:electro_acoustic",
+              "urn:tag:style:qloo:ambient",
+              "urn:tag:instrument:qloo:piano",
+              "urn:tag:style:qloo:neoclassical",
+              "urn:tag:theme:qloo:loss",
+              "urn:tag:music:qloo:cinematic",
+              "urn:tag:theme:qloo:existentialism",
+              "urn:tag:influenced_by:qloo:philip_glass",
+              "urn:tag:influenced_by:qloo:brian_eno",
+              "urn:tag:influence:qloo:neoclassical",
+              "urn:tag:influenced_by:qloo:steve_reich",
+              "urn:tag:audience:qloo:appreciative",
+              "urn:tag:music:qloo:minimalist",
+              "urn:tag:theme:qloo:nature",
+              "urn:tag:style:qloo:expressive",
+              "urn:tag:style:qloo:post_minimalist",
+              "urn:tag:subgenre:qloo:post_minimalism",
+              "urn:tag:genre:qloo:minimalism",
+              "urn:tag:artist:qloo:cinematic",
+              "urn:tag:obscurity:qloo:3",
+              "urn:tag:theme:qloo:time",
+              "urn:tag:genre:music:classical",
+              "urn:tag:genre:qloo:neoclassical",
+              "urn:tag:genre:qloo:contemporary_classical",
+              "urn:tag:instrument:qloo:synthesizer",
+              "urn:tag:style:qloo:intimate",
+              "urn:tag:audience:qloo:devoted",
+              "urn:tag:audience:qloo:contemplative",
+              "urn:tag:audience:qloo:loyal",
+              "urn:tag:music:qloo:ambient",
+              "urn:tag:music:qloo:melancholic",
+              "urn:tag:music:qloo:lyrical",
+              "urn:tag:music:qloo:textured",
+              "urn:tag:music:qloo:introspective",
+              "urn:tag:style:qloo:minimalist",
+              "urn:tag:style:qloo:restrained",
+              "urn:tag:style:qloo:cinematic",
+              "urn:tag:style:qloo:immersive",
+              "urn:tag:artist:qloo:lyrical",
+              "urn:tag:artist:qloo:hypnotic",
+              "urn:tag:artist:qloo:introspective",
+              "urn:tag:artist:qloo:melancholic",
+              "urn:tag:artist:qloo:textured",
+              "urn:tag:artist:qloo:contemporary",
+              "urn:tag:artist:qloo:immersive",
+              "urn:tag:complexity_scale:qloo:6",
+              "urn:tag:style:qloo:post_minimal_cinematic",
+              "urn:tag:style:qloo:ambient_orchestral",
+              "urn:tag:style:qloo:neo_classical_minimalism",
+              "urn:tag:style:qloo:electronica_infused_chamber",
+              "urn:tag:style:qloo:long_form_ambient",
+              "urn:tag:influence:qloo:post_minimalism",
+              "urn:tag:influence:qloo:modern_classical",
+              "urn:tag:influence:qloo:contemporary_soundtrack",
+              "urn:tag:influenced_by:qloo:john_cage",
+              "urn:tag:influenced_by:qloo:minimalism",
+              "urn:tag:instrument:qloo:sampler",
+              "urn:tag:instrument:qloo:keyboard",
+              "urn:tag:theme:qloo:nostalgia",
+              "urn:tag:theme:qloo:sleep",
+              "urn:tag:theme:qloo:introspection",
+              "urn:tag:genre:qloo:classical",
+              "urn:tag:genre:qloo:ambient",
+              "urn:tag:genre:qloo:electronic",
+              "urn:tag:subgenre:qloo:minimalism",
+              "urn:tag:subgenre:qloo:modern_classical",
+              "urn:tag:subgenre:qloo:soundtrack",
+              "urn:tag:subgenre:qloo:ambient_electronic"
+            ],
+            "tagNames": {
+              "urn:tag:genre:music:neoclassical": "Neoclassical",
+              "urn:tag:artist:qloo:innovative": "Innovative",
+              "urn:tag:influence:qloo:contemporary_classical": "Contemporary Classical",
+              "urn:tag:artist:qloo:atmospheric": "Atmospheric",
+              "urn:tag:genre:music:electronic": "Electronic",
+              "urn:tag:music:qloo:atmospheric": "Atmospheric",
+              "urn:tag:instrument:qloo:electronics": "Electronics",
+              "urn:tag:genre:music:ambient": "Ambient",
+              "urn:tag:audience:qloo:thoughtful": "Thoughtful",
+              "urn:tag:audience:qloo:introspective": "Introspective",
+              "urn:tag:artist:qloo:minimalist": "Minimalist",
+              "urn:tag:influence:qloo:ambient": "Ambient",
+              "urn:tag:theme:qloo:memory": "Memory",
+              "urn:tag:genre:music:contemporary_classical": "Contemporary Classical",
+              "urn:tag:subgenre:qloo:electronic": "Electronic",
+              "urn:tag:style:qloo:contemporary_classical": "Contemporary Classical",
+              "urn:tag:subgenre:qloo:ambient": "Ambient",
+              "urn:tag:influenced_by:qloo:arvo_part": "Arvo Part",
+              "urn:tag:style:qloo:reflective": "Reflective",
+              "urn:tag:artist:qloo:emotive": "Emotive",
+              "urn:tag:audience:qloo:cultured": "Cultured",
+              "urn:tag:style:qloo:electro_acoustic": "Electro-Acoustic",
+              "urn:tag:style:qloo:ambient": "Ambient",
+              "urn:tag:instrument:qloo:piano": "Piano",
+              "urn:tag:style:qloo:neoclassical": "Neoclassical",
+              "urn:tag:theme:qloo:loss": "Loss",
+              "urn:tag:music:qloo:cinematic": "Cinematic",
+              "urn:tag:theme:qloo:existentialism": "Existentialism",
+              "urn:tag:influenced_by:qloo:philip_glass": "Philip Glass",
+              "urn:tag:influenced_by:qloo:brian_eno": "Brian Eno",
+              "urn:tag:influence:qloo:neoclassical": "Neoclassical",
+              "urn:tag:influenced_by:qloo:steve_reich": "Steve Reich",
+              "urn:tag:audience:qloo:appreciative": "Appreciative",
+              "urn:tag:music:qloo:minimalist": "Minimalist",
+              "urn:tag:theme:qloo:nature": "Nature",
+              "urn:tag:style:qloo:expressive": "Expressive",
+              "urn:tag:style:qloo:post_minimalist": "Post-Minimalist",
+              "urn:tag:subgenre:qloo:post_minimalism": "Post-Minimalism",
+              "urn:tag:genre:qloo:minimalism": "Minimalism",
+              "urn:tag:artist:qloo:cinematic": "Cinematic",
+              "urn:tag:obscurity:qloo:3": "3",
+              "urn:tag:theme:qloo:time": "Time",
+              "urn:tag:genre:music:classical": "Classical",
+              "urn:tag:genre:qloo:neoclassical": "Neoclassical",
+              "urn:tag:genre:qloo:contemporary_classical": "Contemporary Classical",
+              "urn:tag:instrument:qloo:synthesizer": "Synthesizer",
+              "urn:tag:style:qloo:intimate": "Intimate",
+              "urn:tag:audience:qloo:devoted": "Devoted",
+              "urn:tag:audience:qloo:contemplative": "Contemplative",
+              "urn:tag:audience:qloo:loyal": "Loyal",
+              "urn:tag:music:qloo:ambient": "Ambient",
+              "urn:tag:music:qloo:melancholic": "Melancholic",
+              "urn:tag:music:qloo:lyrical": "Lyrical",
+              "urn:tag:music:qloo:textured": "Textured",
+              "urn:tag:music:qloo:introspective": "Introspective",
+              "urn:tag:style:qloo:minimalist": "Minimalist",
+              "urn:tag:style:qloo:restrained": "Restrained",
+              "urn:tag:style:qloo:cinematic": "Cinematic",
+              "urn:tag:style:qloo:immersive": "Immersive",
+              "urn:tag:artist:qloo:lyrical": "Lyrical",
+              "urn:tag:artist:qloo:hypnotic": "Hypnotic",
+              "urn:tag:artist:qloo:introspective": "Introspective",
+              "urn:tag:artist:qloo:melancholic": "Melancholic",
+              "urn:tag:artist:qloo:textured": "Textured",
+              "urn:tag:artist:qloo:contemporary": "Contemporary",
+              "urn:tag:artist:qloo:immersive": "Immersive",
+              "urn:tag:complexity_scale:qloo:6": "6",
+              "urn:tag:style:qloo:post_minimal_cinematic": "Post-Minimal Cinematic",
+              "urn:tag:style:qloo:ambient_orchestral": "Ambient-Orchestral",
+              "urn:tag:style:qloo:neo_classical_minimalism": "Neo-Classical Minimalism",
+              "urn:tag:style:qloo:electronica_infused_chamber": "Electronica-Infused Chamber",
+              "urn:tag:style:qloo:long_form_ambient": "Long-Form Ambient",
+              "urn:tag:influence:qloo:post_minimalism": "Post-Minimalism",
+              "urn:tag:influence:qloo:modern_classical": "Modern Classical",
+              "urn:tag:influence:qloo:contemporary_soundtrack": "Contemporary Soundtrack",
+              "urn:tag:influenced_by:qloo:john_cage": "John Cage",
+              "urn:tag:influenced_by:qloo:minimalism": "Minimalism",
+              "urn:tag:instrument:qloo:sampler": "Sampler",
+              "urn:tag:instrument:qloo:keyboard": "Keyboard",
+              "urn:tag:theme:qloo:nostalgia": "Nostalgia",
+              "urn:tag:theme:qloo:sleep": "Sleep",
+              "urn:tag:theme:qloo:introspection": "Introspection",
+              "urn:tag:genre:qloo:classical": "Classical",
+              "urn:tag:genre:qloo:ambient": "Ambient",
+              "urn:tag:genre:qloo:electronic": "Electronic",
+              "urn:tag:subgenre:qloo:minimalism": "Minimalism",
+              "urn:tag:subgenre:qloo:modern_classical": "Modern Classical",
+              "urn:tag:subgenre:qloo:soundtrack": "Soundtrack",
+              "urn:tag:subgenre:qloo:ambient_electronic": "Ambient Electronic"
+            }
+          },
+          {
+            "entityId": "96622046-633B-4AF9-A985-EA61AD0B3672",
+            "name": "Ben Lukas Boysen",
+            "affinity": 0.7484689789989782,
+            "affinitySource": "query",
+            "backfill": false,
+            "tags": [
+              "urn:tag:genre:qloo:ambient",
+              "urn:tag:subgenre:qloo:techno",
+              "urn:tag:artist:qloo:emotive",
+              "urn:tag:style:qloo:immersive",
+              "urn:tag:artist:qloo:atmospheric",
+              "urn:tag:influence:qloo:ambient",
+              "urn:tag:artist:qloo:ambient",
+              "urn:tag:style:qloo:soundscape",
+              "urn:tag:instrument:qloo:computer",
+              "urn:tag:influence:qloo:contemporary_classical",
+              "urn:tag:influenced_by:qloo:aphex_twin",
+              "urn:tag:genre:music:drone",
+              "urn:tag:genre:music:ambient",
+              "urn:tag:instrument:qloo:synthesizer",
+              "urn:tag:music:qloo:ambient",
+              "urn:tag:subgenre:qloo:contemporary_classical",
+              "urn:tag:artist:qloo:intricate",
+              "urn:tag:audience:qloo:open_minded",
+              "urn:tag:music:qloo:atmospheric",
+              "urn:tag:style:qloo:idm",
+              "urn:tag:influenced_by:qloo:brian_eno",
+              "urn:tag:genre:music:dark_ambient",
+              "urn:tag:genre:music:contemporary_classical",
+              "urn:tag:genre:qloo:experimental",
+              "urn:tag:audience:qloo:appreciative",
+              "urn:tag:artist:qloo:experimental",
+              "urn:tag:subgenre:qloo:idm",
+              "urn:tag:style:qloo:introspective",
+              "urn:tag:influenced_by:qloo:autechre",
+              "urn:tag:genre:music:idm",
+              "urn:tag:instrument:qloo:sampler",
+              "urn:tag:instrument:qloo:piano",
+              "urn:tag:style:qloo:minimalist",
+              "urn:tag:style:qloo:contemporary_classical",
+              "urn:tag:style:qloo:ambient_techno",
+              "urn:tag:style:qloo:glitch_ambient",
+              "urn:tag:obscurity:qloo:4",
+              "urn:tag:audience:qloo:reflective",
+              "urn:tag:genre:qloo:electronic",
+              "urn:tag:influence:qloo:electronic",
+              "urn:tag:music:qloo:experimental",
+              "urn:tag:music:qloo:emotive",
+              "urn:tag:music:qloo:intricate"
+            ],
+            "tagNames": {
+              "urn:tag:genre:qloo:ambient": "Ambient",
+              "urn:tag:subgenre:qloo:techno": "Techno",
+              "urn:tag:artist:qloo:emotive": "Emotive",
+              "urn:tag:style:qloo:immersive": "Immersive",
+              "urn:tag:artist:qloo:atmospheric": "Atmospheric",
+              "urn:tag:influence:qloo:ambient": "Ambient",
+              "urn:tag:artist:qloo:ambient": "Ambient",
+              "urn:tag:style:qloo:soundscape": "Soundscape",
+              "urn:tag:instrument:qloo:computer": "Computer",
+              "urn:tag:influence:qloo:contemporary_classical": "Contemporary Classical",
+              "urn:tag:influenced_by:qloo:aphex_twin": "Aphex Twin",
+              "urn:tag:genre:music:drone": "Drone",
+              "urn:tag:genre:music:ambient": "Ambient",
+              "urn:tag:instrument:qloo:synthesizer": "Synthesizer",
+              "urn:tag:music:qloo:ambient": "Ambient",
+              "urn:tag:subgenre:qloo:contemporary_classical": "Contemporary Classical",
+              "urn:tag:artist:qloo:intricate": "Intricate",
+              "urn:tag:audience:qloo:open_minded": "Open-Minded",
+              "urn:tag:music:qloo:atmospheric": "Atmospheric",
+              "urn:tag:style:qloo:idm": "IDM",
+              "urn:tag:influenced_by:qloo:brian_eno": "Brian Eno",
+              "urn:tag:genre:music:dark_ambient": "Dark Ambient",
+              "urn:tag:genre:music:contemporary_classical": "Contemporary Classical",
+              "urn:tag:genre:qloo:experimental": "Experimental",
+              "urn:tag:audience:qloo:appreciative": "Appreciative",
+              "urn:tag:artist:qloo:experimental": "Experimental",
+              "urn:tag:subgenre:qloo:idm": "IDM",
+              "urn:tag:style:qloo:introspective": "Introspective",
+              "urn:tag:influenced_by:qloo:autechre": "Autechre",
+              "urn:tag:genre:music:idm": "Idm",
+              "urn:tag:instrument:qloo:sampler": "Sampler",
+              "urn:tag:instrument:qloo:piano": "Piano",
+              "urn:tag:style:qloo:minimalist": "Minimalist",
+              "urn:tag:style:qloo:contemporary_classical": "Contemporary Classical",
+              "urn:tag:style:qloo:ambient_techno": "Ambient Techno",
+              "urn:tag:style:qloo:glitch_ambient": "Glitch Ambient",
+              "urn:tag:obscurity:qloo:4": "4",
+              "urn:tag:audience:qloo:reflective": "Reflective",
+              "urn:tag:genre:qloo:electronic": "Electronic",
+              "urn:tag:influence:qloo:electronic": "Electronic",
+              "urn:tag:music:qloo:experimental": "Experimental",
+              "urn:tag:music:qloo:emotive": "Emotive",
+              "urn:tag:music:qloo:intricate": "Intricate"
+            }
+          }
+        ],
+        "coverage": {
+          "index": 96.7741935483871,
+          "coveredTags": 120,
+          "vocabularySize": 124,
+          "redundancy": 0.2424482016161642,
+          "mostSimilarPair": {
+            "a": "Ólafur Arnalds",
+            "b": "Max Richter",
+            "overlap": 0.47126436781609193
+          },
+          "gaps": [
+            {
+              "tag": "Cinematic Soundscape",
+              "reachableBy": [
+                "Goldmund",
+                "Greg Haines"
+              ]
+            },
+            {
+              "tag": "Contemporary",
+              "reachableBy": [
+                "Joep Beving",
+                "Niklas Paschburg"
+              ]
+            },
+            {
+              "tag": "Melodic",
+              "reachableBy": [
+                "Joep Beving",
+                "Sebastian Plano"
+              ]
+            },
+            {
+              "tag": "Melodic",
+              "reachableBy": [
+                "Joep Beving",
+                "Sebastian Plano"
+              ]
+            }
+          ],
+          "poolSize": 14,
+          "entitiesMeasured": 6,
+          "audit": {
+            "numerator": 120,
+            "denominator": 124,
+            "score": 96.7741935483871,
+            "coveredDimensions": [
+              "urn:tag:artist:qloo:ambient",
+              "urn:tag:artist:qloo:atmospheric",
+              "urn:tag:artist:qloo:cinematic",
+              "urn:tag:artist:qloo:contemplative",
+              "urn:tag:artist:qloo:contemporary",
+              "urn:tag:artist:qloo:delicate",
+              "urn:tag:artist:qloo:emotional",
+              "urn:tag:artist:qloo:emotive",
+              "urn:tag:artist:qloo:ethereal",
+              "urn:tag:artist:qloo:experimental",
+              "urn:tag:artist:qloo:innovative",
+              "urn:tag:artist:qloo:instrumental",
+              "urn:tag:artist:qloo:intricate",
+              "urn:tag:artist:qloo:introspective",
+              "urn:tag:artist:qloo:melancholic",
+              "urn:tag:artist:qloo:minimalist",
+              "urn:tag:artist:qloo:minimalistic",
+              "urn:tag:audience:qloo:appreciative",
+              "urn:tag:audience:qloo:calm",
+              "urn:tag:audience:qloo:contemplative",
+              "urn:tag:audience:qloo:cultured",
+              "urn:tag:audience:qloo:devoted",
+              "urn:tag:audience:qloo:introspective",
+              "urn:tag:audience:qloo:open_minded",
+              "urn:tag:audience:qloo:reflective",
+              "urn:tag:audience:qloo:thoughtful",
+              "urn:tag:complexity_scale:qloo:6",
+              "urn:tag:genre:music:ambient",
+              "urn:tag:genre:music:contemporary_classical",
+              "urn:tag:genre:music:electronic",
+              "urn:tag:genre:music:minimalism",
+              "urn:tag:genre:music:modern_classical",
+              "urn:tag:genre:music:neoclassical",
+              "urn:tag:genre:music:piano",
+              "urn:tag:genre:music:post_classical",
+              "urn:tag:genre:qloo:ambient",
+              "urn:tag:genre:qloo:classical",
+              "urn:tag:genre:qloo:contemporary_classical",
+              "urn:tag:genre:qloo:electronic",
+              "urn:tag:genre:qloo:instrumental",
+              "urn:tag:genre:qloo:minimalism",
+              "urn:tag:genre:qloo:modern_classical",
+              "urn:tag:genre:qloo:neo_classical",
+              "urn:tag:genre:qloo:neoclassical",
+              "urn:tag:influence:qloo:ambient",
+              "urn:tag:influence:qloo:contemporary_classical",
+              "urn:tag:influence:qloo:electronic",
+              "urn:tag:influence:qloo:minimalism",
+              "urn:tag:influence:qloo:modern_classical",
+              "urn:tag:influence:qloo:neoclassical",
+              "urn:tag:influenced_by:qloo:aphex_twin",
+              "urn:tag:influenced_by:qloo:arvo_part",
+              "urn:tag:influenced_by:qloo:brian_eno",
+              "urn:tag:influenced_by:qloo:erik_satie",
+              "urn:tag:influenced_by:qloo:john_cage",
+              "urn:tag:influenced_by:qloo:ludovico_einaudi",
+              "urn:tag:influenced_by:qloo:max_richter",
+              "urn:tag:influenced_by:qloo:philip_glass",
+              "urn:tag:influenced_by:qloo:steve_reich",
+              "urn:tag:instrument:qloo:cello",
+              "urn:tag:instrument:qloo:drums",
+              "urn:tag:instrument:qloo:electronics",
+              "urn:tag:instrument:qloo:guitar",
+              "urn:tag:instrument:qloo:keyboard",
+              "urn:tag:instrument:qloo:piano",
+              "urn:tag:instrument:qloo:sampler",
+              "urn:tag:instrument:qloo:strings",
+              "urn:tag:instrument:qloo:synthesizer",
+              "urn:tag:instrument:qloo:synthesizers",
+              "urn:tag:instrument:qloo:violin",
+              "urn:tag:music:qloo:ambient",
+              "urn:tag:music:qloo:atmospheric",
+              "urn:tag:music:qloo:cinematic",
+              "urn:tag:music:qloo:contemporary",
+              "urn:tag:music:qloo:delicate",
+              "urn:tag:music:qloo:emotional",
+              "urn:tag:music:qloo:emotive",
+              "urn:tag:music:qloo:ethereal",
+              "urn:tag:music:qloo:experimental",
+              "urn:tag:music:qloo:instrumental",
+              "urn:tag:music:qloo:intricate",
+              "urn:tag:music:qloo:introspective",
+              "urn:tag:music:qloo:lush",
+              "urn:tag:music:qloo:melancholic",
+              "urn:tag:music:qloo:minimalist",
+              "urn:tag:music:qloo:minimalistic",
+              "urn:tag:obscurity:qloo:3",
+              "urn:tag:obscurity:qloo:4",
+              "urn:tag:obscurity:qloo:5",
+              "urn:tag:style:qloo:ambient",
+              "urn:tag:style:qloo:ambient_minimalism",
+              "urn:tag:style:qloo:ambient_soundscape",
+              "urn:tag:style:qloo:atmospheric",
+              "urn:tag:style:qloo:cinematic",
+              "urn:tag:style:qloo:contemporary_classical",
+              "urn:tag:style:qloo:emotive_composition",
+              "urn:tag:style:qloo:expressive",
+              "urn:tag:style:qloo:immersive",
+              "urn:tag:style:qloo:intimate",
+              "urn:tag:style:qloo:minimalist",
+              "urn:tag:style:qloo:minimalist_piano",
+              "urn:tag:style:qloo:neo_classical",
+              "urn:tag:style:qloo:neoclassical",
+              "urn:tag:style:qloo:reflective",
+              "urn:tag:style:qloo:subtle",
+              "urn:tag:subgenre:qloo:ambient",
+              "urn:tag:subgenre:qloo:electronic",
+              "urn:tag:subgenre:qloo:experimental",
+              "urn:tag:subgenre:qloo:minimalism",
+              "urn:tag:subgenre:qloo:modern_classical",
+              "urn:tag:subgenre:qloo:post_rock",
+              "urn:tag:subgenre:qloo:soundtrack",
+              "urn:tag:theme:qloo:existentialism",
+              "urn:tag:theme:qloo:introspection",
+              "urn:tag:theme:qloo:loss",
+              "urn:tag:theme:qloo:love",
+              "urn:tag:theme:qloo:melancholy",
+              "urn:tag:theme:qloo:memory",
+              "urn:tag:theme:qloo:nature",
+              "urn:tag:theme:qloo:nostalgia"
+            ],
+            "uncoveredDimensions": [
+              "urn:tag:artist:qloo:melodic",
+              "urn:tag:music:qloo:melodic",
+              "urn:tag:style:qloo:cinematic_soundscape",
+              "urn:tag:style:qloo:contemporary"
+            ],
+            "redundancy": 0.2424482016161642,
+            "mostSimilarPair": {
+              "a": "Ólafur Arnalds",
+              "b": "Max Richter",
+              "overlap": 0.47126436781609193
+            },
+            "warnings": [],
+            "valid": true,
+            "poolSize": 14,
+            "entitiesMeasured": 6,
+            "weightsUsed": "equal"
+          }
+        },
+        "indexDelta": 7.258064516129039,
+        "redundancyDelta": -0.042508598194433256,
+        "improves": true,
+        "newlyCovered": [
+          "urn:tag:artist:qloo:introspective",
+          "urn:tag:genre:music:electronic",
+          "urn:tag:genre:qloo:electronic",
+          "urn:tag:genre:qloo:minimalism",
+          "urn:tag:influenced_by:qloo:aphex_twin",
+          "urn:tag:influenced_by:qloo:john_cage",
+          "urn:tag:influenced_by:qloo:steve_reich",
+          "urn:tag:music:qloo:introspective",
+          "urn:tag:obscurity:qloo:5",
+          "urn:tag:theme:qloo:existentialism"
+        ],
+        "rationale": "Reaches 120 of 124 shared taste tags against 111, holding the slate at 6. Brings in Peter Broderick, Max Richter, Ben Lukas Boysen, in place of Goldmund, Poppy Ackroyd, A Winged Victory for the Sullen."
+      },
+      "originalEntities": [
+        {
+          "entityId": "44A7D755-C551-440C-9DF7-4B3798164F49",
+          "name": "Federico Albanese",
+          "affinity": 0.7528675202298813,
+          "affinitySource": "query",
+          "backfill": false,
+          "tags": [
+            "urn:tag:style:qloo:cinematic_piano",
+            "urn:tag:style:qloo:ambient_minimalism",
+            "urn:tag:genre:qloo:contemporary_classical",
+            "urn:tag:style:qloo:subtle",
+            "urn:tag:music:qloo:minimalist",
+            "urn:tag:music:qloo:cinematic",
+            "urn:tag:style:qloo:contemporary_classical",
+            "urn:tag:influenced_by:qloo:philip_glass",
+            "urn:tag:artist:qloo:cinematic",
+            "urn:tag:subgenre:qloo:minimalism",
+            "urn:tag:influence:qloo:neoclassical",
+            "urn:tag:instrument:qloo:synthesizer",
+            "urn:tag:genre:music:neoclassical",
+            "urn:tag:genre:music:post_classical",
+            "urn:tag:artist:qloo:contemplative",
+            "urn:tag:audience:qloo:appreciative",
+            "urn:tag:audience:qloo:contemplative",
+            "urn:tag:genre:music:contemporary_classical",
+            "urn:tag:music:qloo:emotional",
+            "urn:tag:genre:qloo:neoclassical",
+            "urn:tag:instrument:qloo:piano",
+            "urn:tag:style:qloo:expressive",
+            "urn:tag:artist:qloo:minimalist",
+            "urn:tag:influence:qloo:ambient",
+            "urn:tag:genre:music:piano",
+            "urn:tag:genre:qloo:ambient",
+            "urn:tag:subgenre:qloo:modern_classical",
+            "urn:tag:influenced_by:qloo:max_richter",
+            "urn:tag:genre:music:modern_classical",
+            "urn:tag:artist:qloo:emotional",
+            "urn:tag:influence:qloo:contemporary_classical",
+            "urn:tag:influenced_by:qloo:ludovico_einaudi",
+            "urn:tag:style:qloo:intimate",
+            "urn:tag:music:qloo:atmospheric",
+            "urn:tag:style:qloo:neoclassical",
+            "urn:tag:obscurity:qloo:4",
+            "urn:tag:audience:qloo:introspective",
+            "urn:tag:style:qloo:modern_classical",
+            "urn:tag:artist:qloo:evocative",
+            "urn:tag:music:qloo:evocative"
+          ],
+          "tagNames": {
+            "urn:tag:style:qloo:cinematic_piano": "Cinematic Piano",
+            "urn:tag:style:qloo:ambient_minimalism": "Ambient Minimalism",
+            "urn:tag:genre:qloo:contemporary_classical": "Contemporary Classical",
+            "urn:tag:style:qloo:subtle": "Subtle",
+            "urn:tag:music:qloo:minimalist": "Minimalist",
+            "urn:tag:music:qloo:cinematic": "Cinematic",
+            "urn:tag:style:qloo:contemporary_classical": "Contemporary Classical",
+            "urn:tag:influenced_by:qloo:philip_glass": "Philip Glass",
+            "urn:tag:artist:qloo:cinematic": "Cinematic",
+            "urn:tag:subgenre:qloo:minimalism": "Minimalism",
+            "urn:tag:influence:qloo:neoclassical": "Neoclassical",
+            "urn:tag:instrument:qloo:synthesizer": "Synthesizer",
+            "urn:tag:genre:music:neoclassical": "Neoclassical",
+            "urn:tag:genre:music:post_classical": "Post Classical",
+            "urn:tag:artist:qloo:contemplative": "Contemplative",
+            "urn:tag:audience:qloo:appreciative": "Appreciative",
+            "urn:tag:audience:qloo:contemplative": "Contemplative",
+            "urn:tag:genre:music:contemporary_classical": "Contemporary Classical",
+            "urn:tag:music:qloo:emotional": "Emotional",
+            "urn:tag:genre:qloo:neoclassical": "Neoclassical",
+            "urn:tag:instrument:qloo:piano": "Piano",
+            "urn:tag:style:qloo:expressive": "Expressive",
+            "urn:tag:artist:qloo:minimalist": "Minimalist",
+            "urn:tag:influence:qloo:ambient": "Ambient",
+            "urn:tag:genre:music:piano": "Piano",
+            "urn:tag:genre:qloo:ambient": "Ambient",
+            "urn:tag:subgenre:qloo:modern_classical": "Modern Classical",
+            "urn:tag:influenced_by:qloo:max_richter": "Max Richter",
+            "urn:tag:genre:music:modern_classical": "Modern Classical",
+            "urn:tag:artist:qloo:emotional": "Emotional",
+            "urn:tag:influence:qloo:contemporary_classical": "Contemporary Classical",
+            "urn:tag:influenced_by:qloo:ludovico_einaudi": "Ludovico Einaudi",
+            "urn:tag:style:qloo:intimate": "Intimate",
+            "urn:tag:music:qloo:atmospheric": "Atmospheric",
+            "urn:tag:style:qloo:neoclassical": "Neoclassical",
+            "urn:tag:obscurity:qloo:4": "4",
+            "urn:tag:audience:qloo:introspective": "Introspective",
+            "urn:tag:style:qloo:modern_classical": "Modern Classical",
+            "urn:tag:artist:qloo:evocative": "Evocative",
+            "urn:tag:music:qloo:evocative": "Evocative"
+          }
+        },
+        {
+          "entityId": "02940707-9635-45DA-B290-243F84C6B910",
+          "name": "Ólafur Arnalds",
+          "affinity": 0.7524329962697127,
+          "affinitySource": "query",
+          "backfill": false,
+          "tags": [
+            "urn:tag:audience:qloo:devoted",
+            "urn:tag:style:qloo:minimalist",
+            "urn:tag:influenced_by:qloo:max_richter",
+            "urn:tag:instrument:qloo:synthesizers",
+            "urn:tag:theme:qloo:introspection",
+            "urn:tag:influence:qloo:neo_classical",
+            "urn:tag:theme:qloo:emotions",
+            "urn:tag:theme:qloo:melancholy",
+            "urn:tag:style:qloo:minimalistic",
+            "urn:tag:genre:qloo:ambient",
+            "urn:tag:style:qloo:expressive",
+            "urn:tag:style:qloo:atmospheric",
+            "urn:tag:influenced_by:qloo:sigur_ros",
+            "urn:tag:artist:qloo:minimalistic",
+            "urn:tag:audience:qloo:reflective",
+            "urn:tag:influence:qloo:contemporary_classical",
+            "urn:tag:music:qloo:minimalistic",
+            "urn:tag:artist:qloo:atmospheric",
+            "urn:tag:theme:qloo:nature",
+            "urn:tag:artist:qloo:cinematic",
+            "urn:tag:style:qloo:cinematic",
+            "urn:tag:influenced_by:qloo:brian_eno",
+            "urn:tag:genre:qloo:neo_classical",
+            "urn:tag:influence:qloo:electronic",
+            "urn:tag:instrument:qloo:drums",
+            "urn:tag:subgenre:qloo:electronic",
+            "urn:tag:subgenre:qloo:minimalism",
+            "urn:tag:instrument:qloo:loops",
+            "urn:tag:artist:qloo:emotive",
+            "urn:tag:style:qloo:intimate",
+            "urn:tag:audience:qloo:introspective",
+            "urn:tag:subgenre:qloo:post_rock",
+            "urn:tag:audience:qloo:appreciative",
+            "urn:tag:music:qloo:cinematic",
+            "urn:tag:style:qloo:neo_classical",
+            "urn:tag:obscurity:qloo:3",
+            "urn:tag:style:qloo:ambient",
+            "urn:tag:instrument:qloo:strings",
+            "urn:tag:instrument:qloo:piano",
+            "urn:tag:influenced_by:qloo:philip_glass",
+            "urn:tag:music:qloo:atmospheric",
+            "urn:tag:influence:qloo:ambient",
+            "urn:tag:style:qloo:electronic_infused",
+            "urn:tag:genre:qloo:contemporary_classical",
+            "urn:tag:artist:qloo:innovative",
+            "urn:tag:audience:qloo:cultured",
+            "urn:tag:audience:qloo:atmosphere_seeking",
+            "urn:tag:audience:qloo:emotionally_attuned",
+            "urn:tag:music:qloo:minimalist",
+            "urn:tag:music:qloo:ethereal",
+            "urn:tag:music:qloo:melancholic",
+            "urn:tag:music:qloo:textural",
+            "urn:tag:music:qloo:lush",
+            "urn:tag:music:qloo:intimate",
+            "urn:tag:style:qloo:immersive",
+            "urn:tag:style:qloo:precise",
+            "urn:tag:style:qloo:minimal",
+            "urn:tag:style:qloo:emotive",
+            "urn:tag:style:qloo:interactive",
+            "urn:tag:artist:qloo:minimal",
+            "urn:tag:artist:qloo:melancholic",
+            "urn:tag:artist:qloo:ethereal",
+            "urn:tag:artist:qloo:intimate",
+            "urn:tag:artist:qloo:textural",
+            "urn:tag:complexity_scale:qloo:6",
+            "urn:tag:style:qloo:neo_classical_piano_based",
+            "urn:tag:style:qloo:ambient_chamber_music",
+            "urn:tag:style:qloo:electro_acoustic_minimalism",
+            "urn:tag:style:qloo:cinematic_post_classical",
+            "urn:tag:style:qloo:loop_driven_minimalism",
+            "urn:tag:influence:qloo:post_classical",
+            "urn:tag:influence:qloo:electro_acoustic",
+            "urn:tag:influenced_by:qloo:arvo_part",
+            "urn:tag:influenced_by:qloo:ryuichi_sakamoto",
+            "urn:tag:influenced_by:qloo:icelandic_post_rock_tradition",
+            "urn:tag:instrument:qloo:violin",
+            "urn:tag:instrument:qloo:cello",
+            "urn:tag:instrument:qloo:guitar",
+            "urn:tag:instrument:qloo:synthesizer",
+            "urn:tag:instrument:qloo:electronics",
+            "urn:tag:instrument:qloo:percussion",
+            "urn:tag:instrument:qloo:sampler",
+            "urn:tag:instrument:qloo:programming",
+            "urn:tag:theme:qloo:loss",
+            "urn:tag:theme:qloo:nostalgia",
+            "urn:tag:theme:qloo:isolation",
+            "urn:tag:theme:qloo:memory",
+            "urn:tag:theme:qloo:love",
+            "urn:tag:genre:qloo:classical",
+            "urn:tag:genre:qloo:instrumental",
+            "urn:tag:subgenre:qloo:minimal",
+            "urn:tag:subgenre:qloo:soundtrack",
+            "urn:tag:subgenre:qloo:chamber_music",
+            "urn:tag:subgenre:qloo:ambient_pop"
+          ],
+          "tagNames": {
+            "urn:tag:audience:qloo:devoted": "Devoted",
+            "urn:tag:style:qloo:minimalist": "Minimalist",
+            "urn:tag:influenced_by:qloo:max_richter": "Max Richter",
+            "urn:tag:instrument:qloo:synthesizers": "Synthesizers",
+            "urn:tag:theme:qloo:introspection": "Introspection",
+            "urn:tag:influence:qloo:neo_classical": "Neo-Classical",
+            "urn:tag:theme:qloo:emotions": "Emotions",
+            "urn:tag:theme:qloo:melancholy": "Melancholy",
+            "urn:tag:style:qloo:minimalistic": "Minimalistic",
+            "urn:tag:genre:qloo:ambient": "Ambient",
+            "urn:tag:style:qloo:expressive": "Expressive",
+            "urn:tag:style:qloo:atmospheric": "Atmospheric",
+            "urn:tag:influenced_by:qloo:sigur_ros": "Sigur Ros",
+            "urn:tag:artist:qloo:minimalistic": "Minimalistic",
+            "urn:tag:audience:qloo:reflective": "Reflective",
+            "urn:tag:influence:qloo:contemporary_classical": "Contemporary Classical",
+            "urn:tag:music:qloo:minimalistic": "Minimalistic",
+            "urn:tag:artist:qloo:atmospheric": "Atmospheric",
+            "urn:tag:theme:qloo:nature": "Nature",
+            "urn:tag:artist:qloo:cinematic": "Cinematic",
+            "urn:tag:style:qloo:cinematic": "Cinematic",
+            "urn:tag:influenced_by:qloo:brian_eno": "Brian Eno",
+            "urn:tag:genre:qloo:neo_classical": "Neo-Classical",
+            "urn:tag:influence:qloo:electronic": "Electronic",
+            "urn:tag:instrument:qloo:drums": "Drums",
+            "urn:tag:subgenre:qloo:electronic": "Electronic",
+            "urn:tag:subgenre:qloo:minimalism": "Minimalism",
+            "urn:tag:instrument:qloo:loops": "Loops",
+            "urn:tag:artist:qloo:emotive": "Emotive",
+            "urn:tag:style:qloo:intimate": "Intimate",
+            "urn:tag:audience:qloo:introspective": "Introspective",
+            "urn:tag:subgenre:qloo:post_rock": "Post Rock",
+            "urn:tag:audience:qloo:appreciative": "Appreciative",
+            "urn:tag:music:qloo:cinematic": "Cinematic",
+            "urn:tag:style:qloo:neo_classical": "Neo-Classical",
+            "urn:tag:obscurity:qloo:3": "3",
+            "urn:tag:style:qloo:ambient": "Ambient",
+            "urn:tag:instrument:qloo:strings": "Strings",
+            "urn:tag:instrument:qloo:piano": "Piano",
+            "urn:tag:influenced_by:qloo:philip_glass": "Philip Glass",
+            "urn:tag:music:qloo:atmospheric": "Atmospheric",
+            "urn:tag:influence:qloo:ambient": "Ambient",
+            "urn:tag:style:qloo:electronic_infused": "Electronic Infused",
+            "urn:tag:genre:qloo:contemporary_classical": "Contemporary Classical",
+            "urn:tag:artist:qloo:innovative": "Innovative",
+            "urn:tag:audience:qloo:cultured": "Cultured",
+            "urn:tag:audience:qloo:atmosphere_seeking": "Atmosphere-Seeking",
+            "urn:tag:audience:qloo:emotionally_attuned": "Emotionally Attuned",
+            "urn:tag:music:qloo:minimalist": "Minimalist",
+            "urn:tag:music:qloo:ethereal": "Ethereal",
+            "urn:tag:music:qloo:melancholic": "Melancholic",
+            "urn:tag:music:qloo:textural": "Textural",
+            "urn:tag:music:qloo:lush": "Lush",
+            "urn:tag:music:qloo:intimate": "Intimate",
+            "urn:tag:style:qloo:immersive": "Immersive",
+            "urn:tag:style:qloo:precise": "Precise",
+            "urn:tag:style:qloo:minimal": "Minimal",
+            "urn:tag:style:qloo:emotive": "Emotive",
+            "urn:tag:style:qloo:interactive": "Interactive",
+            "urn:tag:artist:qloo:minimal": "Minimal",
+            "urn:tag:artist:qloo:melancholic": "Melancholic",
+            "urn:tag:artist:qloo:ethereal": "Ethereal",
+            "urn:tag:artist:qloo:intimate": "Intimate",
+            "urn:tag:artist:qloo:textural": "Textural",
+            "urn:tag:complexity_scale:qloo:6": "6",
+            "urn:tag:style:qloo:neo_classical_piano_based": "Neo-Classical Piano-Based",
+            "urn:tag:style:qloo:ambient_chamber_music": "Ambient Chamber Music",
+            "urn:tag:style:qloo:electro_acoustic_minimalism": "Electro-Acoustic Minimalism",
+            "urn:tag:style:qloo:cinematic_post_classical": "Cinematic Post-Classical",
+            "urn:tag:style:qloo:loop_driven_minimalism": "Loop-Driven Minimalism",
+            "urn:tag:influence:qloo:post_classical": "Post-Classical",
+            "urn:tag:influence:qloo:electro_acoustic": "Electro-Acoustic",
+            "urn:tag:influenced_by:qloo:arvo_part": "Arvo Pärt",
+            "urn:tag:influenced_by:qloo:ryuichi_sakamoto": "Ryuichi Sakamoto",
+            "urn:tag:influenced_by:qloo:icelandic_post_rock_tradition": "Icelandic Post-Rock Tradition",
+            "urn:tag:instrument:qloo:violin": "Violin",
+            "urn:tag:instrument:qloo:cello": "Cello",
+            "urn:tag:instrument:qloo:guitar": "Guitar",
+            "urn:tag:instrument:qloo:synthesizer": "Synthesizer",
+            "urn:tag:instrument:qloo:electronics": "Electronics",
+            "urn:tag:instrument:qloo:percussion": "Percussion",
+            "urn:tag:instrument:qloo:sampler": "Sampler",
+            "urn:tag:instrument:qloo:programming": "Programming",
+            "urn:tag:theme:qloo:loss": "Loss",
+            "urn:tag:theme:qloo:nostalgia": "Nostalgia",
+            "urn:tag:theme:qloo:isolation": "Isolation",
+            "urn:tag:theme:qloo:memory": "Memory",
+            "urn:tag:theme:qloo:love": "Love",
+            "urn:tag:genre:qloo:classical": "Classical",
+            "urn:tag:genre:qloo:instrumental": "Instrumental",
+            "urn:tag:subgenre:qloo:minimal": "Minimal",
+            "urn:tag:subgenre:qloo:soundtrack": "Soundtrack",
+            "urn:tag:subgenre:qloo:chamber_music": "Chamber Music",
+            "urn:tag:subgenre:qloo:ambient_pop": "Ambient Pop"
+          }
+        },
+        {
+          "entityId": "3691C25A-CE18-44CA-8DEE-A19579FC37E5",
+          "name": "Luke Howard",
+          "affinity": 0.7516331427171747,
+          "affinitySource": "query",
+          "backfill": false,
+          "tags": [
+            "urn:tag:influence:qloo:ambient",
+            "urn:tag:genre:qloo:instrumental",
+            "urn:tag:style:qloo:minimalist_piano",
+            "urn:tag:audience:qloo:calm",
+            "urn:tag:influence:qloo:minimalism",
+            "urn:tag:audience:qloo:thoughtful",
+            "urn:tag:obscurity:qloo:4",
+            "urn:tag:genre:music:modern_classical",
+            "urn:tag:artist:qloo:contemporary",
+            "urn:tag:artist:qloo:instrumental",
+            "urn:tag:influenced_by:qloo:philip_glass",
+            "urn:tag:music:qloo:instrumental",
+            "urn:tag:influence:qloo:contemporary_classical",
+            "urn:tag:artist:qloo:atmospheric",
+            "urn:tag:music:qloo:contemporary",
+            "urn:tag:artist:qloo:minimalistic",
+            "urn:tag:genre:music:neoclassical",
+            "urn:tag:genre:music:piano",
+            "urn:tag:style:qloo:expressive",
+            "urn:tag:audience:qloo:reflective",
+            "urn:tag:audience:qloo:appreciative",
+            "urn:tag:music:qloo:minimalistic",
+            "urn:tag:artist:qloo:emotive",
+            "urn:tag:genre:qloo:modern_classical",
+            "urn:tag:subgenre:qloo:ambient",
+            "urn:tag:style:qloo:intimate",
+            "urn:tag:style:qloo:ambient_soundscape",
+            "urn:tag:influenced_by:qloo:ludovico_einaudi",
+            "urn:tag:style:qloo:reflective",
+            "urn:tag:genre:qloo:contemporary_classical",
+            "urn:tag:music:qloo:atmospheric",
+            "urn:tag:instrument:qloo:piano",
+            "urn:tag:style:qloo:instrumental_storytelling",
+            "urn:tag:subgenre:qloo:post_rock",
+            "urn:tag:genre:music:contemporary_classical",
+            "urn:tag:influenced_by:qloo:max_richter",
+            "urn:tag:style:qloo:contemporary_classical",
+            "urn:tag:subgenre:qloo:minimalism",
+            "urn:tag:style:qloo:emotive_composition",
+            "urn:tag:music:qloo:emotive"
+          ],
+          "tagNames": {
+            "urn:tag:influence:qloo:ambient": "Ambient",
+            "urn:tag:genre:qloo:instrumental": "Instrumental",
+            "urn:tag:style:qloo:minimalist_piano": "Minimalist Piano",
+            "urn:tag:audience:qloo:calm": "Calm",
+            "urn:tag:influence:qloo:minimalism": "Minimalism",
+            "urn:tag:audience:qloo:thoughtful": "Thoughtful",
+            "urn:tag:obscurity:qloo:4": "4",
+            "urn:tag:genre:music:modern_classical": "Modern Classical",
+            "urn:tag:artist:qloo:contemporary": "Contemporary",
+            "urn:tag:artist:qloo:instrumental": "Instrumental",
+            "urn:tag:influenced_by:qloo:philip_glass": "Philip Glass",
+            "urn:tag:music:qloo:instrumental": "Instrumental",
+            "urn:tag:influence:qloo:contemporary_classical": "Contemporary Classical",
+            "urn:tag:artist:qloo:atmospheric": "Atmospheric",
+            "urn:tag:music:qloo:contemporary": "Contemporary",
+            "urn:tag:artist:qloo:minimalistic": "Minimalistic",
+            "urn:tag:genre:music:neoclassical": "Neoclassical",
+            "urn:tag:genre:music:piano": "Piano",
+            "urn:tag:style:qloo:expressive": "Expressive",
+            "urn:tag:audience:qloo:reflective": "Reflective",
+            "urn:tag:audience:qloo:appreciative": "Appreciative",
+            "urn:tag:music:qloo:minimalistic": "Minimalistic",
+            "urn:tag:artist:qloo:emotive": "Emotive",
+            "urn:tag:genre:qloo:modern_classical": "Modern Classical",
+            "urn:tag:subgenre:qloo:ambient": "Ambient",
+            "urn:tag:style:qloo:intimate": "Intimate",
+            "urn:tag:style:qloo:ambient_soundscape": "Ambient Soundscape",
+            "urn:tag:influenced_by:qloo:ludovico_einaudi": "Ludovico Einaudi",
+            "urn:tag:style:qloo:reflective": "Reflective",
+            "urn:tag:genre:qloo:contemporary_classical": "Contemporary Classical",
+            "urn:tag:music:qloo:atmospheric": "Atmospheric",
+            "urn:tag:instrument:qloo:piano": "Piano",
+            "urn:tag:style:qloo:instrumental_storytelling": "Instrumental Storytelling",
+            "urn:tag:subgenre:qloo:post_rock": "Post Rock",
+            "urn:tag:genre:music:contemporary_classical": "Contemporary Classical",
+            "urn:tag:influenced_by:qloo:max_richter": "Max Richter",
+            "urn:tag:style:qloo:contemporary_classical": "Contemporary Classical",
+            "urn:tag:subgenre:qloo:minimalism": "Minimalism",
+            "urn:tag:style:qloo:emotive_composition": "Emotive Composition",
+            "urn:tag:music:qloo:emotive": "Emotive"
+          }
+        },
+        {
+          "entityId": "D7918037-2D25-4990-BC34-4502B136E5AE",
+          "name": "Goldmund",
+          "affinity": 0.7510374626397749,
+          "affinitySource": "query",
+          "backfill": false,
+          "tags": [
+            "urn:tag:genre:music:piano",
+            "urn:tag:style:qloo:contemporary_classical",
+            "urn:tag:audience:qloo:contemplative",
+            "urn:tag:music:qloo:minimalist",
+            "urn:tag:subgenre:qloo:new_age",
+            "urn:tag:instrument:qloo:piano",
+            "urn:tag:style:qloo:intimate",
+            "urn:tag:influenced_by:qloo:erik_satie",
+            "urn:tag:style:qloo:cinematic_soundscape",
+            "urn:tag:genre:music:ambient",
+            "urn:tag:genre:qloo:contemporary_classical",
+            "urn:tag:obscurity:qloo:4",
+            "urn:tag:influenced_by:qloo:brian_eno",
+            "urn:tag:music:qloo:emotional",
+            "urn:tag:style:qloo:subtle",
+            "urn:tag:influenced_by:qloo:philip_glass",
+            "urn:tag:audience:qloo:appreciative",
+            "urn:tag:influence:qloo:ambient",
+            "urn:tag:genre:qloo:minimalist",
+            "urn:tag:genre:music:instrumental",
+            "urn:tag:influenced_by:qloo:ludovico_einaudi",
+            "urn:tag:genre:music:contemporary_classical",
+            "urn:tag:style:qloo:ambient_piano",
+            "urn:tag:style:qloo:reflective",
+            "urn:tag:influence:qloo:minimalist",
+            "urn:tag:artist:qloo:instrumental",
+            "urn:tag:genre:qloo:instrumental",
+            "urn:tag:instrument:qloo:keyboard",
+            "urn:tag:artist:qloo:ambient",
+            "urn:tag:genre:music:minimalism",
+            "urn:tag:artist:qloo:minimalist",
+            "urn:tag:subgenre:qloo:experimental",
+            "urn:tag:instrument:qloo:synthesizer",
+            "urn:tag:style:qloo:minimalist_instrumental",
+            "urn:tag:music:qloo:ambient",
+            "urn:tag:influence:qloo:contemporary_classical",
+            "urn:tag:artist:qloo:emotional",
+            "urn:tag:genre:qloo:ambient",
+            "urn:tag:music:qloo:cinematic",
+            "urn:tag:style:qloo:emotive_composition",
+            "urn:tag:audience:qloo:reflective",
+            "urn:tag:music:qloo:instrumental",
+            "urn:tag:influence:qloo:new_age",
+            "urn:tag:artist:qloo:cinematic",
+            "urn:tag:audience:qloo:calm"
+          ],
+          "tagNames": {
+            "urn:tag:genre:music:piano": "Piano",
+            "urn:tag:style:qloo:contemporary_classical": "Contemporary Classical",
+            "urn:tag:audience:qloo:contemplative": "Contemplative",
+            "urn:tag:music:qloo:minimalist": "Minimalist",
+            "urn:tag:subgenre:qloo:new_age": "New Age",
+            "urn:tag:instrument:qloo:piano": "Piano",
+            "urn:tag:style:qloo:intimate": "Intimate",
+            "urn:tag:influenced_by:qloo:erik_satie": "Erik Satie",
+            "urn:tag:style:qloo:cinematic_soundscape": "Cinematic Soundscape",
+            "urn:tag:genre:music:ambient": "Ambient",
+            "urn:tag:genre:qloo:contemporary_classical": "Contemporary Classical",
+            "urn:tag:obscurity:qloo:4": "4",
+            "urn:tag:influenced_by:qloo:brian_eno": "Brian Eno",
+            "urn:tag:music:qloo:emotional": "Emotional",
+            "urn:tag:style:qloo:subtle": "Subtle",
+            "urn:tag:influenced_by:qloo:philip_glass": "Philip Glass",
+            "urn:tag:audience:qloo:appreciative": "Appreciative",
+            "urn:tag:influence:qloo:ambient": "Ambient",
+            "urn:tag:genre:qloo:minimalist": "Minimalist",
+            "urn:tag:genre:music:instrumental": "Instrumental",
+            "urn:tag:influenced_by:qloo:ludovico_einaudi": "Ludovico Einaudi",
+            "urn:tag:genre:music:contemporary_classical": "Contemporary Classical",
+            "urn:tag:style:qloo:ambient_piano": "Ambient Piano",
+            "urn:tag:style:qloo:reflective": "Reflective",
+            "urn:tag:influence:qloo:minimalist": "Minimalist",
+            "urn:tag:artist:qloo:instrumental": "Instrumental",
+            "urn:tag:genre:qloo:instrumental": "Instrumental",
+            "urn:tag:instrument:qloo:keyboard": "Keyboard",
+            "urn:tag:artist:qloo:ambient": "Ambient",
+            "urn:tag:genre:music:minimalism": "Minimalism",
+            "urn:tag:artist:qloo:minimalist": "Minimalist",
+            "urn:tag:subgenre:qloo:experimental": "Experimental",
+            "urn:tag:instrument:qloo:synthesizer": "Synthesizer",
+            "urn:tag:style:qloo:minimalist_instrumental": "Minimalist Instrumental",
+            "urn:tag:music:qloo:ambient": "Ambient",
+            "urn:tag:influence:qloo:contemporary_classical": "Contemporary Classical",
+            "urn:tag:artist:qloo:emotional": "Emotional",
+            "urn:tag:genre:qloo:ambient": "Ambient",
+            "urn:tag:music:qloo:cinematic": "Cinematic",
+            "urn:tag:style:qloo:emotive_composition": "Emotive Composition",
+            "urn:tag:audience:qloo:reflective": "Reflective",
+            "urn:tag:music:qloo:instrumental": "Instrumental",
+            "urn:tag:influence:qloo:new_age": "New Age",
+            "urn:tag:artist:qloo:cinematic": "Cinematic",
+            "urn:tag:audience:qloo:calm": "Calm"
+          }
+        },
+        {
+          "entityId": "75AE7DFF-0996-4522-BAEE-064A5CB73FD0",
+          "name": "Poppy Ackroyd",
+          "affinity": 0.7508357240738892,
+          "affinitySource": "query",
+          "backfill": false,
+          "tags": [
+            "urn:tag:influenced_by:qloo:contemporary_experimental_musicians",
+            "urn:tag:audience:qloo:experimental",
+            "urn:tag:genre:music:contemporary_classical",
+            "urn:tag:style:qloo:experimental_violin",
+            "urn:tag:audience:qloo:open_minded",
+            "urn:tag:style:qloo:electroacoustic",
+            "urn:tag:artist:qloo:minimalist",
+            "urn:tag:music:qloo:experimental",
+            "urn:tag:subgenre:qloo:minimalism",
+            "urn:tag:artist:qloo:atmospheric",
+            "urn:tag:instrument:qloo:electronics",
+            "urn:tag:music:qloo:minimalist",
+            "urn:tag:subgenre:qloo:experimental",
+            "urn:tag:style:qloo:contemporary_classical",
+            "urn:tag:artist:qloo:delicate",
+            "urn:tag:influenced_by:qloo:classical_composers",
+            "urn:tag:influence:qloo:contemporary_classical",
+            "urn:tag:obscurity:qloo:4",
+            "urn:tag:style:qloo:detailed",
+            "urn:tag:artist:qloo:experimental",
+            "urn:tag:style:qloo:intimate",
+            "urn:tag:influence:qloo:experimental",
+            "urn:tag:genre:qloo:instrumental",
+            "urn:tag:genre:music:piano",
+            "urn:tag:subgenre:qloo:ambient",
+            "urn:tag:instrument:qloo:piano",
+            "urn:tag:artist:qloo:intricate",
+            "urn:tag:style:qloo:expressive",
+            "urn:tag:instrument:qloo:violin",
+            "urn:tag:audience:qloo:contemporary",
+            "urn:tag:style:qloo:minimalist_piano",
+            "urn:tag:genre:music:ambient",
+            "urn:tag:style:qloo:ambient_soundscape",
+            "urn:tag:genre:music:piano_ambient",
+            "urn:tag:music:qloo:atmospheric",
+            "urn:tag:genre:qloo:contemporary_classical",
+            "urn:tag:genre:music:neoclassical",
+            "urn:tag:audience:qloo:appreciative",
+            "urn:tag:genre:qloo:modern_classical",
+            "urn:tag:influence:qloo:ambient",
+            "urn:tag:music:qloo:intricate",
+            "urn:tag:music:qloo:delicate"
+          ],
+          "tagNames": {
+            "urn:tag:influenced_by:qloo:contemporary_experimental_musicians": "Contemporary Experimental Musicians",
+            "urn:tag:audience:qloo:experimental": "Experimental",
+            "urn:tag:genre:music:contemporary_classical": "Contemporary Classical",
+            "urn:tag:style:qloo:experimental_violin": "Experimental Violin",
+            "urn:tag:audience:qloo:open_minded": "Open-Minded",
+            "urn:tag:style:qloo:electroacoustic": "Electroacoustic",
+            "urn:tag:artist:qloo:minimalist": "Minimalist",
+            "urn:tag:music:qloo:experimental": "Experimental",
+            "urn:tag:subgenre:qloo:minimalism": "Minimalism",
+            "urn:tag:artist:qloo:atmospheric": "Atmospheric",
+            "urn:tag:instrument:qloo:electronics": "Electronics",
+            "urn:tag:music:qloo:minimalist": "Minimalist",
+            "urn:tag:subgenre:qloo:experimental": "Experimental",
+            "urn:tag:style:qloo:contemporary_classical": "Contemporary Classical",
+            "urn:tag:artist:qloo:delicate": "Delicate",
+            "urn:tag:influenced_by:qloo:classical_composers": "Classical Composers",
+            "urn:tag:influence:qloo:contemporary_classical": "Contemporary Classical",
+            "urn:tag:obscurity:qloo:4": "4",
+            "urn:tag:style:qloo:detailed": "Detailed",
+            "urn:tag:artist:qloo:experimental": "Experimental",
+            "urn:tag:style:qloo:intimate": "Intimate",
+            "urn:tag:influence:qloo:experimental": "Experimental",
+            "urn:tag:genre:qloo:instrumental": "Instrumental",
+            "urn:tag:genre:music:piano": "Piano",
+            "urn:tag:subgenre:qloo:ambient": "Ambient",
+            "urn:tag:instrument:qloo:piano": "Piano",
+            "urn:tag:artist:qloo:intricate": "Intricate",
+            "urn:tag:style:qloo:expressive": "Expressive",
+            "urn:tag:instrument:qloo:violin": "Violin",
+            "urn:tag:audience:qloo:contemporary": "Contemporary",
+            "urn:tag:style:qloo:minimalist_piano": "Minimalist Piano",
+            "urn:tag:genre:music:ambient": "Ambient",
+            "urn:tag:style:qloo:ambient_soundscape": "Ambient Soundscape",
+            "urn:tag:genre:music:piano_ambient": "Piano Ambient",
+            "urn:tag:music:qloo:atmospheric": "Atmospheric",
+            "urn:tag:genre:qloo:contemporary_classical": "Contemporary Classical",
+            "urn:tag:genre:music:neoclassical": "Neoclassical",
+            "urn:tag:audience:qloo:appreciative": "Appreciative",
+            "urn:tag:genre:qloo:modern_classical": "Modern Classical",
+            "urn:tag:influence:qloo:ambient": "Ambient",
+            "urn:tag:music:qloo:intricate": "Intricate",
+            "urn:tag:music:qloo:delicate": "Delicate"
+          }
+        },
+        {
+          "entityId": "37EA7EEF-A51E-4D54-9728-5BCFEB9B3E85",
+          "name": "A Winged Victory for the Sullen",
+          "affinity": 0.750748111153521,
+          "affinitySource": "query",
+          "backfill": false,
+          "tags": [
+            "urn:tag:subgenre:qloo:minimalism",
+            "urn:tag:music:qloo:ethereal",
+            "urn:tag:obscurity:qloo:4",
+            "urn:tag:audience:qloo:introspective",
+            "urn:tag:music:qloo:melancholic",
+            "urn:tag:influenced_by:qloo:gustav_mahler",
+            "urn:tag:subgenre:qloo:post_rock",
+            "urn:tag:style:qloo:reflective",
+            "urn:tag:instrument:qloo:guitar",
+            "urn:tag:music:qloo:minimalistic",
+            "urn:tag:audience:qloo:appreciative",
+            "urn:tag:influence:qloo:post_rock",
+            "urn:tag:genre:music:piano",
+            "urn:tag:instrument:qloo:electronics",
+            "urn:tag:style:qloo:cinematic",
+            "urn:tag:instrument:qloo:strings",
+            "urn:tag:style:qloo:minimalist",
+            "urn:tag:style:qloo:drone",
+            "urn:tag:influenced_by:qloo:arvo_part",
+            "urn:tag:music:qloo:cinematic",
+            "urn:tag:artist:qloo:atmospheric",
+            "urn:tag:instrument:qloo:synthesizers",
+            "urn:tag:influence:qloo:modern_classical",
+            "urn:tag:genre:music:contemporary_classical",
+            "urn:tag:music:qloo:atmospheric",
+            "urn:tag:genre:qloo:neoclassical",
+            "urn:tag:style:qloo:ambient",
+            "urn:tag:instrument:qloo:piano",
+            "urn:tag:influenced_by:qloo:philip_glass",
+            "urn:tag:influence:qloo:ambient",
+            "urn:tag:style:qloo:immersive",
+            "urn:tag:style:qloo:intimate",
+            "urn:tag:genre:music:modern_classical",
+            "urn:tag:influence:qloo:neoclassical",
+            "urn:tag:genre:qloo:ambient",
+            "urn:tag:style:qloo:neoclassical",
+            "urn:tag:genre:qloo:modern_classical",
+            "urn:tag:influenced_by:qloo:brian_eno",
+            "urn:tag:artist:qloo:minimalistic",
+            "urn:tag:artist:qloo:ethereal",
+            "urn:tag:subgenre:qloo:drone",
+            "urn:tag:genre:music:neoclassical",
+            "urn:tag:genre:music:ambient",
+            "urn:tag:artist:qloo:melancholic",
+            "urn:tag:artist:qloo:cinematic",
+            "urn:tag:audience:qloo:contemplative"
+          ],
+          "tagNames": {
+            "urn:tag:subgenre:qloo:minimalism": "Minimalism",
+            "urn:tag:music:qloo:ethereal": "Ethereal",
+            "urn:tag:obscurity:qloo:4": "4",
+            "urn:tag:audience:qloo:introspective": "Introspective",
+            "urn:tag:music:qloo:melancholic": "Melancholic",
+            "urn:tag:influenced_by:qloo:gustav_mahler": "Gustav Mahler",
+            "urn:tag:subgenre:qloo:post_rock": "Post Rock",
+            "urn:tag:style:qloo:reflective": "Reflective",
+            "urn:tag:instrument:qloo:guitar": "Guitar",
+            "urn:tag:music:qloo:minimalistic": "Minimalistic",
+            "urn:tag:audience:qloo:appreciative": "Appreciative",
+            "urn:tag:influence:qloo:post_rock": "Post Rock",
+            "urn:tag:genre:music:piano": "Piano",
+            "urn:tag:instrument:qloo:electronics": "Electronics",
+            "urn:tag:style:qloo:cinematic": "Cinematic",
+            "urn:tag:instrument:qloo:strings": "Strings",
+            "urn:tag:style:qloo:minimalist": "Minimalist",
+            "urn:tag:style:qloo:drone": "Drone",
+            "urn:tag:influenced_by:qloo:arvo_part": "Arvo Part",
+            "urn:tag:music:qloo:cinematic": "Cinematic",
+            "urn:tag:artist:qloo:atmospheric": "Atmospheric",
+            "urn:tag:instrument:qloo:synthesizers": "Synthesizers",
+            "urn:tag:influence:qloo:modern_classical": "Modern Classical",
+            "urn:tag:genre:music:contemporary_classical": "Contemporary Classical",
+            "urn:tag:music:qloo:atmospheric": "Atmospheric",
+            "urn:tag:genre:qloo:neoclassical": "Neoclassical",
+            "urn:tag:style:qloo:ambient": "Ambient",
+            "urn:tag:instrument:qloo:piano": "Piano",
+            "urn:tag:influenced_by:qloo:philip_glass": "Philip Glass",
+            "urn:tag:influence:qloo:ambient": "Ambient",
+            "urn:tag:style:qloo:immersive": "Immersive",
+            "urn:tag:style:qloo:intimate": "Intimate",
+            "urn:tag:genre:music:modern_classical": "Modern Classical",
+            "urn:tag:influence:qloo:neoclassical": "Neoclassical",
+            "urn:tag:genre:qloo:ambient": "Ambient",
+            "urn:tag:style:qloo:neoclassical": "Neoclassical",
+            "urn:tag:genre:qloo:modern_classical": "Modern Classical",
+            "urn:tag:influenced_by:qloo:brian_eno": "Brian Eno",
+            "urn:tag:artist:qloo:minimalistic": "Minimalistic",
+            "urn:tag:artist:qloo:ethereal": "Ethereal",
+            "urn:tag:subgenre:qloo:drone": "Drone",
+            "urn:tag:genre:music:neoclassical": "Neoclassical",
+            "urn:tag:genre:music:ambient": "Ambient",
+            "urn:tag:artist:qloo:melancholic": "Melancholic",
+            "urn:tag:artist:qloo:cinematic": "Cinematic",
+            "urn:tag:audience:qloo:contemplative": "Contemplative"
+          }
+        }
+      ],
+      "warnings": []
+    },
+    "status": {
+      "kind": "degraded",
+      "label": "degraded",
+      "detail": "The cue sheet is usable, but part of the workflow did not complete. The ranking below is Qloo's; the notes list what is missing.",
+      "reasons": [
+        "The scene reader fell back to the deterministic parser because the provider rate-limited the request. The brief is parser-generated, not model-generated."
+      ]
+    }
+  }
+}

@@ -1,0 +1,2684 @@
+{
+  "evidenceVersion": "1.0.0",
+  "briefId": "afrobeats-sports-montage",
+  "scene": "A contemporary sports montage. Euphoric and triumphant, high-energy afrobeats and hip hop. The underdog team trains at dawn before the final. 2020s.",
+  "recordedAt": "2026-10-25T09:26:14.004Z",
+  "sourceUrl": "https://cue-nine-iota.vercel.app/api/cue",
+  "sourceCommit": "6d38c7d971afb47a54bd7f4e8b0eda565971f55d",
+  "protocolVersion": "1.0.0",
+  "protocolHash": "c079c8f74dc182d42a7d7c51bee44b4afdcb3baba4950bad6b835aef7ad7d556",
+  "httpStatus": 200,
+  "latencyMs": 8550,
+  "deployment": {
+    "mode": "live",
+    "sceneParse": {
+      "source": "llm",
+      "provider": "groq"
+    },
+    "baselineSource": "llm",
+    "qlooEndpoints": [
+      "GET /v2/tags",
+      "GET /v2/insights",
+      "GET /v2/insights (backfill)",
+      "GET /v2/trending",
+      "GET /v2/insights (cast)",
+      "GET /v2/insights (brand)"
+    ]
+  },
+  "raw": {
+    "brief": {
+      "title": "Underdog Team Dawn Training Montage",
+      "raw": "A contemporary sports montage. Euphoric and triumphant, high-energy afrobeats and hip hop. The underdog team trains at dawn before the final. 2020s.",
+      "mood": [
+        "euphoric",
+        "triumphant",
+        "high-energy"
+      ],
+      "genre": [
+        "Afrobeats",
+        "Hip Hop"
+      ],
+      "era": "2020s",
+      "setting": "underdog team training at dawn before the final",
+      "arc": "euphoric_triumph",
+      "audience": {},
+      "anchors": [],
+      "diegetic": false
+    },
+    "cues": [
+      {
+        "id": "CEDB5547-DFB5-4A7E-982E-68ACA6BC2312",
+        "artist": "Cachao",
+        "artistId": "CEDB5547-DFB5-4A7E-982E-68ACA6BC2312",
+        "track": "Descarga del Cobre",
+        "affinity": 0.6579770406236232,
+        "popularity": 0.9140239466802981,
+        "momentum": 0,
+        "image": "https://images.qloo.com/i/CEDB5547-DFB5-4A7E-982E-68ACA6BC2312-420x-auto.jpg",
+        "why": [
+          "Ranked by Qloo affinity against the scene's taste profile."
+        ],
+        "explainability": [],
+        "placement": "needle_drop",
+        "clearance": "major_label",
+        "risk": "High-profile catalogue; expect a competitive sync fee and a slower clearance.",
+        "confidence": 0.7131908162494494,
+        "discovery": false,
+        "album": "Cachao",
+        "year": "1979",
+        "proposalRationale": "A blistering mambo jam that launches the training montage with high‑octane, sunrise‑ready energy."
+      },
+      {
+        "id": "CC2602AC-E805-47E4-A86A-6F7C3E2BD70E",
+        "artist": "Peter Phillips: The Tallis Scholars",
+        "artistId": "CC2602AC-E805-47E4-A86A-6F7C3E2BD70E",
+        "track": "Missa Pange Lingua",
+        "affinity": 0.6579770406236232,
+        "popularity": 0.7951195695626815,
+        "momentum": 0,
+        "image": "https://images.qloo.com/i/CC2602AC-E805-47E4-A86A-6F7C3E2BD70E-420x-auto.jpg",
+        "why": [
+          "Ranked by Qloo affinity against the scene's taste profile."
+        ],
+        "explainability": [],
+        "placement": "score_bed",
+        "clearance": "unknown",
+        "risk": "Standard clearance path for this profile.",
+        "confidence": 0.7131908162494494,
+        "discovery": false,
+        "album": "Missa Pange Lingua",
+        "year": "2005",
+        "proposalRationale": "The soaring polyphonic choral lines create an uplifting, triumphant feel while staying subtle enough for an underdog vibe."
+      },
+      {
+        "id": "0685FEE9-A3FE-47FC-856C-373016391B88",
+        "artist": "God of Shamisen",
+        "artistId": "0685FEE9-A3FE-47FC-856C-373016391B88",
+        "track": "Kagome",
+        "affinity": 0.6579770406236232,
+        "popularity": 0.7322611721683738,
+        "momentum": 0,
+        "image": "https://images.qloo.com/i/0685FEE9-A3FE-47FC-856C-373016391B88-420x-auto.jpg",
+        "why": [
+          "Ranked by Qloo affinity against the scene's taste profile."
+        ],
+        "explainability": [],
+        "placement": "transition",
+        "clearance": "unknown",
+        "risk": "Standard clearance path for this profile.",
+        "confidence": 0.7131908162494494,
+        "discovery": false,
+        "album": "Shamisen",
+        "year": "2021",
+        "proposalRationale": "Aggressive shamisen riffs paired with modern percussion give a fierce, high‑energy backdrop that feels both ancient and fresh."
+      },
+      {
+        "id": "613D23BA-E73A-4EAF-BEB4-B6740D3F971B",
+        "artist": "Warbreed",
+        "artistId": "613D23BA-E73A-4EAF-BEB4-B6740D3F971B",
+        "track": "Rise",
+        "affinity": 0.6579770406236232,
+        "popularity": 0.7094417028750434,
+        "momentum": 0,
+        "image": "https://images.qloo.com/i/613D23BA-E73A-4EAF-BEB4-B6740D3F971B-420x-auto.jpg",
+        "why": [
+          "Ranked by Qloo affinity against the scene's taste profile."
+        ],
+        "explainability": [],
+        "placement": "title_card",
+        "clearance": "unknown",
+        "risk": "Standard clearance path for this profile.",
+        "confidence": 0.7131908162494494,
+        "discovery": false,
+        "album": "The War Within",
+        "year": "2020",
+        "proposalRationale": "A relentless metal anthem with driving riffs and anthemic choruses, perfect for a gritty dawn‑training sequence."
+      },
+      {
+        "id": "98C1AD09-BCFE-48A6-B78B-CF6E49F49D03",
+        "artist": "Ecstasy",
+        "artistId": "98C1AD09-BCFE-48A6-B78B-CF6E49F49D03",
+        "track": "Morning Rush",
+        "affinity": 0.6579770406236232,
+        "popularity": 0.681556337612803,
+        "momentum": 0,
+        "image": "https://images.qloo.com/i/98C1AD09-BCFE-48A6-B78B-CF6E49F49D03-420x-auto.jpg",
+        "why": [
+          "Ranked by Qloo affinity against the scene's taste profile."
+        ],
+        "explainability": [],
+        "placement": "title_card",
+        "clearance": "unknown",
+        "risk": "Standard clearance path for this profile.",
+        "confidence": 0.7131908162494494,
+        "discovery": false,
+        "album": "Euphoria",
+        "year": "2022",
+        "proposalRationale": "Bright synth arpeggios and a propulsive beat build a euphoric, triumphant momentum without overpowering the visuals."
+      },
+      {
+        "id": "B14CF636-7F6E-4B18-AEEB-9420B4A6DA49",
+        "artist": "Mathématiques Modernes",
+        "artistId": "B14CF636-7F6E-4B18-AEEB-9420B4A6DA49",
+        "track": "Calculus",
+        "affinity": 0.6579770406236232,
+        "popularity": 0.6594348216450727,
+        "momentum": 0,
+        "image": "https://images.qloo.com/i/B14CF636-7F6E-4B18-AEEB-9420B4A6DA49-420x-auto.jpg",
+        "why": [
+          "Ranked by Qloo affinity against the scene's taste profile."
+        ],
+        "explainability": [],
+        "placement": "title_card",
+        "clearance": "unknown",
+        "risk": "Standard clearance path for this profile.",
+        "confidence": 0.7131908162494494,
+        "discovery": false,
+        "album": "Fractals",
+        "year": "2021",
+        "proposalRationale": "Complex rhythmic patterns and uplifting melodies create a modern, high‑energy feel that mirrors the team's calculated progress."
+      },
+      {
+        "id": "EBD11EAA-F163-4487-B65D-3AC6CC69720B",
+        "artist": "MOOSE HILL",
+        "artistId": "EBD11EAA-F163-4487-B65D-3AC6CC69720B",
+        "track": "Sunrise Run",
+        "affinity": 0.7649962877984056,
+        "popularity": 0.5295237533505036,
+        "momentum": 0,
+        "image": "https://images.qloo.com/i/EBD11EAA-F163-4487-B65D-3AC6CC69720B-420x-auto.jpg",
+        "why": [
+          "Surfaced by cross-domain backfill: adjacent to the brief, not an obvious search result."
+        ],
+        "explainability": [],
+        "placement": "title_card",
+        "clearance": "unknown",
+        "risk": "Backfill pick: verify the master and publishing split before locking.",
+        "confidence": 0.7559985151193622,
+        "discovery": true,
+        "album": "Dawn Patrol",
+        "year": "2023",
+        "proposalRationale": "Driving indie‑rock guitars and a steady drum pulse give a feel‑good, triumphant vibe ideal for the final training push."
+      }
+    ],
+    "sceneParse": {
+      "source": "llm",
+      "provider": "groq",
+      "failureStatus": null,
+      "failureProviderCode": null
+    },
+    "baseline": {
+      "cues": [
+        {
+          "artist": "Imagine Dragons",
+          "track": "Thunder",
+          "why": "Pulsating drums and soaring synths create a triumphant, high‑energy feel that matches an underdog team’s sunrise workout and builds excitement for the final."
+        },
+        {
+          "artist": "BTS",
+          "track": "Dynamite",
+          "why": "Bright disco‑pop production, upbeat tempo, and anthemic chorus deliver euphoric optimism, perfect for a dawn training montage that feels victorious."
+        },
+        {
+          "artist": "Dua Lipa",
+          "track": "Physical",
+          "why": "Driving bass line, fast‑paced rhythm, and empowering lyrics give a high‑octane, triumphant vibe that fuels intense early‑morning training."
+        }
+      ],
+      "note": "Generated by the LLM with no cultural data. Plausible on the surface, but unverifiable: no affinity, no audience measurement, no momentum.",
+      "source": "llm"
+    },
+    "receipts": [
+      {
+        "endpoint": "GET /v2/tags",
+        "label": "Tag \"Afrobeats\"",
+        "params": {
+          "filter.query": "Afrobeats",
+          "feature.typo_tolerance": "false",
+          "take": "3"
+        },
+        "status": 200,
+        "ms": 38,
+        "resultCount": 3
+      },
+      {
+        "endpoint": "GET /v2/tags",
+        "label": "Tag \"Hip Hop\"",
+        "params": {
+          "filter.query": "Hip Hop",
+          "feature.typo_tolerance": "false",
+          "take": "3"
+        },
+        "status": 200,
+        "ms": 40,
+        "resultCount": 3
+      },
+      {
+        "endpoint": "GET /v2/tags",
+        "label": "Tag \"euphoric\"",
+        "params": {
+          "filter.query": "euphoric",
+          "feature.typo_tolerance": "false",
+          "take": "3"
+        },
+        "status": 200,
+        "ms": 39,
+        "resultCount": 3
+      },
+      {
+        "endpoint": "GET /v2/tags",
+        "label": "Tag \"triumphant\"",
+        "params": {
+          "filter.query": "triumphant",
+          "feature.typo_tolerance": "false",
+          "take": "3"
+        },
+        "status": 200,
+        "ms": 50,
+        "resultCount": 1
+      },
+      {
+        "endpoint": "GET /v2/tags",
+        "label": "Tag \"high-energy\"",
+        "params": {
+          "filter.query": "high-energy",
+          "feature.typo_tolerance": "false",
+          "take": "3"
+        },
+        "status": 200,
+        "ms": 64,
+        "resultCount": 3
+      },
+      {
+        "endpoint": "GET /v2/insights",
+        "label": "Artist affinity (explainability on)",
+        "params": {
+          "filter.type": "urn:entity:artist",
+          "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:afrobeats\",\"weight\":1},{\"tag\":\"urn:tag:genre:media:hip_hop\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:euphoric\",\"weight\":1},{\"tag\":\"urn:tag:plot:qloo:triumphant\",\"weight\":1},{\"tag\":\"urn:tag:ambience:qloo:high_energy\",\"weight\":1}]",
+          "bias.trends": "medium",
+          "filter.release_year.min": "2020",
+          "feature.explainability": "true",
+          "take": "14"
+        },
+        "status": 200,
+        "ms": 1100,
+        "resultCount": 14
+      },
+      {
+        "endpoint": "GET /v2/insights (backfill)",
+        "label": "Cross-domain discovery",
+        "params": {
+          "filter.type": "urn:entity:artist",
+          "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:afrobeats\",\"weight\":1},{\"tag\":\"urn:tag:genre:media:hip_hop\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:euphoric\",\"weight\":1},{\"tag\":\"urn:tag:plot:qloo:triumphant\",\"weight\":1},{\"tag\":\"urn:tag:ambience:qloo:high_energy\",\"weight\":1}]",
+          "filter.exclude.entities": "CEDB5547-DFB5-4A7E-982E-68ACA6BC2312,CC2602AC-E805-47E4-A86A-6F7C3E2BD70E,0685FEE9-A3FE-47FC-856C-373016391B88,613D23BA-E73A-4EAF-BEB4-B6740D3F971B,98C1AD09-BCFE-48A6-B78B-CF6E49F49D03,B14CF636-7F6E-4B18-AEEB-9420B4A6DA49,994B02EC-0D76-4DF0-9B2F-5838132C8A29,8B5E8F08-A088-407D-999B-91E6CCE9DE37",
+          "filter.release_year.min": "2020",
+          "take": "6",
+          "backfill.cross_domain.take": "6"
+        },
+        "status": 200,
+        "ms": 1212,
+        "resultCount": 6
+      },
+      {
+        "endpoint": "GET /v2/insights",
+        "label": "Comparables: television",
+        "params": {
+          "filter.type": "urn:entity:tv_show",
+          "signal.interests.entities": "",
+          "take": "5"
+        },
+        "status": 200,
+        "ms": 702,
+        "resultCount": 5
+      },
+      {
+        "endpoint": "GET /v2/trending",
+        "label": "Artist momentum",
+        "params": {
+          "signal.interests.entities": "CEDB5547-DFB5-4A7E-982E-68ACA6BC2312",
+          "filter.type": "urn:entity:artist",
+          "filter.start_date": "2024-10-25",
+          "filter.end_date": "2026-10-25",
+          "take": "12"
+        },
+        "status": 200,
+        "ms": 877,
+        "resultCount": 12
+      },
+      {
+        "endpoint": "GET /v2/trending",
+        "label": "Artist momentum",
+        "params": {
+          "signal.interests.entities": "CC2602AC-E805-47E4-A86A-6F7C3E2BD70E",
+          "filter.type": "urn:entity:artist",
+          "filter.start_date": "2024-10-25",
+          "filter.end_date": "2026-10-25",
+          "take": "12"
+        },
+        "status": 200,
+        "ms": 904,
+        "resultCount": 0
+      },
+      {
+        "endpoint": "GET /v2/trending",
+        "label": "Artist momentum",
+        "params": {
+          "signal.interests.entities": "0685FEE9-A3FE-47FC-856C-373016391B88",
+          "filter.type": "urn:entity:artist",
+          "filter.start_date": "2024-10-25",
+          "filter.end_date": "2026-10-25",
+          "take": "12"
+        },
+        "status": 200,
+        "ms": 924,
+        "resultCount": 12
+      },
+      {
+        "endpoint": "GET /v2/trending",
+        "label": "Artist momentum",
+        "params": {
+          "signal.interests.entities": "613D23BA-E73A-4EAF-BEB4-B6740D3F971B",
+          "filter.type": "urn:entity:artist",
+          "filter.start_date": "2024-10-25",
+          "filter.end_date": "2026-10-25",
+          "take": "12"
+        },
+        "status": 200,
+        "ms": 963,
+        "resultCount": 12
+      },
+      {
+        "endpoint": "GET /v2/trending",
+        "label": "Artist momentum",
+        "params": {
+          "signal.interests.entities": "98C1AD09-BCFE-48A6-B78B-CF6E49F49D03",
+          "filter.type": "urn:entity:artist",
+          "filter.start_date": "2024-10-25",
+          "filter.end_date": "2026-10-25",
+          "take": "12"
+        },
+        "status": 200,
+        "ms": 983,
+        "resultCount": 12
+      },
+      {
+        "endpoint": "GET /v2/trending",
+        "label": "Artist momentum",
+        "params": {
+          "signal.interests.entities": "B14CF636-7F6E-4B18-AEEB-9420B4A6DA49",
+          "filter.type": "urn:entity:artist",
+          "filter.start_date": "2024-10-25",
+          "filter.end_date": "2026-10-25",
+          "take": "12"
+        },
+        "status": 200,
+        "ms": 1306,
+        "resultCount": 12
+      },
+      {
+        "endpoint": "GET /v2/trending",
+        "label": "Artist momentum",
+        "params": {
+          "signal.interests.entities": "EBD11EAA-F163-4487-B65D-3AC6CC69720B",
+          "filter.type": "urn:entity:artist",
+          "filter.start_date": "2024-10-25",
+          "filter.end_date": "2026-10-25",
+          "take": "12"
+        },
+        "status": 200,
+        "ms": 1324,
+        "resultCount": 12
+      },
+      {
+        "endpoint": "GET /v2/insights",
+        "label": "Comparables: films",
+        "params": {
+          "filter.type": "urn:entity:movie",
+          "signal.interests.entities": "",
+          "take": "5"
+        },
+        "status": 200,
+        "ms": 1726,
+        "resultCount": 5
+      },
+      {
+        "endpoint": "GET /v2/insights",
+        "label": "Comparables: books",
+        "params": {
+          "filter.type": "urn:entity:book",
+          "signal.interests.entities": "",
+          "take": "5"
+        },
+        "status": 200,
+        "ms": 1829,
+        "resultCount": 5
+      },
+      {
+        "endpoint": "GET /v2/insights (cast)",
+        "label": "Casting fit: people",
+        "params": {
+          "filter.type": "urn:entity:person",
+          "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:afrobeats\",\"weight\":1},{\"tag\":\"urn:tag:genre:media:hip_hop\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:euphoric\",\"weight\":1},{\"tag\":\"urn:tag:plot:qloo:triumphant\",\"weight\":1},{\"tag\":\"urn:tag:ambience:qloo:high_energy\",\"weight\":1}]",
+          "take": "10"
+        },
+        "status": 200,
+        "ms": 860,
+        "resultCount": 10
+      },
+      {
+        "endpoint": "GET /v2/insights (brand)",
+        "label": "Cross-domain: brands",
+        "params": {
+          "filter.type": "urn:entity:brand",
+          "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:afrobeats\",\"weight\":1},{\"tag\":\"urn:tag:genre:media:hip_hop\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:euphoric\",\"weight\":1},{\"tag\":\"urn:tag:plot:qloo:triumphant\",\"weight\":1},{\"tag\":\"urn:tag:ambience:qloo:high_energy\",\"weight\":1}]",
+          "take": "6"
+        },
+        "status": 200,
+        "ms": 1832,
+        "resultCount": 6
+      }
+    ],
+    "warnings": [
+      "None of the scene's named references resolved to Qloo entities. Falling back to mood and genre tags.",
+      "No named references in the brief, so Qloo returned a uniform affinity for tag matches. Cues are ordered by popularity instead of affinity — add a film, director or artist to get true affinity ranking.",
+      "No cross-domain discoveries were searched: the brief resolved no Qloo anchor, so there was no audience to measure against. Naming a film, show or artist usually fixes this."
+    ],
+    "mode": "live",
+    "llmConfigured": true,
+    "casting": {
+      "audience": "the brief's taste tags",
+      "candidates": [
+        {
+          "name": "Melinda Ademi",
+          "entityId": "E59EC921-0DD3-4122-ADD8-0C8967A06CDB",
+          "affinity": 0.7649962877984056,
+          "popularity": 0.8910862025853166,
+          "crossDomain": false
+        },
+        {
+          "name": "Soraya Arnelas",
+          "entityId": "8FB1C527-0027-462E-ABA5-32F48BDAC527",
+          "affinity": 0.7649962877984056,
+          "popularity": 0.8805188027962296,
+          "crossDomain": false,
+          "image": "https://images.qloo.com/i/8FB1C527-0027-462E-ABA5-32F48BDAC527-420x-auto.jpg"
+        },
+        {
+          "name": "John Ross Bowie",
+          "entityId": "7755AB69-11B3-40FA-83FD-88FAFAAFF0B7",
+          "affinity": 0.7649962877984056,
+          "popularity": 0.6832552374947,
+          "crossDomain": false,
+          "image": "https://images.qloo.com/i/7755AB69-11B3-40FA-83FD-88FAFAAFF0B7-420x-auto.jpg"
+        },
+        {
+          "name": "Sean de Guzman",
+          "entityId": "27615752-21D8-4504-BFF3-6DA18551BA1E",
+          "affinity": 0.7649962877984056,
+          "popularity": 0.5935084419608397,
+          "crossDomain": false
+        },
+        {
+          "name": "Wadih Damous",
+          "entityId": "45366EEF-D794-4C15-912E-A5AF27F01A5A",
+          "affinity": 0.7649962877984056,
+          "popularity": 0.39748969895956776,
+          "crossDomain": false,
+          "image": "https://images.qloo.com/i/45366EEF-D794-4C15-912E-A5AF27F01A5A-420x-auto.jpg"
+        },
+        {
+          "name": "Deidre Henderson",
+          "entityId": "409F9E2E-FF87-4E5C-8677-F2EE8E071247",
+          "affinity": 0.7649962877984056,
+          "popularity": 0.3680923234146182,
+          "crossDomain": false,
+          "image": "https://images.qloo.com/i/409F9E2E-FF87-4E5C-8677-F2EE8E071247-420x-auto.jpg"
+        },
+        {
+          "name": "Donnie Lewis Jr.",
+          "entityId": "13C5116B-F1A0-45C7-AF93-3DFEF1D67F6B",
+          "affinity": 0.7649962877984056,
+          "popularity": 0.3209738967830313,
+          "crossDomain": false,
+          "image": "https://images.qloo.com/i/13C5116B-F1A0-45C7-AF93-3DFEF1D67F6B-420x-auto.jpg"
+        },
+        {
+          "name": "The Intruders",
+          "entityId": "4E3D8087-B486-4B7F-990D-1333967D2CA5",
+          "affinity": 0.7649962877984056,
+          "popularity": 0.18810406496993945,
+          "crossDomain": false
+        },
+        {
+          "name": "Brooklynn Prince",
+          "entityId": "D72621A5-C59C-47BA-972F-F6D55D3A0B93",
+          "affinity": 0.7649962877984056,
+          "popularity": 0.11197964797077657,
+          "crossDomain": false,
+          "image": "https://images.qloo.com/i/D72621A5-C59C-47BA-972F-F6D55D3A0B93-420x-auto.jpg"
+        },
+        {
+          "name": "Cockney Rebel",
+          "entityId": "FB524B81-D861-412F-8AB8-FC8B9B6059CC",
+          "affinity": 0.7649962877984056,
+          "popularity": 0.05261956273578239,
+          "crossDomain": false
+        },
+        {
+          "name": "Binance",
+          "entityId": "5024DC4A-0125-469D-B07E-879C5104D291",
+          "affinity": 0.7649962877984056,
+          "popularity": 0.993685477445712,
+          "crossDomain": true,
+          "image": "https://images.qloo.com/i/5024DC4A-0125-469D-B07E-879C5104D291-420x-auto.jpg"
+        },
+        {
+          "name": "Brother Vellies",
+          "entityId": "5039441C-2412-4F10-8DBA-7696E685BF79",
+          "affinity": 0.7649962877984056,
+          "popularity": 0.9029004424403723,
+          "crossDomain": true,
+          "image": "https://images.qloo.com/i/5039441C-2412-4F10-8DBA-7696E685BF79-420x-auto.jpg"
+        },
+        {
+          "name": "Goldilocks Bakeshop",
+          "entityId": "4AB0CE8F-E57A-4BC3-A89C-F2C6C67FEBDF",
+          "affinity": 0.7649962877984056,
+          "popularity": 0.8559526029394314,
+          "crossDomain": true,
+          "image": "https://images.qloo.com/i/4AB0CE8F-E57A-4BC3-A89C-F2C6C67FEBDF-420x-auto.jpg"
+        },
+        {
+          "name": "Orfeu Cafés e Azeites",
+          "entityId": "4E8D1362-6673-4BAE-B143-AE3101AA63B5",
+          "affinity": 0.7649962877984056,
+          "popularity": 0.8272448339577224,
+          "crossDomain": true,
+          "image": "https://images.qloo.com/i/4E8D1362-6673-4BAE-B143-AE3101AA63B5-420x-auto.jpg"
+        },
+        {
+          "name": "Politix Men's Fashion",
+          "entityId": "4B84CEE5-59EA-43E1-9000-27C66D684CFA",
+          "affinity": 0.7649962877984056,
+          "popularity": 0.6002610567713719,
+          "crossDomain": true,
+          "image": "https://images.qloo.com/i/4B84CEE5-59EA-43E1-9000-27C66D684CFA-420x-auto.jpg"
+        },
+        {
+          "name": "Duncan Quinn",
+          "entityId": "4E179884-8BA7-4391-A2F3-B65D7114A15C",
+          "affinity": 0.7649962877984056,
+          "popularity": 0.5456256039056805,
+          "crossDomain": true,
+          "image": "https://images.qloo.com/i/4E179884-8BA7-4391-A2F3-B65D7114A15C-420x-auto.jpg"
+        }
+      ],
+      "receipts": [
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"Afrobeats\"",
+          "params": {
+            "filter.query": "Afrobeats",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 38,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"Hip Hop\"",
+          "params": {
+            "filter.query": "Hip Hop",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 40,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"euphoric\"",
+          "params": {
+            "filter.query": "euphoric",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 39,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"triumphant\"",
+          "params": {
+            "filter.query": "triumphant",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 50,
+          "resultCount": 1
+        },
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"high-energy\"",
+          "params": {
+            "filter.query": "high-energy",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 64,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Artist affinity (explainability on)",
+          "params": {
+            "filter.type": "urn:entity:artist",
+            "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:afrobeats\",\"weight\":1},{\"tag\":\"urn:tag:genre:media:hip_hop\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:euphoric\",\"weight\":1},{\"tag\":\"urn:tag:plot:qloo:triumphant\",\"weight\":1},{\"tag\":\"urn:tag:ambience:qloo:high_energy\",\"weight\":1}]",
+            "bias.trends": "medium",
+            "filter.release_year.min": "2020",
+            "feature.explainability": "true",
+            "take": "14"
+          },
+          "status": 200,
+          "ms": 1100,
+          "resultCount": 14
+        },
+        {
+          "endpoint": "GET /v2/insights (backfill)",
+          "label": "Cross-domain discovery",
+          "params": {
+            "filter.type": "urn:entity:artist",
+            "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:afrobeats\",\"weight\":1},{\"tag\":\"urn:tag:genre:media:hip_hop\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:euphoric\",\"weight\":1},{\"tag\":\"urn:tag:plot:qloo:triumphant\",\"weight\":1},{\"tag\":\"urn:tag:ambience:qloo:high_energy\",\"weight\":1}]",
+            "filter.exclude.entities": "CEDB5547-DFB5-4A7E-982E-68ACA6BC2312,CC2602AC-E805-47E4-A86A-6F7C3E2BD70E,0685FEE9-A3FE-47FC-856C-373016391B88,613D23BA-E73A-4EAF-BEB4-B6740D3F971B,98C1AD09-BCFE-48A6-B78B-CF6E49F49D03,B14CF636-7F6E-4B18-AEEB-9420B4A6DA49,994B02EC-0D76-4DF0-9B2F-5838132C8A29,8B5E8F08-A088-407D-999B-91E6CCE9DE37",
+            "filter.release_year.min": "2020",
+            "take": "6",
+            "backfill.cross_domain.take": "6"
+          },
+          "status": 200,
+          "ms": 1212,
+          "resultCount": 6
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Comparables: television",
+          "params": {
+            "filter.type": "urn:entity:tv_show",
+            "signal.interests.entities": "",
+            "take": "5"
+          },
+          "status": 200,
+          "ms": 702,
+          "resultCount": 5
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "CEDB5547-DFB5-4A7E-982E-68ACA6BC2312",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 877,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "CC2602AC-E805-47E4-A86A-6F7C3E2BD70E",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 904,
+          "resultCount": 0
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "0685FEE9-A3FE-47FC-856C-373016391B88",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 924,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "613D23BA-E73A-4EAF-BEB4-B6740D3F971B",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 963,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "98C1AD09-BCFE-48A6-B78B-CF6E49F49D03",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 983,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "B14CF636-7F6E-4B18-AEEB-9420B4A6DA49",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 1306,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "EBD11EAA-F163-4487-B65D-3AC6CC69720B",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 1324,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Comparables: films",
+          "params": {
+            "filter.type": "urn:entity:movie",
+            "signal.interests.entities": "",
+            "take": "5"
+          },
+          "status": 200,
+          "ms": 1726,
+          "resultCount": 5
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Comparables: books",
+          "params": {
+            "filter.type": "urn:entity:book",
+            "signal.interests.entities": "",
+            "take": "5"
+          },
+          "status": 200,
+          "ms": 1829,
+          "resultCount": 5
+        },
+        {
+          "endpoint": "GET /v2/insights (cast)",
+          "label": "Casting fit: people",
+          "params": {
+            "filter.type": "urn:entity:person",
+            "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:afrobeats\",\"weight\":1},{\"tag\":\"urn:tag:genre:media:hip_hop\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:euphoric\",\"weight\":1},{\"tag\":\"urn:tag:plot:qloo:triumphant\",\"weight\":1},{\"tag\":\"urn:tag:ambience:qloo:high_energy\",\"weight\":1}]",
+            "take": "10"
+          },
+          "status": 200,
+          "ms": 860,
+          "resultCount": 10
+        },
+        {
+          "endpoint": "GET /v2/insights (brand)",
+          "label": "Cross-domain: brands",
+          "params": {
+            "filter.type": "urn:entity:brand",
+            "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:afrobeats\",\"weight\":1},{\"tag\":\"urn:tag:genre:media:hip_hop\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:euphoric\",\"weight\":1},{\"tag\":\"urn:tag:plot:qloo:triumphant\",\"weight\":1},{\"tag\":\"urn:tag:ambience:qloo:high_energy\",\"weight\":1}]",
+            "take": "6"
+          },
+          "status": 200,
+          "ms": 1832,
+          "resultCount": 6
+        }
+      ],
+      "warnings": []
+    },
+    "audienceBrief": {
+      "available": false,
+      "evidence": [],
+      "interpretation": null,
+      "anchorsWithoutEvidence": [],
+      "anchorsUnresolved": [],
+      "noAnchors": true
+    },
+    "comparables": {
+      "groups": [
+        {
+          "domain": "movie",
+          "label": "Films",
+          "items": [
+            {
+              "name": "A Nice Neighbor",
+              "entityId": "48F3193E-9F20-4FB7-8965-C413D3294912",
+              "domain": "movie",
+              "affinity": 0.7649962877984056,
+              "popularity": 0,
+              "releaseYear": 1979,
+              "image": "https://images.qloo.com/i/48F3193E-9F20-4FB7-8965-C413D3294912-420x-auto.jpg"
+            },
+            {
+              "name": "7:11 PM",
+              "entityId": "E3E947F9-3E44-42F5-B8EE-5F3BAD7125B4",
+              "domain": "movie",
+              "affinity": 0.7649962877984056,
+              "popularity": 0.4316831897017214,
+              "releaseYear": 2023,
+              "image": "https://images.qloo.com/i/E3E947F9-3E44-42F5-B8EE-5F3BAD7125B4-420x-auto.jpg"
+            },
+            {
+              "name": "Come on Children",
+              "entityId": "1C4C0421-4AAE-473C-9994-6784E7A9462F",
+              "domain": "movie",
+              "affinity": 0.7649962877984056,
+              "popularity": 0.19812522948659797,
+              "releaseYear": 1973,
+              "image": "https://images.qloo.com/i/1C4C0421-4AAE-473C-9994-6784E7A9462F-420x-auto.jpg"
+            },
+            {
+              "name": "Always Audacious",
+              "entityId": "DFB7E774-B8E0-497A-A4B1-001AE2D61A33",
+              "domain": "movie",
+              "affinity": 0.7649962877984056,
+              "popularity": 0,
+              "releaseYear": 1920,
+              "image": "https://images.qloo.com/i/DFB7E774-B8E0-497A-A4B1-001AE2D61A33-420x-auto.jpg"
+            },
+            {
+              "name": "El enemigo",
+              "entityId": "1EB1BEE2-BF0F-48A2-8788-64FD3C50C1E7",
+              "domain": "movie",
+              "affinity": 0.7649962877984056,
+              "popularity": 0,
+              "releaseYear": 2008,
+              "image": "https://images.qloo.com/i/1EB1BEE2-BF0F-48A2-8788-64FD3C50C1E7-420x-auto.jpg"
+            }
+          ]
+        },
+        {
+          "domain": "tv_show",
+          "label": "Television",
+          "items": [
+            {
+              "name": "Kublai Khan",
+              "entityId": "A867B4FE-F0B7-43B7-ACDE-25BD1A5A5DFB",
+              "domain": "tv_show",
+              "affinity": 0.7649962877984056,
+              "popularity": 0,
+              "releaseYear": 2025,
+              "image": "https://images.qloo.com/i/A867B4FE-F0B7-43B7-ACDE-25BD1A5A5DFB-420x-auto.jpg"
+            },
+            {
+              "name": "Nostalgia Trip Longplays",
+              "entityId": "7554B6CD-7D95-48EC-B4AD-AA3F3CD905C7",
+              "domain": "tv_show",
+              "affinity": 0.7649962877984056,
+              "popularity": 0,
+              "releaseYear": 2025
+            },
+            {
+              "name": "The Thinkery Channel",
+              "entityId": "F316CB56-BFD3-4BB8-995E-D8C2487A10EA",
+              "domain": "tv_show",
+              "affinity": 0.7649962877984056,
+              "popularity": 0,
+              "releaseYear": 2017,
+              "image": "https://images.qloo.com/i/F316CB56-BFD3-4BB8-995E-D8C2487A10EA-420x-auto.jpg"
+            },
+            {
+              "name": "Regular Old Bogan",
+              "entityId": "8914F1D8-7C5E-415E-85DA-82E67F9BE3F9",
+              "domain": "tv_show",
+              "affinity": 0.7649962877984056,
+              "popularity": 0,
+              "releaseYear": 2020,
+              "image": "https://images.qloo.com/i/8914F1D8-7C5E-415E-85DA-82E67F9BE3F9-420x-auto.jpg"
+            },
+            {
+              "name": "Mocros",
+              "entityId": "CA368D19-431B-4214-97BE-1EA2E54326CE",
+              "domain": "tv_show",
+              "affinity": 0.7649962877984056,
+              "popularity": 0,
+              "releaseYear": 2026,
+              "image": "https://images.qloo.com/i/CA368D19-431B-4214-97BE-1EA2E54326CE-420x-auto.jpg"
+            }
+          ]
+        },
+        {
+          "domain": "book",
+          "label": "Books",
+          "items": [
+            {
+              "name": "Anne Arrives: Inspired by Anne of Green Gables",
+              "entityId": "6D6135EB-1B25-4EC7-ADFD-7D82D6BCE0BA",
+              "domain": "book",
+              "affinity": 0.7649962877984056,
+              "popularity": 0.1645337213888398,
+              "image": "https://images.qloo.com/i/6D6135EB-1B25-4EC7-ADFD-7D82D6BCE0BA-420x-auto.jpg"
+            },
+            {
+              "name": "Rising Fury (Jesse McDermitt Caribbean Adventure #12)",
+              "entityId": "5F8C0425-A0E3-4314-B735-93AAE116BAAA",
+              "domain": "book",
+              "affinity": 0.7649962877984056,
+              "popularity": 0.7153504059622734,
+              "image": "https://images.qloo.com/i/5F8C0425-A0E3-4314-B735-93AAE116BAAA-420x-auto.jpg"
+            },
+            {
+              "name": "Grim Witchery (Royals of Villain Academy, #7)",
+              "entityId": "92B45FF7-58A1-456F-AFEC-8AFAC7BF5276",
+              "domain": "book",
+              "affinity": 0.7649962877984056,
+              "popularity": 0.26927130791932435,
+              "image": "https://images.qloo.com/i/92B45FF7-58A1-456F-AFEC-8AFAC7BF5276-420x-auto.jpg"
+            },
+            {
+              "name": "The Woman on the Island (Vera Stanhope #9.5)",
+              "entityId": "6897CEE1-4A61-43A5-AFF4-D0DF69F7F4A3",
+              "domain": "book",
+              "affinity": 0.7649962877984056,
+              "popularity": 0.8363332834663875,
+              "image": "https://images.qloo.com/i/6897CEE1-4A61-43A5-AFF4-D0DF69F7F4A3-420x-auto.jpg"
+            },
+            {
+              "name": "#Poser (Hashtag, #5)",
+              "entityId": "847675C1-09F3-4338-8057-0FB47D32F19B",
+              "domain": "book",
+              "affinity": 0.7649962877984056,
+              "popularity": 0.08028124957499762,
+              "image": "https://images.qloo.com/i/847675C1-09F3-4338-8057-0FB47D32F19B-420x-auto.jpg"
+            }
+          ]
+        }
+      ],
+      "emptyDomains": [],
+      "skippedDomains": [],
+      "receipts": [
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"Afrobeats\"",
+          "params": {
+            "filter.query": "Afrobeats",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 38,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"Hip Hop\"",
+          "params": {
+            "filter.query": "Hip Hop",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 40,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"euphoric\"",
+          "params": {
+            "filter.query": "euphoric",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 39,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"triumphant\"",
+          "params": {
+            "filter.query": "triumphant",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 50,
+          "resultCount": 1
+        },
+        {
+          "endpoint": "GET /v2/tags",
+          "label": "Tag \"high-energy\"",
+          "params": {
+            "filter.query": "high-energy",
+            "feature.typo_tolerance": "false",
+            "take": "3"
+          },
+          "status": 200,
+          "ms": 64,
+          "resultCount": 3
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Artist affinity (explainability on)",
+          "params": {
+            "filter.type": "urn:entity:artist",
+            "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:afrobeats\",\"weight\":1},{\"tag\":\"urn:tag:genre:media:hip_hop\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:euphoric\",\"weight\":1},{\"tag\":\"urn:tag:plot:qloo:triumphant\",\"weight\":1},{\"tag\":\"urn:tag:ambience:qloo:high_energy\",\"weight\":1}]",
+            "bias.trends": "medium",
+            "filter.release_year.min": "2020",
+            "feature.explainability": "true",
+            "take": "14"
+          },
+          "status": 200,
+          "ms": 1100,
+          "resultCount": 14
+        },
+        {
+          "endpoint": "GET /v2/insights (backfill)",
+          "label": "Cross-domain discovery",
+          "params": {
+            "filter.type": "urn:entity:artist",
+            "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:afrobeats\",\"weight\":1},{\"tag\":\"urn:tag:genre:media:hip_hop\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:euphoric\",\"weight\":1},{\"tag\":\"urn:tag:plot:qloo:triumphant\",\"weight\":1},{\"tag\":\"urn:tag:ambience:qloo:high_energy\",\"weight\":1}]",
+            "filter.exclude.entities": "CEDB5547-DFB5-4A7E-982E-68ACA6BC2312,CC2602AC-E805-47E4-A86A-6F7C3E2BD70E,0685FEE9-A3FE-47FC-856C-373016391B88,613D23BA-E73A-4EAF-BEB4-B6740D3F971B,98C1AD09-BCFE-48A6-B78B-CF6E49F49D03,B14CF636-7F6E-4B18-AEEB-9420B4A6DA49,994B02EC-0D76-4DF0-9B2F-5838132C8A29,8B5E8F08-A088-407D-999B-91E6CCE9DE37",
+            "filter.release_year.min": "2020",
+            "take": "6",
+            "backfill.cross_domain.take": "6"
+          },
+          "status": 200,
+          "ms": 1212,
+          "resultCount": 6
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Comparables: television",
+          "params": {
+            "filter.type": "urn:entity:tv_show",
+            "signal.interests.entities": "",
+            "take": "5"
+          },
+          "status": 200,
+          "ms": 702,
+          "resultCount": 5
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "CEDB5547-DFB5-4A7E-982E-68ACA6BC2312",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 877,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "CC2602AC-E805-47E4-A86A-6F7C3E2BD70E",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 904,
+          "resultCount": 0
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "0685FEE9-A3FE-47FC-856C-373016391B88",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 924,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "613D23BA-E73A-4EAF-BEB4-B6740D3F971B",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 963,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "98C1AD09-BCFE-48A6-B78B-CF6E49F49D03",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 983,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "B14CF636-7F6E-4B18-AEEB-9420B4A6DA49",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 1306,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/trending",
+          "label": "Artist momentum",
+          "params": {
+            "signal.interests.entities": "EBD11EAA-F163-4487-B65D-3AC6CC69720B",
+            "filter.type": "urn:entity:artist",
+            "filter.start_date": "2024-10-25",
+            "filter.end_date": "2026-10-25",
+            "take": "12"
+          },
+          "status": 200,
+          "ms": 1324,
+          "resultCount": 12
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Comparables: films",
+          "params": {
+            "filter.type": "urn:entity:movie",
+            "signal.interests.entities": "",
+            "take": "5"
+          },
+          "status": 200,
+          "ms": 1726,
+          "resultCount": 5
+        },
+        {
+          "endpoint": "GET /v2/insights",
+          "label": "Comparables: books",
+          "params": {
+            "filter.type": "urn:entity:book",
+            "signal.interests.entities": "",
+            "take": "5"
+          },
+          "status": 200,
+          "ms": 1829,
+          "resultCount": 5
+        },
+        {
+          "endpoint": "GET /v2/insights (cast)",
+          "label": "Casting fit: people",
+          "params": {
+            "filter.type": "urn:entity:person",
+            "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:afrobeats\",\"weight\":1},{\"tag\":\"urn:tag:genre:media:hip_hop\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:euphoric\",\"weight\":1},{\"tag\":\"urn:tag:plot:qloo:triumphant\",\"weight\":1},{\"tag\":\"urn:tag:ambience:qloo:high_energy\",\"weight\":1}]",
+            "take": "10"
+          },
+          "status": 200,
+          "ms": 860,
+          "resultCount": 10
+        },
+        {
+          "endpoint": "GET /v2/insights (brand)",
+          "label": "Cross-domain: brands",
+          "params": {
+            "filter.type": "urn:entity:brand",
+            "signal.interests.tags": "[{\"tag\":\"urn:tag:genre:music:afrobeats\",\"weight\":1},{\"tag\":\"urn:tag:genre:media:hip_hop\",\"weight\":1},{\"tag\":\"urn:tag:genre:music:euphoric\",\"weight\":1},{\"tag\":\"urn:tag:plot:qloo:triumphant\",\"weight\":1},{\"tag\":\"urn:tag:ambience:qloo:high_energy\",\"weight\":1}]",
+            "take": "6"
+          },
+          "status": 200,
+          "ms": 1832,
+          "resultCount": 6
+        }
+      ],
+      "warnings": []
+    },
+    "tasteGap": {
+      "original": {
+        "index": 79.16666666666666,
+        "coveredTags": 38,
+        "vocabularySize": 48,
+        "redundancy": 0.0821172894399439,
+        "mostSimilarPair": {
+          "a": "Ecstasy",
+          "b": "MOOSE HILL",
+          "overlap": 0.5
+        },
+        "gaps": [
+          {
+            "tag": "Dance",
+            "reachableBy": [
+              "Smija",
+              "Mutine"
+            ]
+          },
+          {
+            "tag": "Emotions",
+            "reachableBy": [
+              "YOSSY LITTLE NOISE WEAVER",
+              "Mutine"
+            ]
+          },
+          {
+            "tag": "Indie",
+            "reachableBy": [
+              "ABLE",
+              "YOSSY LITTLE NOISE WEAVER"
+            ]
+          },
+          {
+            "tag": "Indie Pop",
+            "reachableBy": [
+              "YOSSY LITTLE NOISE WEAVER",
+              "Smija"
+            ]
+          },
+          {
+            "tag": "Keyboard",
+            "reachableBy": [
+              "YOSSY LITTLE NOISE WEAVER",
+              "Smija"
+            ]
+          },
+          {
+            "tag": "Love",
+            "reachableBy": [
+              "Smija",
+              "Mutine"
+            ]
+          },
+          {
+            "tag": "Relationships",
+            "reachableBy": [
+              "YOSSY LITTLE NOISE WEAVER",
+              "Mutine"
+            ]
+          },
+          {
+            "tag": "Sampler",
+            "reachableBy": [
+              "DJ Feego",
+              "Mutine"
+            ]
+          },
+          {
+            "tag": "Melodic",
+            "reachableBy": [
+              "YOSSY LITTLE NOISE WEAVER",
+              "Smija",
+              "Mutine"
+            ]
+          },
+          {
+            "tag": "Melodic",
+            "reachableBy": [
+              "YOSSY LITTLE NOISE WEAVER",
+              "Smija",
+              "Mutine"
+            ]
+          }
+        ],
+        "poolSize": 15,
+        "entitiesMeasured": 7,
+        "audit": {
+          "numerator": 38,
+          "denominator": 48,
+          "score": 79.16666666666666,
+          "coveredDimensions": [
+            "urn:tag:artist:qloo:electronic",
+            "urn:tag:artist:qloo:energetic",
+            "urn:tag:artist:qloo:innovative",
+            "urn:tag:artist:qloo:virtuosic",
+            "urn:tag:audience:qloo:dedicated",
+            "urn:tag:audience:qloo:energetic",
+            "urn:tag:audience:qloo:knowledgeable",
+            "urn:tag:audience:qloo:loyal",
+            "urn:tag:audience:qloo:passionate",
+            "urn:tag:genre:music:ambient",
+            "urn:tag:genre:music:electronic",
+            "urn:tag:genre:music:french",
+            "urn:tag:genre:music:japanese",
+            "urn:tag:genre:music:metal",
+            "urn:tag:genre:qloo:electronic",
+            "urn:tag:influenced_by:qloo:kraftwerk",
+            "urn:tag:instrument:qloo:bass_guitar",
+            "urn:tag:instrument:qloo:drum_machine",
+            "urn:tag:instrument:qloo:electric_guitar",
+            "urn:tag:instrument:qloo:synthesizer",
+            "urn:tag:instrument:qloo:vocals",
+            "urn:tag:music:qloo:atmospheric",
+            "urn:tag:music:qloo:danceable",
+            "urn:tag:music:qloo:dynamic",
+            "urn:tag:music:qloo:electronic",
+            "urn:tag:music:qloo:energetic",
+            "urn:tag:music:qloo:innovative",
+            "urn:tag:music:qloo:rhythmic",
+            "urn:tag:obscurity:qloo:3",
+            "urn:tag:obscurity:qloo:5",
+            "urn:tag:obscurity:qloo:6",
+            "urn:tag:obscurity:qloo:7",
+            "urn:tag:style:qloo:dynamic",
+            "urn:tag:style:qloo:energetic",
+            "urn:tag:style:qloo:engaging",
+            "urn:tag:style:qloo:expressive",
+            "urn:tag:style:qloo:intimate",
+            "urn:tag:theme:qloo:struggle"
+          ],
+          "uncoveredDimensions": [
+            "urn:tag:artist:qloo:melodic",
+            "urn:tag:genre:music:indie",
+            "urn:tag:influence:qloo:indie_pop",
+            "urn:tag:instrument:qloo:keyboard",
+            "urn:tag:instrument:qloo:sampler",
+            "urn:tag:music:qloo:melodic",
+            "urn:tag:subgenre:qloo:dance",
+            "urn:tag:theme:qloo:emotions",
+            "urn:tag:theme:qloo:love",
+            "urn:tag:theme:qloo:relationships"
+          ],
+          "redundancy": 0.0821172894399439,
+          "mostSimilarPair": {
+            "a": "Ecstasy",
+            "b": "MOOSE HILL",
+            "overlap": 0.5
+          },
+          "warnings": [],
+          "valid": true,
+          "poolSize": 15,
+          "entitiesMeasured": 7,
+          "weightsUsed": "equal"
+        }
+      },
+      "revised": {
+        "entities": [
+          {
+            "entityId": "CEDB5547-DFB5-4A7E-982E-68ACA6BC2312",
+            "name": "Cachao",
+            "affinity": 0.6579770406236232,
+            "affinitySource": "query",
+            "backfill": false,
+            "tags": [
+              "urn:tag:influence:qloo:afro_cuban_jazz",
+              "urn:tag:audience:qloo:passionate",
+              "urn:tag:genre:qloo:afro_cuban_jazz",
+              "urn:tag:style:qloo:dynamic",
+              "urn:tag:style:qloo:afro_cuban",
+              "urn:tag:artist:qloo:influential",
+              "urn:tag:artist:qloo:virtuosic",
+              "urn:tag:audience:qloo:loyal",
+              "urn:tag:instrument:qloo:bass",
+              "urn:tag:influence:qloo:latin_jazz",
+              "urn:tag:influence:qloo:salsa",
+              "urn:tag:obscurity:qloo:3",
+              "urn:tag:audience:qloo:devoted",
+              "urn:tag:genre:qloo:son_cubano",
+              "urn:tag:style:qloo:danzon",
+              "urn:tag:influenced_by:qloo:julio_gutierrez",
+              "urn:tag:theme:qloo:cuban_culture",
+              "urn:tag:artist:qloo:pioneering",
+              "urn:tag:genre:qloo:latin_jazz",
+              "urn:tag:influenced_by:qloo:arsenio_rodriguez",
+              "urn:tag:artist:qloo:innovative",
+              "urn:tag:artist:qloo:legendary",
+              "urn:tag:instrument:qloo:double_bass",
+              "urn:tag:theme:qloo:dance",
+              "urn:tag:style:qloo:expressive",
+              "urn:tag:music:qloo:danceable",
+              "urn:tag:style:qloo:latin_jazz",
+              "urn:tag:style:qloo:mambo",
+              "urn:tag:subgenre:qloo:salsa",
+              "urn:tag:style:qloo:descarga",
+              "urn:tag:influence:qloo:mambo",
+              "urn:tag:genre:qloo:danzon",
+              "urn:tag:subgenre:qloo:bolero",
+              "urn:tag:style:qloo:engaging",
+              "urn:tag:music:qloo:rhythmic",
+              "urn:tag:genre:qloo:mambo",
+              "urn:tag:music:qloo:complex",
+              "urn:tag:theme:qloo:celebration",
+              "urn:tag:audience:qloo:knowledgeable",
+              "urn:tag:music:qloo:energetic",
+              "urn:tag:music:qloo:innovative"
+            ],
+            "tagNames": {
+              "urn:tag:influence:qloo:afro_cuban_jazz": "Afro-Cuban Jazz",
+              "urn:tag:audience:qloo:passionate": "Passionate",
+              "urn:tag:genre:qloo:afro_cuban_jazz": "Afro-Cuban Jazz",
+              "urn:tag:style:qloo:dynamic": "Dynamic",
+              "urn:tag:style:qloo:afro_cuban": "Afro-Cuban",
+              "urn:tag:artist:qloo:influential": "Influential",
+              "urn:tag:artist:qloo:virtuosic": "Virtuosic",
+              "urn:tag:audience:qloo:loyal": "Loyal",
+              "urn:tag:instrument:qloo:bass": "Bass",
+              "urn:tag:influence:qloo:latin_jazz": "Latin Jazz",
+              "urn:tag:influence:qloo:salsa": "Salsa",
+              "urn:tag:obscurity:qloo:3": "3",
+              "urn:tag:audience:qloo:devoted": "Devoted",
+              "urn:tag:genre:qloo:son_cubano": "Son Cubano",
+              "urn:tag:style:qloo:danzon": "Danzón",
+              "urn:tag:influenced_by:qloo:julio_gutierrez": "Julio Gutiérrez",
+              "urn:tag:theme:qloo:cuban_culture": "Cuban Culture",
+              "urn:tag:artist:qloo:pioneering": "Pioneering",
+              "urn:tag:genre:qloo:latin_jazz": "Latin Jazz",
+              "urn:tag:influenced_by:qloo:arsenio_rodriguez": "Arsenio Rodriguez",
+              "urn:tag:artist:qloo:innovative": "Innovative",
+              "urn:tag:artist:qloo:legendary": "Legendary",
+              "urn:tag:instrument:qloo:double_bass": "Double Bass",
+              "urn:tag:theme:qloo:dance": "Dance",
+              "urn:tag:style:qloo:expressive": "Expressive",
+              "urn:tag:music:qloo:danceable": "Danceable",
+              "urn:tag:style:qloo:latin_jazz": "Latin Jazz",
+              "urn:tag:style:qloo:mambo": "Mambo",
+              "urn:tag:subgenre:qloo:salsa": "Salsa",
+              "urn:tag:style:qloo:descarga": "Descarga",
+              "urn:tag:influence:qloo:mambo": "Mambo",
+              "urn:tag:genre:qloo:danzon": "Danzon",
+              "urn:tag:subgenre:qloo:bolero": "Bolero",
+              "urn:tag:style:qloo:engaging": "Engaging",
+              "urn:tag:music:qloo:rhythmic": "Rhythmic",
+              "urn:tag:genre:qloo:mambo": "Mambo",
+              "urn:tag:music:qloo:complex": "Complex",
+              "urn:tag:theme:qloo:celebration": "Celebration",
+              "urn:tag:audience:qloo:knowledgeable": "Knowledgeable",
+              "urn:tag:music:qloo:energetic": "Energetic",
+              "urn:tag:music:qloo:innovative": "Innovative"
+            }
+          },
+          {
+            "entityId": "E1D06441-F998-4CD6-B4F5-0C3E83527F62",
+            "name": "Mutine",
+            "affinity": 0.6579770406236232,
+            "affinitySource": "query",
+            "backfill": false,
+            "tags": [
+              "urn:tag:genre:qloo:deep_house",
+              "urn:tag:influence:qloo:deep_house",
+              "urn:tag:music:qloo:smooth",
+              "urn:tag:artist:qloo:melodic",
+              "urn:tag:genre:music:electronic",
+              "urn:tag:subgenre:qloo:tech_house",
+              "urn:tag:music:qloo:danceable",
+              "urn:tag:theme:qloo:love",
+              "urn:tag:style:qloo:french_deep_house",
+              "urn:tag:audience:qloo:loyal",
+              "urn:tag:genre:music:pop",
+              "urn:tag:genre:qloo:house",
+              "urn:tag:style:qloo:tech_house_groove",
+              "urn:tag:audience:qloo:dance_oriented",
+              "urn:tag:artist:qloo:groovy",
+              "urn:tag:subgenre:qloo:dance",
+              "urn:tag:instrument:qloo:sampler",
+              "urn:tag:style:qloo:dancefloor_oriented",
+              "urn:tag:instrument:qloo:digital_audio_workstation",
+              "urn:tag:genre:music:rock",
+              "urn:tag:artist:qloo:energetic",
+              "urn:tag:style:qloo:engaging",
+              "urn:tag:influence:qloo:tech_house",
+              "urn:tag:style:qloo:energetic",
+              "urn:tag:audience:qloo:energetic",
+              "urn:tag:genre:qloo:electronic",
+              "urn:tag:artist:qloo:innovative",
+              "urn:tag:artist:qloo:danceable",
+              "urn:tag:audience:qloo:passionate",
+              "urn:tag:influenced_by:qloo:larry_heard",
+              "urn:tag:instrument:qloo:synthesizer",
+              "urn:tag:style:qloo:dynamic",
+              "urn:tag:theme:qloo:relationships",
+              "urn:tag:style:qloo:melodic_electronic",
+              "urn:tag:instrument:qloo:drum_machine",
+              "urn:tag:influenced_by:qloo:masters_at_work",
+              "urn:tag:style:qloo:soulful_house",
+              "urn:tag:genre:music:french",
+              "urn:tag:influenced_by:qloo:daft_punk",
+              "urn:tag:obscurity:qloo:4",
+              "urn:tag:influenced_by:qloo:kraftwerk",
+              "urn:tag:music:qloo:melodic",
+              "urn:tag:influence:qloo:electronic_dance_music",
+              "urn:tag:theme:qloo:emotions",
+              "urn:tag:music:qloo:groovy",
+              "urn:tag:music:qloo:energetic"
+            ],
+            "tagNames": {
+              "urn:tag:genre:qloo:deep_house": "Deep House",
+              "urn:tag:influence:qloo:deep_house": "Deep House",
+              "urn:tag:music:qloo:smooth": "Smooth",
+              "urn:tag:artist:qloo:melodic": "Melodic",
+              "urn:tag:genre:music:electronic": "Electronic",
+              "urn:tag:subgenre:qloo:tech_house": "Tech House",
+              "urn:tag:music:qloo:danceable": "Danceable",
+              "urn:tag:theme:qloo:love": "Love",
+              "urn:tag:style:qloo:french_deep_house": "French Deep House",
+              "urn:tag:audience:qloo:loyal": "Loyal",
+              "urn:tag:genre:music:pop": "Pop",
+              "urn:tag:genre:qloo:house": "House",
+              "urn:tag:style:qloo:tech_house_groove": "Tech House Groove",
+              "urn:tag:audience:qloo:dance_oriented": "Dance-Oriented",
+              "urn:tag:artist:qloo:groovy": "Groovy",
+              "urn:tag:subgenre:qloo:dance": "Dance",
+              "urn:tag:instrument:qloo:sampler": "Sampler",
+              "urn:tag:style:qloo:dancefloor_oriented": "Dancefloor Oriented",
+              "urn:tag:instrument:qloo:digital_audio_workstation": "Digital Audio Workstation",
+              "urn:tag:genre:music:rock": "Rock",
+              "urn:tag:artist:qloo:energetic": "Energetic",
+              "urn:tag:style:qloo:engaging": "Engaging",
+              "urn:tag:influence:qloo:tech_house": "Tech House",
+              "urn:tag:style:qloo:energetic": "Energetic",
+              "urn:tag:audience:qloo:energetic": "Energetic",
+              "urn:tag:genre:qloo:electronic": "Electronic",
+              "urn:tag:artist:qloo:innovative": "Innovative",
+              "urn:tag:artist:qloo:danceable": "Danceable",
+              "urn:tag:audience:qloo:passionate": "Passionate",
+              "urn:tag:influenced_by:qloo:larry_heard": "Larry Heard",
+              "urn:tag:instrument:qloo:synthesizer": "Synthesizer",
+              "urn:tag:style:qloo:dynamic": "Dynamic",
+              "urn:tag:theme:qloo:relationships": "Relationships",
+              "urn:tag:style:qloo:melodic_electronic": "Melodic Electronic",
+              "urn:tag:instrument:qloo:drum_machine": "Drum Machine",
+              "urn:tag:influenced_by:qloo:masters_at_work": "Masters At Work",
+              "urn:tag:style:qloo:soulful_house": "Soulful House",
+              "urn:tag:genre:music:french": "French",
+              "urn:tag:influenced_by:qloo:daft_punk": "Daft Punk",
+              "urn:tag:obscurity:qloo:4": "4",
+              "urn:tag:influenced_by:qloo:kraftwerk": "Kraftwerk",
+              "urn:tag:music:qloo:melodic": "Melodic",
+              "urn:tag:influence:qloo:electronic_dance_music": "Electronic Dance Music",
+              "urn:tag:theme:qloo:emotions": "Emotions",
+              "urn:tag:music:qloo:groovy": "Groovy",
+              "urn:tag:music:qloo:energetic": "Energetic"
+            }
+          },
+          {
+            "entityId": "614BCEAD-04CC-4E5F-9CEC-E5A6C1656B85",
+            "name": "YOSSY LITTLE NOISE WEAVER",
+            "affinity": 0.6579770406236232,
+            "affinitySource": "query",
+            "backfill": false,
+            "tags": [
+              "urn:tag:theme:qloo:dreams",
+              "urn:tag:style:qloo:calm",
+              "urn:tag:genre:music:japanese",
+              "urn:tag:influenced_by:qloo:sufjan_stevens",
+              "urn:tag:music:qloo:melodic",
+              "urn:tag:music:qloo:atmospheric",
+              "urn:tag:artist:qloo:introspective",
+              "urn:tag:instrument:qloo:guitar",
+              "urn:tag:audience:qloo:dedicated",
+              "urn:tag:style:qloo:intimate",
+              "urn:tag:genre:music:electronica",
+              "urn:tag:instrument:qloo:vocals",
+              "urn:tag:influence:qloo:indie_pop",
+              "urn:tag:style:qloo:chamber_pop",
+              "urn:tag:influenced_by:qloo:feist",
+              "urn:tag:theme:qloo:relationships",
+              "urn:tag:genre:qloo:alternative",
+              "urn:tag:genre:music:dance",
+              "urn:tag:influence:qloo:japanese_indie_folk",
+              "urn:tag:artist:qloo:soothing",
+              "urn:tag:theme:qloo:nature",
+              "urn:tag:theme:qloo:introspection",
+              "urn:tag:subgenre:qloo:electronic",
+              "urn:tag:artist:qloo:delicate",
+              "urn:tag:style:qloo:dream_pop",
+              "urn:tag:style:qloo:folktronica",
+              "urn:tag:obscurity:qloo:6",
+              "urn:tag:audience:qloo:artistic",
+              "urn:tag:genre:music:electronic",
+              "urn:tag:artist:qloo:unique",
+              "urn:tag:instrument:qloo:keyboard",
+              "urn:tag:subgenre:qloo:folk",
+              "urn:tag:style:qloo:emotive",
+              "urn:tag:influenced_by:qloo:bjork",
+              "urn:tag:audience:qloo:loyal",
+              "urn:tag:theme:qloo:emotions",
+              "urn:tag:style:qloo:indie_folk",
+              "urn:tag:genre:qloo:indie_pop",
+              "urn:tag:artist:qloo:melodic",
+              "urn:tag:style:qloo:ambient_pop",
+              "urn:tag:genre:music:indie",
+              "urn:tag:audience:qloo:introspective",
+              "urn:tag:music:qloo:delicate",
+              "urn:tag:music:qloo:introspective",
+              "urn:tag:music:qloo:soothing"
+            ],
+            "tagNames": {
+              "urn:tag:theme:qloo:dreams": "Dreams",
+              "urn:tag:style:qloo:calm": "Calm",
+              "urn:tag:genre:music:japanese": "Japanese",
+              "urn:tag:influenced_by:qloo:sufjan_stevens": "Sufjan Stevens",
+              "urn:tag:music:qloo:melodic": "Melodic",
+              "urn:tag:music:qloo:atmospheric": "Atmospheric",
+              "urn:tag:artist:qloo:introspective": "Introspective",
+              "urn:tag:instrument:qloo:guitar": "Guitar",
+              "urn:tag:audience:qloo:dedicated": "Dedicated",
+              "urn:tag:style:qloo:intimate": "Intimate",
+              "urn:tag:genre:music:electronica": "Electronica",
+              "urn:tag:instrument:qloo:vocals": "Vocals",
+              "urn:tag:influence:qloo:indie_pop": "Indie Pop",
+              "urn:tag:style:qloo:chamber_pop": "Chamber Pop",
+              "urn:tag:influenced_by:qloo:feist": "Feist",
+              "urn:tag:theme:qloo:relationships": "Relationships",
+              "urn:tag:genre:qloo:alternative": "Alternative",
+              "urn:tag:genre:music:dance": "Dance",
+              "urn:tag:influence:qloo:japanese_indie_folk": "Japanese Indie Folk",
+              "urn:tag:artist:qloo:soothing": "Soothing",
+              "urn:tag:theme:qloo:nature": "Nature",
+              "urn:tag:theme:qloo:introspection": "Introspection",
+              "urn:tag:subgenre:qloo:electronic": "Electronic",
+              "urn:tag:artist:qloo:delicate": "Delicate",
+              "urn:tag:style:qloo:dream_pop": "Dream Pop",
+              "urn:tag:style:qloo:folktronica": "Folktronica",
+              "urn:tag:obscurity:qloo:6": "6",
+              "urn:tag:audience:qloo:artistic": "Artistic",
+              "urn:tag:genre:music:electronic": "Electronic",
+              "urn:tag:artist:qloo:unique": "Unique",
+              "urn:tag:instrument:qloo:keyboard": "Keyboard",
+              "urn:tag:subgenre:qloo:folk": "Folk",
+              "urn:tag:style:qloo:emotive": "Emotive",
+              "urn:tag:influenced_by:qloo:bjork": "Bjork",
+              "urn:tag:audience:qloo:loyal": "Loyal",
+              "urn:tag:theme:qloo:emotions": "Emotions",
+              "urn:tag:style:qloo:indie_folk": "Indie Folk",
+              "urn:tag:genre:qloo:indie_pop": "Indie Pop",
+              "urn:tag:artist:qloo:melodic": "Melodic",
+              "urn:tag:style:qloo:ambient_pop": "Ambient Pop",
+              "urn:tag:genre:music:indie": "Indie",
+              "urn:tag:audience:qloo:introspective": "Introspective",
+              "urn:tag:music:qloo:delicate": "Delicate",
+              "urn:tag:music:qloo:introspective": "Introspective",
+              "urn:tag:music:qloo:soothing": "Soothing"
+            }
+          },
+          {
+            "entityId": "B14CF636-7F6E-4B18-AEEB-9420B4A6DA49",
+            "name": "Mathématiques Modernes",
+            "affinity": 0.6579770406236232,
+            "affinitySource": "query",
+            "backfill": false,
+            "tags": [
+              "urn:tag:style:qloo:french_synthpop",
+              "urn:tag:artist:qloo:new_wave",
+              "urn:tag:artist:qloo:experimental",
+              "urn:tag:genre:music:french",
+              "urn:tag:audience:qloo:electronic",
+              "urn:tag:influenced_by:qloo:brian_eno",
+              "urn:tag:artist:qloo:synth_driven",
+              "urn:tag:style:qloo:energetic",
+              "urn:tag:influence:qloo:french_synthpop",
+              "urn:tag:style:qloo:minimal_synth",
+              "urn:tag:music:qloo:experimental",
+              "urn:tag:theme:qloo:modernity",
+              "urn:tag:genre:music:france",
+              "urn:tag:music:qloo:atmospheric",
+              "urn:tag:instrument:qloo:electric_guitar",
+              "urn:tag:artist:qloo:innovative",
+              "urn:tag:theme:qloo:urban_life",
+              "urn:tag:influenced_by:qloo:david_bowie",
+              "urn:tag:subgenre:qloo:post_punk",
+              "urn:tag:style:qloo:electronic",
+              "urn:tag:audience:qloo:avant_garde",
+              "urn:tag:influenced_by:qloo:kraftwerk",
+              "urn:tag:audience:qloo:dedicated",
+              "urn:tag:instrument:qloo:drum_machine",
+              "urn:tag:subgenre:qloo:experimental",
+              "urn:tag:audience:qloo:cult",
+              "urn:tag:theme:qloo:technology",
+              "urn:tag:genre:qloo:new_wave",
+              "urn:tag:artist:qloo:electronic",
+              "urn:tag:instrument:qloo:bass_guitar",
+              "urn:tag:style:qloo:post_punk_electronic",
+              "urn:tag:theme:qloo:alienation",
+              "urn:tag:audience:qloo:nostalgic",
+              "urn:tag:music:qloo:electronic",
+              "urn:tag:style:qloo:cold_wave",
+              "urn:tag:obscurity:qloo:7",
+              "urn:tag:influence:qloo:electronic",
+              "urn:tag:genre:qloo:synthpop",
+              "urn:tag:influence:qloo:new_wave",
+              "urn:tag:style:qloo:minimalist",
+              "urn:tag:genre:music:minimal_synth",
+              "urn:tag:genre:music:new_wave",
+              "urn:tag:style:qloo:experimental_synth",
+              "urn:tag:instrument:qloo:synthesizer",
+              "urn:tag:genre:qloo:electronic",
+              "urn:tag:style:qloo:atmospheric",
+              "urn:tag:music:qloo:synth_driven",
+              "urn:tag:music:qloo:innovative",
+              "urn:tag:style:qloo:coldwave"
+            ],
+            "tagNames": {
+              "urn:tag:style:qloo:french_synthpop": "French Synthpop",
+              "urn:tag:artist:qloo:new_wave": "New Wave",
+              "urn:tag:artist:qloo:experimental": "Experimental",
+              "urn:tag:genre:music:french": "French",
+              "urn:tag:audience:qloo:electronic": "Electronic",
+              "urn:tag:influenced_by:qloo:brian_eno": "Brian Eno",
+              "urn:tag:artist:qloo:synth_driven": "Synth-Driven",
+              "urn:tag:style:qloo:energetic": "Energetic",
+              "urn:tag:influence:qloo:french_synthpop": "French Synthpop",
+              "urn:tag:style:qloo:minimal_synth": "Minimal Synth",
+              "urn:tag:music:qloo:experimental": "Experimental",
+              "urn:tag:theme:qloo:modernity": "Modernity",
+              "urn:tag:genre:music:france": "France",
+              "urn:tag:music:qloo:atmospheric": "Atmospheric",
+              "urn:tag:instrument:qloo:electric_guitar": "Electric Guitar",
+              "urn:tag:artist:qloo:innovative": "Innovative",
+              "urn:tag:theme:qloo:urban_life": "Urban Life",
+              "urn:tag:influenced_by:qloo:david_bowie": "David Bowie",
+              "urn:tag:subgenre:qloo:post_punk": "Post-Punk",
+              "urn:tag:style:qloo:electronic": "Electronic",
+              "urn:tag:audience:qloo:avant_garde": "Avant-Garde",
+              "urn:tag:influenced_by:qloo:kraftwerk": "Kraftwerk",
+              "urn:tag:audience:qloo:dedicated": "Dedicated",
+              "urn:tag:instrument:qloo:drum_machine": "Drum Machine",
+              "urn:tag:subgenre:qloo:experimental": "Experimental",
+              "urn:tag:audience:qloo:cult": "Cult",
+              "urn:tag:theme:qloo:technology": "Technology",
+              "urn:tag:genre:qloo:new_wave": "New Wave",
+              "urn:tag:artist:qloo:electronic": "Electronic",
+              "urn:tag:instrument:qloo:bass_guitar": "Bass Guitar",
+              "urn:tag:style:qloo:post_punk_electronic": "Post-Punk Electronic",
+              "urn:tag:theme:qloo:alienation": "Alienation",
+              "urn:tag:audience:qloo:nostalgic": "Nostalgic",
+              "urn:tag:music:qloo:electronic": "Electronic",
+              "urn:tag:style:qloo:cold_wave": "Cold Wave",
+              "urn:tag:obscurity:qloo:7": "7",
+              "urn:tag:influence:qloo:electronic": "Electronic",
+              "urn:tag:genre:qloo:synthpop": "Synthpop",
+              "urn:tag:influence:qloo:new_wave": "New Wave",
+              "urn:tag:style:qloo:minimalist": "Minimalist",
+              "urn:tag:genre:music:minimal_synth": "Minimal Synth",
+              "urn:tag:genre:music:new_wave": "New Wave",
+              "urn:tag:style:qloo:experimental_synth": "Experimental Synth",
+              "urn:tag:instrument:qloo:synthesizer": "Synthesizer",
+              "urn:tag:genre:qloo:electronic": "Electronic",
+              "urn:tag:style:qloo:atmospheric": "Atmospheric",
+              "urn:tag:music:qloo:synth_driven": "Synth-Driven",
+              "urn:tag:music:qloo:innovative": "Innovative",
+              "urn:tag:style:qloo:coldwave": "Coldwave"
+            }
+          },
+          {
+            "entityId": "0685FEE9-A3FE-47FC-856C-373016391B88",
+            "name": "God of Shamisen",
+            "affinity": 0.6579770406236232,
+            "affinitySource": "query",
+            "backfill": false,
+            "tags": [
+              "urn:tag:style:qloo:expressive",
+              "urn:tag:influenced_by:qloo:traditional_japanese_shamisen_masters",
+              "urn:tag:style:qloo:traditional_shamisen",
+              "urn:tag:influence:qloo:instrumental_fusion",
+              "urn:tag:style:qloo:japanese_folk_fusion",
+              "urn:tag:audience:qloo:passionate",
+              "urn:tag:subgenre:qloo:fusion",
+              "urn:tag:audience:qloo:culturally_curious",
+              "urn:tag:style:qloo:virtuosic",
+              "urn:tag:artist:qloo:dynamic",
+              "urn:tag:style:qloo:energetic",
+              "urn:tag:influenced_by:qloo:japanese_folk_music",
+              "urn:tag:genre:music:progressive_metal",
+              "urn:tag:influence:qloo:modern_shamisen_music",
+              "urn:tag:genre:qloo:shamisen_music",
+              "urn:tag:music:qloo:traditional",
+              "urn:tag:instrument:qloo:shamisen",
+              "urn:tag:artist:qloo:expressive",
+              "urn:tag:music:qloo:fusion",
+              "urn:tag:genre:qloo:instrumental",
+              "urn:tag:subgenre:qloo:world_music",
+              "urn:tag:genre:music:japanese",
+              "urn:tag:genre:music:folk_metal",
+              "urn:tag:genre:qloo:traditional_japanese_music",
+              "urn:tag:audience:qloo:dedicated",
+              "urn:tag:style:qloo:instrumental_virtuosic",
+              "urn:tag:obscurity:qloo:5",
+              "urn:tag:genre:music:shamisen",
+              "urn:tag:genre:music:metal",
+              "urn:tag:artist:qloo:traditional",
+              "urn:tag:artist:qloo:virtuosic",
+              "urn:tag:artist:qloo:innovative",
+              "urn:tag:influence:qloo:world_fusion",
+              "urn:tag:style:qloo:world_fusion",
+              "urn:tag:style:qloo:contemporary_shamisen",
+              "urn:tag:music:qloo:instrumental",
+              "urn:tag:influenced_by:qloo:modern_fusion_artists",
+              "urn:tag:music:qloo:expressive",
+              "urn:tag:music:qloo:dynamic",
+              "urn:tag:style:qloo:world_music_fusion"
+            ],
+            "tagNames": {
+              "urn:tag:style:qloo:expressive": "Expressive",
+              "urn:tag:influenced_by:qloo:traditional_japanese_shamisen_masters": "Traditional Japanese Shamisen Masters",
+              "urn:tag:style:qloo:traditional_shamisen": "Traditional Shamisen",
+              "urn:tag:influence:qloo:instrumental_fusion": "Instrumental Fusion",
+              "urn:tag:style:qloo:japanese_folk_fusion": "Japanese Folk Fusion",
+              "urn:tag:audience:qloo:passionate": "Passionate",
+              "urn:tag:subgenre:qloo:fusion": "Fusion",
+              "urn:tag:audience:qloo:culturally_curious": "Culturally Curious",
+              "urn:tag:style:qloo:virtuosic": "Virtuosic",
+              "urn:tag:artist:qloo:dynamic": "Dynamic",
+              "urn:tag:style:qloo:energetic": "Energetic",
+              "urn:tag:influenced_by:qloo:japanese_folk_music": "Japanese Folk Music",
+              "urn:tag:genre:music:progressive_metal": "Progressive Metal",
+              "urn:tag:influence:qloo:modern_shamisen_music": "Modern Shamisen Music",
+              "urn:tag:genre:qloo:shamisen_music": "Shamisen Music",
+              "urn:tag:music:qloo:traditional": "Traditional",
+              "urn:tag:instrument:qloo:shamisen": "Shamisen",
+              "urn:tag:artist:qloo:expressive": "Expressive",
+              "urn:tag:music:qloo:fusion": "Fusion",
+              "urn:tag:genre:qloo:instrumental": "Instrumental",
+              "urn:tag:subgenre:qloo:world_music": "World Music",
+              "urn:tag:genre:music:japanese": "Japanese",
+              "urn:tag:genre:music:folk_metal": "Folk Metal",
+              "urn:tag:genre:qloo:traditional_japanese_music": "Traditional Japanese Music",
+              "urn:tag:audience:qloo:dedicated": "Dedicated",
+              "urn:tag:style:qloo:instrumental_virtuosic": "Instrumental Virtuosic",
+              "urn:tag:obscurity:qloo:5": "5",
+              "urn:tag:genre:music:shamisen": "Shamisen",
+              "urn:tag:genre:music:metal": "Metal",
+              "urn:tag:artist:qloo:traditional": "Traditional",
+              "urn:tag:artist:qloo:virtuosic": "Virtuosic",
+              "urn:tag:artist:qloo:innovative": "Innovative",
+              "urn:tag:influence:qloo:world_fusion": "World Fusion",
+              "urn:tag:style:qloo:world_fusion": "World Fusion",
+              "urn:tag:style:qloo:contemporary_shamisen": "Contemporary Shamisen",
+              "urn:tag:music:qloo:instrumental": "Instrumental",
+              "urn:tag:influenced_by:qloo:modern_fusion_artists": "Modern Fusion Artists",
+              "urn:tag:music:qloo:expressive": "Expressive",
+              "urn:tag:music:qloo:dynamic": "Dynamic",
+              "urn:tag:style:qloo:world_music_fusion": "World Music Fusion"
+            }
+          },
+          {
+            "entityId": "613D23BA-E73A-4EAF-BEB4-B6740D3F971B",
+            "name": "Warbreed",
+            "affinity": 0.6579770406236232,
+            "affinitySource": "query",
+            "backfill": false,
+            "tags": [
+              "urn:tag:artist:qloo:passionate",
+              "urn:tag:style:qloo:emotionally_charged",
+              "urn:tag:audience:qloo:passionate",
+              "urn:tag:instrument:qloo:bass_guitar",
+              "urn:tag:influenced_by:qloo:pantera",
+              "urn:tag:style:qloo:intense",
+              "urn:tag:influenced_by:qloo:metallica",
+              "urn:tag:artist:qloo:aggressive",
+              "urn:tag:style:qloo:aggressive",
+              "urn:tag:style:qloo:raw",
+              "urn:tag:artist:qloo:heavy",
+              "urn:tag:artist:qloo:intense",
+              "urn:tag:style:qloo:breakdown_heavy",
+              "urn:tag:genre:music:argentinian",
+              "urn:tag:genre:music:melodic_death_metal",
+              "urn:tag:instrument:qloo:drums",
+              "urn:tag:genre:qloo:metalcore",
+              "urn:tag:style:qloo:metalcore",
+              "urn:tag:subgenre:qloo:heavy_metal",
+              "urn:tag:artist:qloo:energetic",
+              "urn:tag:theme:qloo:inner_conflict",
+              "urn:tag:influenced_by:qloo:earth_crisis",
+              "urn:tag:style:qloo:hardcore",
+              "urn:tag:influenced_by:qloo:converge",
+              "urn:tag:instrument:qloo:electric_guitar",
+              "urn:tag:influence:qloo:hardcore_punk",
+              "urn:tag:genre:music:argentina",
+              "urn:tag:obscurity:qloo:6",
+              "urn:tag:genre:qloo:hardcore_punk",
+              "urn:tag:theme:qloo:war",
+              "urn:tag:style:qloo:powerful",
+              "urn:tag:theme:qloo:brotherhood",
+              "urn:tag:influence:qloo:metalcore",
+              "urn:tag:theme:qloo:resilience",
+              "urn:tag:theme:qloo:struggle",
+              "urn:tag:instrument:qloo:vocals",
+              "urn:tag:audience:qloo:energetic",
+              "urn:tag:style:qloo:energetic",
+              "urn:tag:audience:qloo:loyal",
+              "urn:tag:audience:qloo:dedicated",
+              "urn:tag:music:qloo:aggressive",
+              "urn:tag:music:qloo:heavy",
+              "urn:tag:music:qloo:energetic",
+              "urn:tag:music:qloo:raw",
+              "urn:tag:music:qloo:powerful"
+            ],
+            "tagNames": {
+              "urn:tag:artist:qloo:passionate": "Passionate",
+              "urn:tag:style:qloo:emotionally_charged": "Emotionally Charged",
+              "urn:tag:audience:qloo:passionate": "Passionate",
+              "urn:tag:instrument:qloo:bass_guitar": "Bass Guitar",
+              "urn:tag:influenced_by:qloo:pantera": "Pantera",
+              "urn:tag:style:qloo:intense": "Intense",
+              "urn:tag:influenced_by:qloo:metallica": "Metallica",
+              "urn:tag:artist:qloo:aggressive": "Aggressive",
+              "urn:tag:style:qloo:aggressive": "Aggressive",
+              "urn:tag:style:qloo:raw": "Raw",
+              "urn:tag:artist:qloo:heavy": "Heavy",
+              "urn:tag:artist:qloo:intense": "Intense",
+              "urn:tag:style:qloo:breakdown_heavy": "Breakdown-Heavy",
+              "urn:tag:genre:music:argentinian": "Argentinian",
+              "urn:tag:genre:music:melodic_death_metal": "Melodic Death Metal",
+              "urn:tag:instrument:qloo:drums": "Drums",
+              "urn:tag:genre:qloo:metalcore": "Metalcore",
+              "urn:tag:style:qloo:metalcore": "Metalcore",
+              "urn:tag:subgenre:qloo:heavy_metal": "Heavy Metal",
+              "urn:tag:artist:qloo:energetic": "Energetic",
+              "urn:tag:theme:qloo:inner_conflict": "Inner Conflict",
+              "urn:tag:influenced_by:qloo:earth_crisis": "Earth Crisis",
+              "urn:tag:style:qloo:hardcore": "Hardcore",
+              "urn:tag:influenced_by:qloo:converge": "Converge",
+              "urn:tag:instrument:qloo:electric_guitar": "Electric Guitar",
+              "urn:tag:influence:qloo:hardcore_punk": "Hardcore Punk",
+              "urn:tag:genre:music:argentina": "Argentina",
+              "urn:tag:obscurity:qloo:6": "6",
+              "urn:tag:genre:qloo:hardcore_punk": "Hardcore Punk",
+              "urn:tag:theme:qloo:war": "War",
+              "urn:tag:style:qloo:powerful": "Powerful",
+              "urn:tag:theme:qloo:brotherhood": "Brotherhood",
+              "urn:tag:influence:qloo:metalcore": "Metalcore",
+              "urn:tag:theme:qloo:resilience": "Resilience",
+              "urn:tag:theme:qloo:struggle": "Struggle",
+              "urn:tag:instrument:qloo:vocals": "Vocals",
+              "urn:tag:audience:qloo:energetic": "Energetic",
+              "urn:tag:style:qloo:energetic": "Energetic",
+              "urn:tag:audience:qloo:loyal": "Loyal",
+              "urn:tag:audience:qloo:dedicated": "Dedicated",
+              "urn:tag:music:qloo:aggressive": "Aggressive",
+              "urn:tag:music:qloo:heavy": "Heavy",
+              "urn:tag:music:qloo:energetic": "Energetic",
+              "urn:tag:music:qloo:raw": "Raw",
+              "urn:tag:music:qloo:powerful": "Powerful"
+            }
+          },
+          {
+            "entityId": "8B5E8F08-A088-407D-999B-91E6CCE9DE37",
+            "name": "ABLE",
+            "affinity": 0.6579770406236232,
+            "affinitySource": "query",
+            "backfill": false,
+            "tags": [
+              "urn:tag:genre:music:indie",
+              "urn:tag:genre:music:experimental",
+              "urn:tag:genre:music:ambient",
+              "urn:tag:genre:music:americana"
+            ],
+            "tagNames": {
+              "urn:tag:genre:music:indie": "Indie",
+              "urn:tag:genre:music:experimental": "Experimental",
+              "urn:tag:genre:music:ambient": "Ambient",
+              "urn:tag:genre:music:americana": "Americana"
+            }
+          }
+        ],
+        "coverage": {
+          "index": 100,
+          "coveredTags": 48,
+          "vocabularySize": 48,
+          "redundancy": 0.1088286634821456,
+          "mostSimilarPair": {
+            "a": "Cachao",
+            "b": "Mutine",
+            "overlap": 0.2413793103448276
+          },
+          "gaps": [],
+          "poolSize": 15,
+          "entitiesMeasured": 7,
+          "audit": {
+            "numerator": 48,
+            "denominator": 48,
+            "score": 100,
+            "coveredDimensions": [
+              "urn:tag:artist:qloo:electronic",
+              "urn:tag:artist:qloo:energetic",
+              "urn:tag:artist:qloo:innovative",
+              "urn:tag:artist:qloo:melodic",
+              "urn:tag:artist:qloo:virtuosic",
+              "urn:tag:audience:qloo:dedicated",
+              "urn:tag:audience:qloo:energetic",
+              "urn:tag:audience:qloo:knowledgeable",
+              "urn:tag:audience:qloo:loyal",
+              "urn:tag:audience:qloo:passionate",
+              "urn:tag:genre:music:ambient",
+              "urn:tag:genre:music:electronic",
+              "urn:tag:genre:music:french",
+              "urn:tag:genre:music:indie",
+              "urn:tag:genre:music:japanese",
+              "urn:tag:genre:music:metal",
+              "urn:tag:genre:qloo:electronic",
+              "urn:tag:influence:qloo:indie_pop",
+              "urn:tag:influenced_by:qloo:kraftwerk",
+              "urn:tag:instrument:qloo:bass_guitar",
+              "urn:tag:instrument:qloo:drum_machine",
+              "urn:tag:instrument:qloo:electric_guitar",
+              "urn:tag:instrument:qloo:keyboard",
+              "urn:tag:instrument:qloo:sampler",
+              "urn:tag:instrument:qloo:synthesizer",
+              "urn:tag:instrument:qloo:vocals",
+              "urn:tag:music:qloo:atmospheric",
+              "urn:tag:music:qloo:danceable",
+              "urn:tag:music:qloo:dynamic",
+              "urn:tag:music:qloo:electronic",
+              "urn:tag:music:qloo:energetic",
+              "urn:tag:music:qloo:innovative",
+              "urn:tag:music:qloo:melodic",
+              "urn:tag:music:qloo:rhythmic",
+              "urn:tag:obscurity:qloo:3",
+              "urn:tag:obscurity:qloo:5",
+              "urn:tag:obscurity:qloo:6",
+              "urn:tag:obscurity:qloo:7",
+              "urn:tag:style:qloo:dynamic",
+              "urn:tag:style:qloo:energetic",
+              "urn:tag:style:qloo:engaging",
+              "urn:tag:style:qloo:expressive",
+              "urn:tag:style:qloo:intimate",
+              "urn:tag:subgenre:qloo:dance",
+              "urn:tag:theme:qloo:emotions",
+              "urn:tag:theme:qloo:love",
+              "urn:tag:theme:qloo:relationships",
+              "urn:tag:theme:qloo:struggle"
+            ],
+            "uncoveredDimensions": [],
+            "redundancy": 0.1088286634821456,
+            "mostSimilarPair": {
+              "a": "Cachao",
+              "b": "Mutine",
+              "overlap": 0.2413793103448276
+            },
+            "warnings": [],
+            "valid": true,
+            "poolSize": 15,
+            "entitiesMeasured": 7,
+            "weightsUsed": "equal"
+          }
+        },
+        "indexDelta": 20.833333333333343,
+        "redundancyDelta": 0.026711374042201697,
+        "improves": true,
+        "newlyCovered": [
+          "urn:tag:artist:qloo:melodic",
+          "urn:tag:genre:music:indie",
+          "urn:tag:influence:qloo:indie_pop",
+          "urn:tag:instrument:qloo:keyboard",
+          "urn:tag:instrument:qloo:sampler",
+          "urn:tag:music:qloo:melodic",
+          "urn:tag:subgenre:qloo:dance",
+          "urn:tag:theme:qloo:emotions",
+          "urn:tag:theme:qloo:love",
+          "urn:tag:theme:qloo:relationships"
+        ],
+        "rationale": "Reaches 48 of 48 shared taste tags against 38, holding the slate at 7. Brings in Mutine, YOSSY LITTLE NOISE WEAVER, ABLE, in place of Peter Phillips: The Tallis Scholars, Ecstasy, MOOSE HILL."
+      },
+      "originalEntities": [
+        {
+          "entityId": "CEDB5547-DFB5-4A7E-982E-68ACA6BC2312",
+          "name": "Cachao",
+          "affinity": 0.6579770406236232,
+          "affinitySource": "query",
+          "backfill": false,
+          "tags": [
+            "urn:tag:influence:qloo:afro_cuban_jazz",
+            "urn:tag:audience:qloo:passionate",
+            "urn:tag:genre:qloo:afro_cuban_jazz",
+            "urn:tag:style:qloo:dynamic",
+            "urn:tag:style:qloo:afro_cuban",
+            "urn:tag:artist:qloo:influential",
+            "urn:tag:artist:qloo:virtuosic",
+            "urn:tag:audience:qloo:loyal",
+            "urn:tag:instrument:qloo:bass",
+            "urn:tag:influence:qloo:latin_jazz",
+            "urn:tag:influence:qloo:salsa",
+            "urn:tag:obscurity:qloo:3",
+            "urn:tag:audience:qloo:devoted",
+            "urn:tag:genre:qloo:son_cubano",
+            "urn:tag:style:qloo:danzon",
+            "urn:tag:influenced_by:qloo:julio_gutierrez",
+            "urn:tag:theme:qloo:cuban_culture",
+            "urn:tag:artist:qloo:pioneering",
+            "urn:tag:genre:qloo:latin_jazz",
+            "urn:tag:influenced_by:qloo:arsenio_rodriguez",
+            "urn:tag:artist:qloo:innovative",
+            "urn:tag:artist:qloo:legendary",
+            "urn:tag:instrument:qloo:double_bass",
+            "urn:tag:theme:qloo:dance",
+            "urn:tag:style:qloo:expressive",
+            "urn:tag:music:qloo:danceable",
+            "urn:tag:style:qloo:latin_jazz",
+            "urn:tag:style:qloo:mambo",
+            "urn:tag:subgenre:qloo:salsa",
+            "urn:tag:style:qloo:descarga",
+            "urn:tag:influence:qloo:mambo",
+            "urn:tag:genre:qloo:danzon",
+            "urn:tag:subgenre:qloo:bolero",
+            "urn:tag:style:qloo:engaging",
+            "urn:tag:music:qloo:rhythmic",
+            "urn:tag:genre:qloo:mambo",
+            "urn:tag:music:qloo:complex",
+            "urn:tag:theme:qloo:celebration",
+            "urn:tag:audience:qloo:knowledgeable",
+            "urn:tag:music:qloo:energetic",
+            "urn:tag:music:qloo:innovative"
+          ],
+          "tagNames": {
+            "urn:tag:influence:qloo:afro_cuban_jazz": "Afro-Cuban Jazz",
+            "urn:tag:audience:qloo:passionate": "Passionate",
+            "urn:tag:genre:qloo:afro_cuban_jazz": "Afro-Cuban Jazz",
+            "urn:tag:style:qloo:dynamic": "Dynamic",
+            "urn:tag:style:qloo:afro_cuban": "Afro-Cuban",
+            "urn:tag:artist:qloo:influential": "Influential",
+            "urn:tag:artist:qloo:virtuosic": "Virtuosic",
+            "urn:tag:audience:qloo:loyal": "Loyal",
+            "urn:tag:instrument:qloo:bass": "Bass",
+            "urn:tag:influence:qloo:latin_jazz": "Latin Jazz",
+            "urn:tag:influence:qloo:salsa": "Salsa",
+            "urn:tag:obscurity:qloo:3": "3",
+            "urn:tag:audience:qloo:devoted": "Devoted",
+            "urn:tag:genre:qloo:son_cubano": "Son Cubano",
+            "urn:tag:style:qloo:danzon": "Danzón",
+            "urn:tag:influenced_by:qloo:julio_gutierrez": "Julio Gutiérrez",
+            "urn:tag:theme:qloo:cuban_culture": "Cuban Culture",
+            "urn:tag:artist:qloo:pioneering": "Pioneering",
+            "urn:tag:genre:qloo:latin_jazz": "Latin Jazz",
+            "urn:tag:influenced_by:qloo:arsenio_rodriguez": "Arsenio Rodriguez",
+            "urn:tag:artist:qloo:innovative": "Innovative",
+            "urn:tag:artist:qloo:legendary": "Legendary",
+            "urn:tag:instrument:qloo:double_bass": "Double Bass",
+            "urn:tag:theme:qloo:dance": "Dance",
+            "urn:tag:style:qloo:expressive": "Expressive",
+            "urn:tag:music:qloo:danceable": "Danceable",
+            "urn:tag:style:qloo:latin_jazz": "Latin Jazz",
+            "urn:tag:style:qloo:mambo": "Mambo",
+            "urn:tag:subgenre:qloo:salsa": "Salsa",
+            "urn:tag:style:qloo:descarga": "Descarga",
+            "urn:tag:influence:qloo:mambo": "Mambo",
+            "urn:tag:genre:qloo:danzon": "Danzon",
+            "urn:tag:subgenre:qloo:bolero": "Bolero",
+            "urn:tag:style:qloo:engaging": "Engaging",
+            "urn:tag:music:qloo:rhythmic": "Rhythmic",
+            "urn:tag:genre:qloo:mambo": "Mambo",
+            "urn:tag:music:qloo:complex": "Complex",
+            "urn:tag:theme:qloo:celebration": "Celebration",
+            "urn:tag:audience:qloo:knowledgeable": "Knowledgeable",
+            "urn:tag:music:qloo:energetic": "Energetic",
+            "urn:tag:music:qloo:innovative": "Innovative"
+          }
+        },
+        {
+          "entityId": "CC2602AC-E805-47E4-A86A-6F7C3E2BD70E",
+          "name": "Peter Phillips: The Tallis Scholars",
+          "affinity": 0.6579770406236232,
+          "affinitySource": "query",
+          "backfill": false,
+          "tags": [
+            "urn:tag:genre:qloo:classical",
+            "urn:tag:style:qloo:intimate",
+            "urn:tag:subgenre:qloo:sacred_music",
+            "urn:tag:genre:qloo:renaissance_choral",
+            "urn:tag:artist:qloo:historically_informed",
+            "urn:tag:style:qloo:precise",
+            "urn:tag:artist:qloo:renowned",
+            "urn:tag:theme:qloo:liturgical",
+            "urn:tag:style:qloo:elegant",
+            "urn:tag:style:qloo:liturgical",
+            "urn:tag:audience:qloo:knowledgeable",
+            "urn:tag:obscurity:qloo:3",
+            "urn:tag:music:qloo:sacred",
+            "urn:tag:style:qloo:renaissance_polyphonic",
+            "urn:tag:influenced_by:qloo:william_byrd",
+            "urn:tag:style:qloo:sacred_choral",
+            "urn:tag:theme:qloo:spiritual",
+            "urn:tag:subgenre:qloo:polyphony",
+            "urn:tag:style:qloo:refined",
+            "urn:tag:influenced_by:qloo:thomas_tallis",
+            "urn:tag:artist:qloo:acclaimed",
+            "urn:tag:style:qloo:a_cappella",
+            "urn:tag:genre:qloo:early_music",
+            "urn:tag:theme:qloo:sacred",
+            "urn:tag:audience:qloo:cultured",
+            "urn:tag:music:qloo:polyphonic",
+            "urn:tag:artist:qloo:pure_vocal_tone",
+            "urn:tag:audience:qloo:dedicated",
+            "urn:tag:theme:qloo:religious",
+            "urn:tag:influenced_by:qloo:giovanni_pierluigi_da_palestrina",
+            "urn:tag:influence:qloo:early_music",
+            "urn:tag:instrument:qloo:voice",
+            "urn:tag:style:qloo:historically_informed",
+            "urn:tag:artist:qloo:specialized",
+            "urn:tag:audience:qloo:appreciative",
+            "urn:tag:influence:qloo:sacred_music",
+            "urn:tag:influence:qloo:choral_music",
+            "urn:tag:music:qloo:pure",
+            "urn:tag:music:qloo:clear",
+            "urn:tag:music:qloo:historically_informed"
+          ],
+          "tagNames": {
+            "urn:tag:genre:qloo:classical": "Classical",
+            "urn:tag:style:qloo:intimate": "Intimate",
+            "urn:tag:subgenre:qloo:sacred_music": "Sacred Music",
+            "urn:tag:genre:qloo:renaissance_choral": "Renaissance Choral",
+            "urn:tag:artist:qloo:historically_informed": "Historically Informed",
+            "urn:tag:style:qloo:precise": "Precise",
+            "urn:tag:artist:qloo:renowned": "Renowned",
+            "urn:tag:theme:qloo:liturgical": "Liturgical",
+            "urn:tag:style:qloo:elegant": "Elegant",
+            "urn:tag:style:qloo:liturgical": "Liturgical",
+            "urn:tag:audience:qloo:knowledgeable": "Knowledgeable",
+            "urn:tag:obscurity:qloo:3": "3",
+            "urn:tag:music:qloo:sacred": "Sacred",
+            "urn:tag:style:qloo:renaissance_polyphonic": "Renaissance Polyphonic",
+            "urn:tag:influenced_by:qloo:william_byrd": "William Byrd",
+            "urn:tag:style:qloo:sacred_choral": "Sacred Choral",
+            "urn:tag:theme:qloo:spiritual": "Spiritual",
+            "urn:tag:subgenre:qloo:polyphony": "Polyphony",
+            "urn:tag:style:qloo:refined": "Refined",
+            "urn:tag:influenced_by:qloo:thomas_tallis": "Thomas Tallis",
+            "urn:tag:artist:qloo:acclaimed": "Acclaimed",
+            "urn:tag:style:qloo:a_cappella": "A Cappella",
+            "urn:tag:genre:qloo:early_music": "Early Music",
+            "urn:tag:theme:qloo:sacred": "Sacred",
+            "urn:tag:audience:qloo:cultured": "Cultured",
+            "urn:tag:music:qloo:polyphonic": "Polyphonic",
+            "urn:tag:artist:qloo:pure_vocal_tone": "Pure Vocal Tone",
+            "urn:tag:audience:qloo:dedicated": "Dedicated",
+            "urn:tag:theme:qloo:religious": "Religious",
+            "urn:tag:influenced_by:qloo:giovanni_pierluigi_da_palestrina": "Giovanni Pierluigi da Palestrina",
+            "urn:tag:influence:qloo:early_music": "Early Music",
+            "urn:tag:instrument:qloo:voice": "Voice",
+            "urn:tag:style:qloo:historically_informed": "Historically Informed",
+            "urn:tag:artist:qloo:specialized": "Specialized",
+            "urn:tag:audience:qloo:appreciative": "Appreciative",
+            "urn:tag:influence:qloo:sacred_music": "Sacred Music",
+            "urn:tag:influence:qloo:choral_music": "Choral Music",
+            "urn:tag:music:qloo:pure": "Pure",
+            "urn:tag:music:qloo:clear": "Clear",
+            "urn:tag:music:qloo:historically_informed": "Historically Informed"
+          }
+        },
+        {
+          "entityId": "0685FEE9-A3FE-47FC-856C-373016391B88",
+          "name": "God of Shamisen",
+          "affinity": 0.6579770406236232,
+          "affinitySource": "query",
+          "backfill": false,
+          "tags": [
+            "urn:tag:style:qloo:expressive",
+            "urn:tag:influenced_by:qloo:traditional_japanese_shamisen_masters",
+            "urn:tag:style:qloo:traditional_shamisen",
+            "urn:tag:influence:qloo:instrumental_fusion",
+            "urn:tag:style:qloo:japanese_folk_fusion",
+            "urn:tag:audience:qloo:passionate",
+            "urn:tag:subgenre:qloo:fusion",
+            "urn:tag:audience:qloo:culturally_curious",
+            "urn:tag:style:qloo:virtuosic",
+            "urn:tag:artist:qloo:dynamic",
+            "urn:tag:style:qloo:energetic",
+            "urn:tag:influenced_by:qloo:japanese_folk_music",
+            "urn:tag:genre:music:progressive_metal",
+            "urn:tag:influence:qloo:modern_shamisen_music",
+            "urn:tag:genre:qloo:shamisen_music",
+            "urn:tag:music:qloo:traditional",
+            "urn:tag:instrument:qloo:shamisen",
+            "urn:tag:artist:qloo:expressive",
+            "urn:tag:music:qloo:fusion",
+            "urn:tag:genre:qloo:instrumental",
+            "urn:tag:subgenre:qloo:world_music",
+            "urn:tag:genre:music:japanese",
+            "urn:tag:genre:music:folk_metal",
+            "urn:tag:genre:qloo:traditional_japanese_music",
+            "urn:tag:audience:qloo:dedicated",
+            "urn:tag:style:qloo:instrumental_virtuosic",
+            "urn:tag:obscurity:qloo:5",
+            "urn:tag:genre:music:shamisen",
+            "urn:tag:genre:music:metal",
+            "urn:tag:artist:qloo:traditional",
+            "urn:tag:artist:qloo:virtuosic",
+            "urn:tag:artist:qloo:innovative",
+            "urn:tag:influence:qloo:world_fusion",
+            "urn:tag:style:qloo:world_fusion",
+            "urn:tag:style:qloo:contemporary_shamisen",
+            "urn:tag:music:qloo:instrumental",
+            "urn:tag:influenced_by:qloo:modern_fusion_artists",
+            "urn:tag:music:qloo:expressive",
+            "urn:tag:music:qloo:dynamic",
+            "urn:tag:style:qloo:world_music_fusion"
+          ],
+          "tagNames": {
+            "urn:tag:style:qloo:expressive": "Expressive",
+            "urn:tag:influenced_by:qloo:traditional_japanese_shamisen_masters": "Traditional Japanese Shamisen Masters",
+            "urn:tag:style:qloo:traditional_shamisen": "Traditional Shamisen",
+            "urn:tag:influence:qloo:instrumental_fusion": "Instrumental Fusion",
+            "urn:tag:style:qloo:japanese_folk_fusion": "Japanese Folk Fusion",
+            "urn:tag:audience:qloo:passionate": "Passionate",
+            "urn:tag:subgenre:qloo:fusion": "Fusion",
+            "urn:tag:audience:qloo:culturally_curious": "Culturally Curious",
+            "urn:tag:style:qloo:virtuosic": "Virtuosic",
+            "urn:tag:artist:qloo:dynamic": "Dynamic",
+            "urn:tag:style:qloo:energetic": "Energetic",
+            "urn:tag:influenced_by:qloo:japanese_folk_music": "Japanese Folk Music",
+            "urn:tag:genre:music:progressive_metal": "Progressive Metal",
+            "urn:tag:influence:qloo:modern_shamisen_music": "Modern Shamisen Music",
+            "urn:tag:genre:qloo:shamisen_music": "Shamisen Music",
+            "urn:tag:music:qloo:traditional": "Traditional",
+            "urn:tag:instrument:qloo:shamisen": "Shamisen",
+            "urn:tag:artist:qloo:expressive": "Expressive",
+            "urn:tag:music:qloo:fusion": "Fusion",
+            "urn:tag:genre:qloo:instrumental": "Instrumental",
+            "urn:tag:subgenre:qloo:world_music": "World Music",
+            "urn:tag:genre:music:japanese": "Japanese",
+            "urn:tag:genre:music:folk_metal": "Folk Metal",
+            "urn:tag:genre:qloo:traditional_japanese_music": "Traditional Japanese Music",
+            "urn:tag:audience:qloo:dedicated": "Dedicated",
+            "urn:tag:style:qloo:instrumental_virtuosic": "Instrumental Virtuosic",
+            "urn:tag:obscurity:qloo:5": "5",
+            "urn:tag:genre:music:shamisen": "Shamisen",
+            "urn:tag:genre:music:metal": "Metal",
+            "urn:tag:artist:qloo:traditional": "Traditional",
+            "urn:tag:artist:qloo:virtuosic": "Virtuosic",
+            "urn:tag:artist:qloo:innovative": "Innovative",
+            "urn:tag:influence:qloo:world_fusion": "World Fusion",
+            "urn:tag:style:qloo:world_fusion": "World Fusion",
+            "urn:tag:style:qloo:contemporary_shamisen": "Contemporary Shamisen",
+            "urn:tag:music:qloo:instrumental": "Instrumental",
+            "urn:tag:influenced_by:qloo:modern_fusion_artists": "Modern Fusion Artists",
+            "urn:tag:music:qloo:expressive": "Expressive",
+            "urn:tag:music:qloo:dynamic": "Dynamic",
+            "urn:tag:style:qloo:world_music_fusion": "World Music Fusion"
+          }
+        },
+        {
+          "entityId": "613D23BA-E73A-4EAF-BEB4-B6740D3F971B",
+          "name": "Warbreed",
+          "affinity": 0.6579770406236232,
+          "affinitySource": "query",
+          "backfill": false,
+          "tags": [
+            "urn:tag:artist:qloo:passionate",
+            "urn:tag:style:qloo:emotionally_charged",
+            "urn:tag:audience:qloo:passionate",
+            "urn:tag:instrument:qloo:bass_guitar",
+            "urn:tag:influenced_by:qloo:pantera",
+            "urn:tag:style:qloo:intense",
+            "urn:tag:influenced_by:qloo:metallica",
+            "urn:tag:artist:qloo:aggressive",
+            "urn:tag:style:qloo:aggressive",
+            "urn:tag:style:qloo:raw",
+            "urn:tag:artist:qloo:heavy",
+            "urn:tag:artist:qloo:intense",
+            "urn:tag:style:qloo:breakdown_heavy",
+            "urn:tag:genre:music:argentinian",
+            "urn:tag:genre:music:melodic_death_metal",
+            "urn:tag:instrument:qloo:drums",
+            "urn:tag:genre:qloo:metalcore",
+            "urn:tag:style:qloo:metalcore",
+            "urn:tag:subgenre:qloo:heavy_metal",
+            "urn:tag:artist:qloo:energetic",
+            "urn:tag:theme:qloo:inner_conflict",
+            "urn:tag:influenced_by:qloo:earth_crisis",
+            "urn:tag:style:qloo:hardcore",
+            "urn:tag:influenced_by:qloo:converge",
+            "urn:tag:instrument:qloo:electric_guitar",
+            "urn:tag:influence:qloo:hardcore_punk",
+            "urn:tag:genre:music:argentina",
+            "urn:tag:obscurity:qloo:6",
+            "urn:tag:genre:qloo:hardcore_punk",
+            "urn:tag:theme:qloo:war",
+            "urn:tag:style:qloo:powerful",
+            "urn:tag:theme:qloo:brotherhood",
+            "urn:tag:influence:qloo:metalcore",
+            "urn:tag:theme:qloo:resilience",
+            "urn:tag:theme:qloo:struggle",
+            "urn:tag:instrument:qloo:vocals",
+            "urn:tag:audience:qloo:energetic",
+            "urn:tag:style:qloo:energetic",
+            "urn:tag:audience:qloo:loyal",
+            "urn:tag:audience:qloo:dedicated",
+            "urn:tag:music:qloo:aggressive",
+            "urn:tag:music:qloo:heavy",
+            "urn:tag:music:qloo:energetic",
+            "urn:tag:music:qloo:raw",
+            "urn:tag:music:qloo:powerful"
+          ],
+          "tagNames": {
+            "urn:tag:artist:qloo:passionate": "Passionate",
+            "urn:tag:style:qloo:emotionally_charged": "Emotionally Charged",
+            "urn:tag:audience:qloo:passionate": "Passionate",
+            "urn:tag:instrument:qloo:bass_guitar": "Bass Guitar",
+            "urn:tag:influenced_by:qloo:pantera": "Pantera",
+            "urn:tag:style:qloo:intense": "Intense",
+            "urn:tag:influenced_by:qloo:metallica": "Metallica",
+            "urn:tag:artist:qloo:aggressive": "Aggressive",
+            "urn:tag:style:qloo:aggressive": "Aggressive",
+            "urn:tag:style:qloo:raw": "Raw",
+            "urn:tag:artist:qloo:heavy": "Heavy",
+            "urn:tag:artist:qloo:intense": "Intense",
+            "urn:tag:style:qloo:breakdown_heavy": "Breakdown-Heavy",
+            "urn:tag:genre:music:argentinian": "Argentinian",
+            "urn:tag:genre:music:melodic_death_metal": "Melodic Death Metal",
+            "urn:tag:instrument:qloo:drums": "Drums",
+            "urn:tag:genre:qloo:metalcore": "Metalcore",
+            "urn:tag:style:qloo:metalcore": "Metalcore",
+            "urn:tag:subgenre:qloo:heavy_metal": "Heavy Metal",
+            "urn:tag:artist:qloo:energetic": "Energetic",
+            "urn:tag:theme:qloo:inner_conflict": "Inner Conflict",
+            "urn:tag:influenced_by:qloo:earth_crisis": "Earth Crisis",
+            "urn:tag:style:qloo:hardcore": "Hardcore",
+            "urn:tag:influenced_by:qloo:converge": "Converge",
+            "urn:tag:instrument:qloo:electric_guitar": "Electric Guitar",
+            "urn:tag:influence:qloo:hardcore_punk": "Hardcore Punk",
+            "urn:tag:genre:music:argentina": "Argentina",
+            "urn:tag:obscurity:qloo:6": "6",
+            "urn:tag:genre:qloo:hardcore_punk": "Hardcore Punk",
+            "urn:tag:theme:qloo:war": "War",
+            "urn:tag:style:qloo:powerful": "Powerful",
+            "urn:tag:theme:qloo:brotherhood": "Brotherhood",
+            "urn:tag:influence:qloo:metalcore": "Metalcore",
+            "urn:tag:theme:qloo:resilience": "Resilience",
+            "urn:tag:theme:qloo:struggle": "Struggle",
+            "urn:tag:instrument:qloo:vocals": "Vocals",
+            "urn:tag:audience:qloo:energetic": "Energetic",
+            "urn:tag:style:qloo:energetic": "Energetic",
+            "urn:tag:audience:qloo:loyal": "Loyal",
+            "urn:tag:audience:qloo:dedicated": "Dedicated",
+            "urn:tag:music:qloo:aggressive": "Aggressive",
+            "urn:tag:music:qloo:heavy": "Heavy",
+            "urn:tag:music:qloo:energetic": "Energetic",
+            "urn:tag:music:qloo:raw": "Raw",
+            "urn:tag:music:qloo:powerful": "Powerful"
+          }
+        },
+        {
+          "entityId": "98C1AD09-BCFE-48A6-B78B-CF6E49F49D03",
+          "name": "Ecstasy",
+          "affinity": 0.6579770406236232,
+          "affinitySource": "query",
+          "backfill": false,
+          "tags": [
+            "urn:tag:genre:music:electronic",
+            "urn:tag:genre:music:punk",
+            "urn:tag:genre:music:british"
+          ],
+          "tagNames": {
+            "urn:tag:genre:music:electronic": "Electronic",
+            "urn:tag:genre:music:punk": "Punk",
+            "urn:tag:genre:music:british": "British"
+          }
+        },
+        {
+          "entityId": "B14CF636-7F6E-4B18-AEEB-9420B4A6DA49",
+          "name": "Mathématiques Modernes",
+          "affinity": 0.6579770406236232,
+          "affinitySource": "query",
+          "backfill": false,
+          "tags": [
+            "urn:tag:style:qloo:french_synthpop",
+            "urn:tag:artist:qloo:new_wave",
+            "urn:tag:artist:qloo:experimental",
+            "urn:tag:genre:music:french",
+            "urn:tag:audience:qloo:electronic",
+            "urn:tag:influenced_by:qloo:brian_eno",
+            "urn:tag:artist:qloo:synth_driven",
+            "urn:tag:style:qloo:energetic",
+            "urn:tag:influence:qloo:french_synthpop",
+            "urn:tag:style:qloo:minimal_synth",
+            "urn:tag:music:qloo:experimental",
+            "urn:tag:theme:qloo:modernity",
+            "urn:tag:genre:music:france",
+            "urn:tag:music:qloo:atmospheric",
+            "urn:tag:instrument:qloo:electric_guitar",
+            "urn:tag:artist:qloo:innovative",
+            "urn:tag:theme:qloo:urban_life",
+            "urn:tag:influenced_by:qloo:david_bowie",
+            "urn:tag:subgenre:qloo:post_punk",
+            "urn:tag:style:qloo:electronic",
+            "urn:tag:audience:qloo:avant_garde",
+            "urn:tag:influenced_by:qloo:kraftwerk",
+            "urn:tag:audience:qloo:dedicated",
+            "urn:tag:instrument:qloo:drum_machine",
+            "urn:tag:subgenre:qloo:experimental",
+            "urn:tag:audience:qloo:cult",
+            "urn:tag:theme:qloo:technology",
+            "urn:tag:genre:qloo:new_wave",
+            "urn:tag:artist:qloo:electronic",
+            "urn:tag:instrument:qloo:bass_guitar",
+            "urn:tag:style:qloo:post_punk_electronic",
+            "urn:tag:theme:qloo:alienation",
+            "urn:tag:audience:qloo:nostalgic",
+            "urn:tag:music:qloo:electronic",
+            "urn:tag:style:qloo:cold_wave",
+            "urn:tag:obscurity:qloo:7",
+            "urn:tag:influence:qloo:electronic",
+            "urn:tag:genre:qloo:synthpop",
+            "urn:tag:influence:qloo:new_wave",
+            "urn:tag:style:qloo:minimalist",
+            "urn:tag:genre:music:minimal_synth",
+            "urn:tag:genre:music:new_wave",
+            "urn:tag:style:qloo:experimental_synth",
+            "urn:tag:instrument:qloo:synthesizer",
+            "urn:tag:genre:qloo:electronic",
+            "urn:tag:style:qloo:atmospheric",
+            "urn:tag:music:qloo:synth_driven",
+            "urn:tag:music:qloo:innovative",
+            "urn:tag:style:qloo:coldwave"
+          ],
+          "tagNames": {
+            "urn:tag:style:qloo:french_synthpop": "French Synthpop",
+            "urn:tag:artist:qloo:new_wave": "New Wave",
+            "urn:tag:artist:qloo:experimental": "Experimental",
+            "urn:tag:genre:music:french": "French",
+            "urn:tag:audience:qloo:electronic": "Electronic",
+            "urn:tag:influenced_by:qloo:brian_eno": "Brian Eno",
+            "urn:tag:artist:qloo:synth_driven": "Synth-Driven",
+            "urn:tag:style:qloo:energetic": "Energetic",
+            "urn:tag:influence:qloo:french_synthpop": "French Synthpop",
+            "urn:tag:style:qloo:minimal_synth": "Minimal Synth",
+            "urn:tag:music:qloo:experimental": "Experimental",
+            "urn:tag:theme:qloo:modernity": "Modernity",
+            "urn:tag:genre:music:france": "France",
+            "urn:tag:music:qloo:atmospheric": "Atmospheric",
+            "urn:tag:instrument:qloo:electric_guitar": "Electric Guitar",
+            "urn:tag:artist:qloo:innovative": "Innovative",
+            "urn:tag:theme:qloo:urban_life": "Urban Life",
+            "urn:tag:influenced_by:qloo:david_bowie": "David Bowie",
+            "urn:tag:subgenre:qloo:post_punk": "Post-Punk",
+            "urn:tag:style:qloo:electronic": "Electronic",
+            "urn:tag:audience:qloo:avant_garde": "Avant-Garde",
+            "urn:tag:influenced_by:qloo:kraftwerk": "Kraftwerk",
+            "urn:tag:audience:qloo:dedicated": "Dedicated",
+            "urn:tag:instrument:qloo:drum_machine": "Drum Machine",
+            "urn:tag:subgenre:qloo:experimental": "Experimental",
+            "urn:tag:audience:qloo:cult": "Cult",
+            "urn:tag:theme:qloo:technology": "Technology",
+            "urn:tag:genre:qloo:new_wave": "New Wave",
+            "urn:tag:artist:qloo:electronic": "Electronic",
+            "urn:tag:instrument:qloo:bass_guitar": "Bass Guitar",
+            "urn:tag:style:qloo:post_punk_electronic": "Post-Punk Electronic",
+            "urn:tag:theme:qloo:alienation": "Alienation",
+            "urn:tag:audience:qloo:nostalgic": "Nostalgic",
+            "urn:tag:music:qloo:electronic": "Electronic",
+            "urn:tag:style:qloo:cold_wave": "Cold Wave",
+            "urn:tag:obscurity:qloo:7": "7",
+            "urn:tag:influence:qloo:electronic": "Electronic",
+            "urn:tag:genre:qloo:synthpop": "Synthpop",
+            "urn:tag:influence:qloo:new_wave": "New Wave",
+            "urn:tag:style:qloo:minimalist": "Minimalist",
+            "urn:tag:genre:music:minimal_synth": "Minimal Synth",
+            "urn:tag:genre:music:new_wave": "New Wave",
+            "urn:tag:style:qloo:experimental_synth": "Experimental Synth",
+            "urn:tag:instrument:qloo:synthesizer": "Synthesizer",
+            "urn:tag:genre:qloo:electronic": "Electronic",
+            "urn:tag:style:qloo:atmospheric": "Atmospheric",
+            "urn:tag:music:qloo:synth_driven": "Synth-Driven",
+            "urn:tag:music:qloo:innovative": "Innovative",
+            "urn:tag:style:qloo:coldwave": "Coldwave"
+          }
+        },
+        {
+          "entityId": "EBD11EAA-F163-4487-B65D-3AC6CC69720B",
+          "name": "MOOSE HILL",
+          "affinity": 0.7649962877984056,
+          "affinitySource": "query",
+          "backfill": true,
+          "tags": [
+            "urn:tag:genre:music:electronic",
+            "urn:tag:genre:music:acoustic",
+            "urn:tag:genre:music:ambient"
+          ],
+          "tagNames": {
+            "urn:tag:genre:music:electronic": "Electronic",
+            "urn:tag:genre:music:acoustic": "Acoustic",
+            "urn:tag:genre:music:ambient": "Ambient"
+          }
+        }
+      ],
+      "warnings": []
+    },
+    "status": {
+      "kind": "live",
+      "label": "live",
+      "detail": "Every required step ran: the model read the scene and Qloo ranked the artists by measured audience affinity.",
+      "reasons": []
+    }
+  }
+}
