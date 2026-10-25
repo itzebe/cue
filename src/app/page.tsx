@@ -59,6 +59,14 @@ export default function StudioPage() {
   // ungrounded answer from the same run, with the measured panels named as absent.
   const [groundedOn, setGroundedOn] = useState<boolean>(true);
 
+  // The brief and this button are server-rendered before React attaches, so a
+  // click in that window is a no-op: the handler is not bound yet. Gating the
+  // control on hydration turns a silent dead click into a visibly disabled one.
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+
   // Advance the stage ticker while a request is in flight so the agent's work
   // is legible rather than an indeterminate spinner.
   useEffect(() => {
@@ -260,7 +268,7 @@ export default function StudioPage() {
               <button
                 type="button"
                 onClick={run}
-                disabled={status === "running" || scene.trim().length < 20}
+                disabled={!hydrated || status === "running" || scene.trim().length < 20}
                 className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-b from-ember-500 to-ember-600 px-4 py-3 text-sm font-medium text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {status === "running" ? (
@@ -272,7 +280,9 @@ export default function StudioPage() {
                   "Build the cue sheet"
                 )}
               </button>
-              {scene.trim().length < 20 ? (
+              {!hydrated ? (
+                <p className="mt-2 text-[11px] text-haze-500">Loading the agent…</p>
+              ) : scene.trim().length < 20 ? (
                 <p className="mt-2 text-[11px] text-haze-500">
                   Add a little more detail to run the agent.
                 </p>

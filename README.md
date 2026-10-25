@@ -40,7 +40,7 @@ Everything the submission needs, in one place:
 | **Live demo** | [cue-nine-iota.vercel.app](https://cue-nine-iota.vercel.app/) — hosted on Vercel, no signup, no key |
 | **Source** | [github.com/itzebe/cue](https://github.com/itzebe/cue) — public, MIT |
 | **Run it locally** | `npm install && npm run dev` → [localhost:12000](http://localhost:12000). Works with no keys at all (see [Run it](#run-it)) |
-| **Verify it** | `npm run verify` (167 checks) · `npm run reproduce` (rebuilds the Taste Gap figures offline) · `npm run reproduce:benchmark` (exhaustive null distribution) |
+| **Verify it** | `npm run verify` (192 checks) · `npm run reproduce` (rebuilds the Taste Gap figures offline) · `npm run reproduce:benchmark` (exhaustive null distribution) |
 | **The Qloo difference** | [The Taste Gap](#the-taste-gap) — a measurement no LLM can produce, on a feature that would not exist without the taste graph |
 
 **The sixty-second read.** A brief goes in; Qloo ranks artists by measured audience affinity and
@@ -639,7 +639,7 @@ React and Next — the pipeline is plain TypeScript in `src/lib/`.
 ## Verification
 
 ```bash
-npm run verify               # 167 checks
+npm run verify               # 192 checks
 npm run reproduce            # 3 checks: rebuilds the README's Taste Gap table offline
 npm run reproduce:benchmark  # 20 checks: exhaustive null distribution for the same briefs
 npm run benchmark            # replay the Qloo-vs-LLM-only metrics and assert they match the artifact
@@ -649,7 +649,7 @@ npm run build                # production build
 ```
 
 `npm run verify` prints a `passed`/`failed` line and exits non-zero on any failure. It currently
-reports **167 passed, 0 failed**. The only thing stubbed is `fetch` — the real HTTP boundary. Every
+reports **192 passed, 0 failed**. The only thing stubbed is `fetch` — the real HTTP boundary. Every
 layer under test is the production code path, exercised with response bodies shaped like real Qloo
 payloads. Coverage includes normalisation, affinity extraction, explainability parsing, momentum
 derivation, failure degradation, cue assembly, concurrency limits, request-budget accounting,
