@@ -4345,6 +4345,442 @@ await check("Audit: the music adapter and the generic engine agree on the same i
   assert.deepEqual(music.gaps.map((gap) => gap.tag).sort(), generic.uncoveredDimensions.map((d) => d.replace("urn:tag:qloo:", "")).sort());
 });
 
+// ---------------------------------------------------------------------------
+// Cultural vocabulary and the venue Taste Gap.
+//
+// Every tag below is a fixture: a hand-built Qloo response shape, not recorded
+// live data. The namespaces and their classification were read from live
+// responses (see the rationale in src/lib/cultural.ts), but nothing here is
+// presented as live evidence. Live verification is separate and is described in
+// the pull request.
+// ---------------------------------------------------------------------------
+
+/** A place-shaped fixture entity carrying explicit namespaced tag ids. */
+function placeFixture(name: string, tagIds: string[], affinity?: number) {
+  return {
+    entity_id: `place-${name}`,
+    name,
+    type: "urn:entity:place",
+    tags: tagIds.map((id) => ({ tag_id: id, name: id.split(":").pop() ?? id })),
+    query: affinity === undefined ? {} : { affinity },
+    popularity: 0.5,
+  };
+}
+
+/** Build a namespaced tag id in the shape Qloo returns for places. */
+function tag(ns: string, value: string): string {
+  return `urn:tag:${ns}:qloo:${value}`;
+}
+
+await check("Cultural: the allowlist retains every cultural namespace", async () => {
+  const { CULTURAL_NAMESPACES, isCulturalTag } = await import("../src/lib/cultural.ts");
+  // The list must not be empty and must contain the namespaces the live probe
+  // found to be cultural.
+  assert.ok(CULTURAL_NAMESPACES.length > 0, "the allowlist must not be empty");
+  for (const ns of ["ambience", "decor", "setting", "interests", "activity_type", "view"]) {
+    assert.ok(CULTURAL_NAMESPACES.includes(ns as never), `${ns} must be on the allowlist`);
+  }
+  for (const ns of CULTURAL_NAMESPACES) {
+    assert.equal(isCulturalTag(tag(ns, "x")), true, `${ns} must be treated as cultural`);
+  }
+});
+
+await check("Cultural: operational namespaces are excluded", async () => {
+  const { isCulturalTag } = await import("../src/lib/cultural.ts");
+  // Each of these was observed on live place responses and carries operational
+  // or type information, not cultural preference.
+  const operational = [
+    "parking",
+    "credit_card",
+    "accessibility",
+    "payments",
+    "amenity",
+    "amenities",
+    "children",
+    "dietary_option",
+    "age_range",
+    "service_options",
+    "service_type",
+    "offerings",
+    "planning",
+    "cost_description",
+    "menu_highlight",
+    "specialty_dish",
+    "dining_options",
+    "beverage_offering",
+    "category",
+    "genre",
+    "nearby_attraction",
+    "noise_level",
+    "inclusivity",
+    "room_type",
+    "hotel_rating",
+    "event",
+    "collection",
+    "resy",
+    "recycling",
+    "pets",
+    "sustainability_initiative",
+    "activities",
+    "place_page_attributes",
+    "not_for_display",
+  ];
+  for (const ns of operational) {
+    assert.equal(isCulturalTag(tag(ns, "x")), false, `${ns} must not be treated as cultural`);
+  }
+});
+
+await check("Cultural: unknown namespaces are excluded by default", async () => {
+  const { isCulturalTag } = await import("../src/lib/cultural.ts");
+  // A namespace Qloo has not shipped yet must not silently become cultural.
+  for (const unknown of ["vibe_v2", "cultural_context", "future_axis", "mood"]) {
+    assert.equal(isCulturalTag(tag(unknown, "something")), false, `${unknown} must fail closed`);
+  }
+});
+
+await check("Cultural: the music tag namespace is excluded, so music cannot be mis-measured as venues", async () => {
+  const { isCulturalTag, namespaceOf } = await import("../src/lib/cultural.ts");
+  // Artist tags are `urn:tag:qloo:<something>` — no venue namespace. The filter
+  // must drop them, which is what stops the venue path from ever scoring music
+  // tags as cultural dimensions.
+  assert.equal(namespaceOf("urn:tag:qloo:cinematic"), "qloo");
+  assert.equal(isCulturalTag("urn:tag:qloo:cinematic"), false);
+  assert.equal(isCulturalTag("urn:tag:qloo:warmth"), false);
+});
+
+await check("Cultural: malformed tag ids are excluded and never throw", async () => {
+  const { isCulturalTag, namespaceOf, filterCulturalEntities } = await import(
+    "../src/lib/cultural.ts"
+  );
+  const malformed = [null, undefined, 42, {}, "", "urn:tag:", "urn:tag:ambience", "not-a-urn"];
+  for (const bad of malformed) {
+    assert.equal(isCulturalTag(bad), false, `${String(bad)} must not be cultural`);
+    assert.equal(namespaceOf(bad), null, `${String(bad)} must have no namespace`);
+  }
+  // A pool that is not an array, contains nulls, or has non-array tags must not throw.
+  assert.deepEqual(filterCulturalEntities(undefined), []);
+  assert.deepEqual(filterCulturalEntities(null as never), []);
+  const messy = filterCulturalEntities([
+    placeFixture("Keep", [tag("ambience", "cinematic"), tag("parking", "paid")]),
+    null as never,
+    { entity_id: "no-tags", name: "NoTags", type: "urn:entity:place" } as never,
+    { entity_id: "bad-tags", name: "BadTags", tags: "nope" } as never,
+  ]);
+  assert.equal(messy.length, 4, "malformed entries pass through rather than throwing");
+  const kept = messy[0] as { tags: { tag_id: string }[] };
+  assert.deepEqual(
+    kept.tags.map((t) => t.tag_id),
+    [tag("ambience", "cinematic")],
+    "only the cultural tag survives filtering",
+  );
+});
+
+await check("Cultural: filtering never mutates the original pool", async () => {
+  const { filterCulturalEntities } = await import("../src/lib/cultural.ts");
+  const original = placeFixture("Original", [tag("ambience", "cinematic"), tag("parking", "paid")]);
+  const pool = [original];
+  const filtered = filterCulturalEntities(pool);
+  assert.notEqual(filtered[0], original, "a copy must be returned, not the same object");
+  assert.equal(original.tags.length, 2, "the source pool keeps its operational tags");
+  assert.equal((filtered[0] as { tags: unknown[] }).tags.length, 1);
+});
+
+await check("Cultural coverage: operational tags cannot enter the cultural score", async () => {
+  const { filterCulturalEntities } = await import("../src/lib/cultural.ts");
+  const { computeTasteGap } = await import("../src/lib/coverage.ts");
+  // Operational tags are shared by all three places (support 3) and would form
+  // the entire vocabulary if the filter were missing. The single cultural tag is
+  // shared by two. The score must reflect only the cultural tag.
+  const pool = [
+    placeFixture("A", [tag("parking", "paid"), tag("credit_card", "visa"), tag("ambience", "cinematic")], 0.9),
+    placeFixture("B", [tag("parking", "paid"), tag("credit_card", "visa"), tag("ambience", "cinematic")], 0.8),
+    placeFixture("C", [tag("parking", "paid"), tag("credit_card", "visa")], 0.7),
+  ];
+  const gap = computeTasteGap(filterCulturalEntities(pool as never), [0, 1]);
+  assert.equal(gap.original.vocabularySize, 1, "only the cultural dimension is measurable");
+  assert.equal(gap.original.coveredTags, 1);
+  assert.equal(gap.original.index, 100);
+  const allTags = gap.original.audit.coveredDimensions.concat(gap.original.audit.uncoveredDimensions);
+  for (const id of allTags) {
+    assert.ok(
+      !/parking|credit_card/.test(id),
+      `operational tag ${id} must never appear in the cultural measurement`,
+    );
+  }
+});
+
+await check("Cultural coverage: an empty cultural pool reports unavailable, not a zero score", async () => {
+  const { filterCulturalEntities } = await import("../src/lib/cultural.ts");
+  const { computeTasteGap } = await import("../src/lib/coverage.ts");
+  // Places that carry only operational tags: real data, but no cultural evidence.
+  const pool = [
+    placeFixture("A", [tag("parking", "paid")], 0.9),
+    placeFixture("B", [tag("amenity", "restrooms")], 0.8),
+  ];
+  const gap = computeTasteGap(filterCulturalEntities(pool as never), [0, 1]);
+  assert.ok(gap.unavailableReason, "an unmeasurable pool must carry an unavailable reason");
+  assert.equal(gap.original.audit.valid, false, "the measurement must be marked invalid");
+});
+
+await check("Cultural coverage: the score comes from the production engine, not a reimplementation", async () => {
+  const { filterCulturalEntities } = await import("../src/lib/cultural.ts");
+  const { computeTasteGap, toCoverageEntities } = await import("../src/lib/coverage.ts");
+  const { auditSelection } = await import("../src/lib/audit.ts");
+  const pool = [
+    placeFixture("A", [tag("ambience", "cinematic"), tag("decor", "classic"), tag("view", "sunset_view")], 0.9),
+    placeFixture("B", [tag("ambience", "cinematic"), tag("decor", "classic")], 0.8),
+    placeFixture("C", [tag("setting", "historic"), tag("view", "sunset_view")], 0.7),
+    placeFixture("D", [tag("setting", "historic"), tag("interests", "cinema_history")], 0.6),
+  ];
+  const cultural = filterCulturalEntities(pool as never);
+  const gap = computeTasteGap(cultural, [0, 1]);
+  const generic = auditSelection(
+    toCoverageEntities(cultural as never).map((e) => ({
+      entityId: e.entityId,
+      name: e.name,
+      dimensions: e.tags,
+    })),
+    [0, 1],
+  );
+  assert.equal(gap.original.index, generic.score, "the venue score must equal the engine's score");
+  assert.equal(gap.original.coveredTags, generic.numerator);
+  assert.equal(gap.original.vocabularySize, generic.denominator);
+});
+
+await check("Localisation: each market's cultural coverage is measured from its own pool", async () => {
+  const original = globalThis.fetch;
+  calls.length = 0;
+  const perMarket: Record<string, string[]> = {
+    "Los Angeles": [tag("ambience", "cinematic"), tag("decor", "old_hollywood"), tag("view", "sunset_view")],
+    Tokyo: [tag("ambience", "minimalist"), tag("setting", "nature")],
+  };
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = typeof input === "string" ? input : input.toString();
+    const parsed = new URL(url);
+    calls.push({ url, headers: {} });
+    const market = parsed.searchParams.get("filter.location.query") ?? "";
+    const tags = perMarket[market] ?? [];
+    const entities = [
+      { entity_id: `${market}-1`, name: `${market} One`, tags: tags.map((id) => ({ tag_id: id, name: id.split(":").pop() })), query: { affinity: 0.9 }, popularity: 0.5 },
+      { entity_id: `${market}-2`, name: `${market} Two`, tags: tags.map((id) => ({ tag_id: id, name: id.split(":").pop() })), query: { affinity: 0.8 }, popularity: 0.5 },
+      { entity_id: `${market}-3`, name: `${market} Three`, tags: [{ tag_id: tag("parking", "paid"), name: "paid" }], query: { affinity: 0.7 }, popularity: 0.5 },
+    ];
+    return jsonResponse({ results: { entities } });
+  }) as typeof fetch;
+
+  try {
+    const { localiseBrief } = await import("../src/lib/localise.ts");
+    const { filterCulturalEntities } = await import("../src/lib/cultural.ts");
+    const { computeTasteGap } = await import("../src/lib/coverage.ts");
+    const receipts: Receipt[] = [];
+    const result = await localiseBrief([], [], "Los Angeles", ["Tokyo"], receipts);
+
+    assert.equal(receipts.length, 2, "one Qloo call per market, and no more");
+
+    for (const market of result.markets) {
+      const coverage = market.culturalCoverage;
+      assert.ok(coverage, `${market.market} must carry cultural coverage`);
+      assert.ok(!coverage.unavailableReason, `${market.market} shares cultural dimensions`);
+      assert.equal(coverage.original.poolSize, 3, "the pool is every place the market returned");
+      // Recompute independently from that market's own tags and require equality.
+      const expected = computeTasteGap(
+        filterCulturalEntities([
+          placeFixture(`${market.market} One`, perMarket[market.market] ?? [], 0.9),
+          placeFixture(`${market.market} Two`, perMarket[market.market] ?? [], 0.8),
+          placeFixture(`${market.market} Three`, [tag("parking", "paid")], 0.7),
+        ] as never),
+        [0, 1],
+      );
+      assert.equal(
+        coverage.original.vocabularySize,
+        expected.original.vocabularySize,
+        `${market.market} must be measured against its own pool`,
+      );
+    }
+
+    // The two markets have different cultural vocabularies, so their denominators
+    // must differ — proof the measurement is per-market, not shared.
+    const [la, tokyo] = result.markets;
+    assert.notEqual(
+      la.culturalCoverage!.original.vocabularySize,
+      tokyo.culturalCoverage!.original.vocabularySize,
+      "markets must not share one cultural vocabulary",
+    );
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("Localisation: the unfiltered pool still drives touchpoints and overlap", async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = typeof input === "string" ? input : input.toString();
+    const market = new URL(url).searchParams.get("filter.location.query");
+    // Every place carries only operational tags, so the cultural measurement is
+    // unavailable — but the touchpoint list must still be populated from the raw
+    // response, because localisation does not depend on cultural tags.
+    const names = market === "Los Angeles" ? ["Hollywood Sign"] : ["Ghibli Museum"];
+    return jsonResponse({
+      results: {
+        entities: names.map((name, index) => ({
+          entity_id: `${market}-${index}`,
+          name,
+          tags: [{ tag_id: tag("parking", "paid"), name: "paid" }],
+          query: { affinity: 0.9 - index * 0.1 },
+        })),
+      },
+    });
+  }) as typeof fetch;
+
+  try {
+    const { localiseBrief } = await import("../src/lib/localise.ts");
+    const result = await localiseBrief([], [], "Los Angeles", ["Tokyo"], []);
+    assert.equal(result.markets[0].touchpoints[0].name, "Hollywood Sign");
+    assert.equal(result.markets[1].uniqueToMarket.includes("Ghibli Museum"), true);
+    assert.equal(result.markets[1].overlapWithReference, 0);
+    // Cultural coverage exists (pool is non-empty) but honestly reports that it
+    // cannot be measured rather than scoring zero.
+    assert.ok(result.markets[0].culturalCoverage, "a non-empty pool yields a coverage object");
+    assert.ok(
+      result.markets[0].culturalCoverage!.unavailableReason,
+      "an operational-only pool cannot produce a cultural score",
+    );
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("Localisation: a revision that cannot improve is not reported as an improvement", async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = (async () => {
+    // Three places carrying an identical cultural tag set: no reordering can
+    // reach more, so the revision must report no improvement.
+    const same = [tag("ambience", "cinematic"), tag("decor", "classic")];
+    return jsonResponse({
+      results: {
+        entities: ["One", "Two", "Three"].map((name, index) => ({
+          entity_id: `p-${index}`,
+          name,
+          tags: same.map((id) => ({ tag_id: id, name: id.split(":").pop() })),
+          query: { affinity: 0.9 - index * 0.1 },
+        })),
+      },
+    });
+  }) as typeof fetch;
+
+  try {
+    const { localiseBrief } = await import("../src/lib/localise.ts");
+    const result = await localiseBrief([], [], "Los Angeles", ["Tokyo"], []);
+    for (const market of result.markets) {
+      const coverage = market.culturalCoverage!;
+      assert.equal(coverage.revised.improves, false, "no improvement must not be claimed");
+      assert.equal(coverage.revised.indexDelta, 0, "a flat revision reports a zero delta");
+      assert.equal(coverage.original.index, 100, "an identical pool is fully covered");
+    }
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("Localisation: missing or malformed tag data does not crash localisation", async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = (async () => {
+    return jsonResponse({
+      results: {
+        entities: [
+          { entity_id: "p1", name: "Has Tags", tags: [{ tag_id: tag("ambience", "cinematic"), name: "cinematic" }], query: { affinity: 0.9 } },
+          { entity_id: "p2", name: "Null Tags", tags: null, query: { affinity: 0.8 } },
+          { entity_id: "p3", name: "Bad Tags", tags: [null, 42, {}, { tag_id: "" }], query: { affinity: 0.7 } },
+          { entity_id: "p4", name: "No Tags", query: { affinity: 0.6 } },
+          null,
+        ],
+      },
+    });
+  }) as typeof fetch;
+
+  try {
+    const { localiseBrief } = await import("../src/lib/localise.ts");
+    const receipts: Receipt[] = [];
+    const result = await localiseBrief([], [], "Los Angeles", ["Tokyo"], receipts);
+    assert.equal(result.markets.length, 2, "localisation completes despite malformed tags");
+    for (const market of result.markets) {
+      assert.ok(market.culturalCoverage, "a coverage object is produced, not a crash");
+      assert.equal(typeof market.culturalCoverage!.original.poolSize, "number");
+    }
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("Localisation: a market that returns no places yields no cultural coverage", async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const market = new URL(typeof input === "string" ? input : input.toString()).searchParams.get(
+      "filter.location.query",
+    );
+    if (market === "Tokyo") return jsonResponse({ results: { entities: [] } });
+    return jsonResponse({
+      results: {
+        entities: [
+          { entity_id: "la-1", name: "LA One", tags: [{ tag_id: tag("ambience", "cinematic"), name: "cinematic" }], query: { affinity: 0.9 } },
+        ],
+      },
+    });
+  }) as typeof fetch;
+
+  try {
+    const { localiseBrief } = await import("../src/lib/localise.ts");
+    const result = await localiseBrief([], [], "Los Angeles", ["Tokyo"], []);
+    const tokyo = result.markets.find((m) => m.market === "Tokyo")!;
+    assert.equal(tokyo.failed, true, "an empty market is marked failed");
+    assert.equal(tokyo.culturalCoverage, undefined, "no coverage is fabricated for an empty market");
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("Localisation: the existing overlap behaviour is unchanged alongside cultural coverage", async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const market = new URL(typeof input === "string" ? input : input.toString()).searchParams.get(
+      "filter.location.query",
+    );
+    const perMarket: Record<string, string[]> = {
+      "Los Angeles": ["Hollywood Sign", "Warner Bros. Studio Tour"],
+      Seoul: ["Drip Factory", "Starfield Library"],
+      Tokyo: ["Samurai Museum", "Ghibli Museum"],
+    };
+    const names = perMarket[market ?? ""] ?? [];
+    return jsonResponse({
+      results: {
+        entities: names.map((name, index) => ({
+          entity_id: `place-${market}-${index}`,
+          name,
+          tags: [{ tag_id: tag("ambience", "cinematic"), name: "cinematic" }],
+          query: { affinity: 0.9 - index * 0.1 },
+        })),
+      },
+    });
+  }) as typeof fetch;
+
+  try {
+    const { localiseBrief } = await import("../src/lib/localise.ts");
+    const result = await localiseBrief([], [], "Los Angeles", ["Seoul", "Tokyo"], []);
+    // The pre-existing contract must hold exactly as before.
+    assert.equal(result.markets.length, 3);
+    assert.equal(result.markets[0].overlapWithReference, 1);
+    assert.equal(result.markets[1].overlapWithReference, 0);
+    assert.equal(result.markets[1].uniqueToMarket.includes("Drip Factory"), true);
+    assert.equal(result.uniform, false);
+    // And every market now also carries its cultural coverage.
+    for (const market of result.markets) {
+      assert.ok(market.culturalCoverage, `${market.market} must carry cultural coverage`);
+    }
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
 console.log(`\n${passed} passed, ${failures.length} failed.\n`);
 if (failures.length > 0) {
   for (const failure of failures) console.error(`  - ${failure}`);
