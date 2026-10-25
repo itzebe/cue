@@ -624,11 +624,15 @@ one.
   `population_percentile` are constant across every artist tested. The field is parsed, ranked and
   rendered; it simply reports "steady" rather than fabricating a trend. The unit tests cover the
   rising and cooling branches with a varying series.
-- **Tag-only briefs return a uniform affinity.** When a brief names no film, director or artist,
-  `/v2/insights` matches on tags alone and returns the same affinity for every entity. Cue detects
-  this (zero spread with no signal entities), orders by popularity as a deterministic tiebreak, and
-  says so in the warnings instead of presenting an arbitrary order as a ranking. Naming an anchor
-  restores true affinity ranking.
+- **Tag-only briefs are scoped by tags, then ordered by popularity.** When a brief names no film,
+  director or artist, `/v2/insights` does not restrict its candidates on tag *signals* — the
+  hackathon key returns the same entities for death metal as for polka. Cue therefore applies the
+  brief's resolved genre and mood tags as a `filter.tags` candidate filter, which is what makes the
+  pool brief-specific. Within that pool the affinity is still uniform, so Cue detects the zero
+  spread and orders by popularity as a deterministic tiebreak, saying so in the warnings rather than
+  presenting an arbitrary order as a ranking. Naming an anchor restores true affinity ranking.
+  `filter.tags` is a union, so a brief whose tags match nothing falls back to the unscoped ranking
+  with a warning that says the slate is not filtered to the brief.
 - **No "song" entity type exists in Qloo.** Cue grounds the *artist* and *vibe* with Qloo, then
   proposes specific tracks from those artists. This is stated openly rather than papered over.
 - **Clearance is a model, not a quote.** Fee bands, splits and timelines are Cue's own transparent

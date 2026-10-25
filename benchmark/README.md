@@ -97,3 +97,20 @@ unmeasurable, never scored as zero.
 Every `evidence/<brief>.json` carries the source commit, the protocol sha256, the HTTP status and
 latency, and the deployment's own report of which model ran. A credential-pattern guard refuses to
 write a response that looks like it contains key material; the committed files contain none.
+
+## Follow-up: the post-hoc finding was a bug
+
+The exploratory finding `E1-cross-brief-distinctiveness` in `results.json` noted that Arm B returned
+an identical slate for two briefs with disjoint requested genres. That observation was correct, and
+it was a defect rather than a property of the taste graph.
+
+`signal.interests.tags` scores candidates but does not restrict them. For a brief with no named
+reference, `/v2/insights` therefore returned the same entities whatever the requested genre, the
+ranking fell back to popularity, and unrelated briefs produced the same slate. The fix applies the
+brief's resolved tags as a `filter.tags` candidate filter on the anchor-less path. See the "Known
+limitations" section of the root README.
+
+The recorded evidence and `results.json` are left exactly as captured — they are the record of what
+the deployed build returned at the time. The benchmark's replay still matches them, because it
+replays recorded payloads rather than calling the live API.
+
