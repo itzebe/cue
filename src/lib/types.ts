@@ -78,6 +78,13 @@ export interface SearchResult {
 export interface TagResult {
   tag_id: string;
   name: string;
+  /**
+   * Qloo's own classification of the tag, e.g. `urn:tag:genre:music` or
+   * `urn:tag:style:qloo`. `/v2/tags` returns this as `type`; `/v2/search`
+   * returns the same value as `subtype`. Callers must not guess tag kinds from
+   * the id string when this is available.
+   */
+  type?: string;
   subtype?: string;
   types?: string[];
 }
