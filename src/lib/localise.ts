@@ -24,10 +24,18 @@
  * reference or shoot against in each market. The music stays global, because the
  * data says it is global, and the UI states the limitation rather than papering
  * over it.
+ *
+ * Each market's places also carry their own cultural tags, so the same Taste Gap
+ * the cue sheet uses is measured here over those tags — restricted to cultural
+ * namespaces (see `cultural.ts`) and reusing the place pool this stage already
+ * fetched, so it adds no Qloo call. That is what makes the metric demonstrably
+ * domain-agnostic rather than a music-only claim.
  */
 
 import { insights, type TagSignal } from "./qloo";
 import type { QlooEntity, Receipt, SearchResult, TagResult } from "./types";
+import { computeTasteGap, type TasteGapResult } from "./coverage";
+import { filterCulturalEntities } from "./cultural";
 
 export interface MarketTouchpoint {
   name: string;
@@ -35,6 +43,13 @@ export interface MarketTouchpoint {
   affinity: number;
   popularity: number;
 }
+
+/**
+ * How many of a market's touchpoints the panel shows, and the size the cultural
+ * coverage is measured at. One constant so the headline number and the list
+ * beneath it describe the same selection.
+ */
+export const TOUCHPOINTS_SHOWN = 5;
 
 export interface MarketResult {
   market: string;
@@ -44,6 +59,20 @@ export interface MarketResult {
   /** Touchpoints this market uniquely surfaces — the localisation insight. */
   uniqueToMarket: string[];
   failed: boolean;
+  /**
+   * The Taste Gap over this market's cultural dimensions only.
+   *
+   * Measured from the place pool this market already returned, restricted to the
+   * namespaces in `cultural.ts` — so it costs no extra Qloo call. The pool is
+   * every place the market returned; the selection is the same top
+   * `TOUCHPOINTS_SHOWN` the panel lists, so the percentage describes the list a
+   * reader is looking at rather than a hidden one.
+   *
+   * Absent only when the market returned no places at all, where the panel
+   * already reports the market as uncovered. When the pool exists but shares no
+   * cultural dimension, this carries `unavailableReason` rather than a number.
+   */
+  culturalCoverage?: TasteGapResult;
 }
 
 export interface LocalisationResult {
@@ -118,6 +147,39 @@ function toTouchpoints(entities: QlooEntity[]): MarketTouchpoint[] {
 }
 
 /**
+ * Measure the cultural Taste Gap over one market's place pool.
+ *
+ * The pool is the places this market already returned — the same response the
+ * touchpoint list is built from, so this adds no Qloo call. It is then restricted
+ * to the cultural namespaces in `cultural.ts` before measurement, because a raw
+ * place pool scores operational tags (parking, payment) as if they were cultural
+ * reach.
+ *
+ * The selection is the highest-affinity touchpoints, in the same affinity order
+ * `toTouchpoints` lists them, and the same size. That keeps the percentage and
+ * the list beneath it describing one selection instead of two.
+ *
+ * Returns `undefined` only when the market returned nothing, where the caller
+ * already reports the market as uncovered. A non-empty pool that shares no
+ * cultural dimension returns a result carrying `unavailableReason` — never a
+ * fabricated zero.
+ */
+function culturalCoverageFor(pool: QlooEntity[]): TasteGapResult | undefined {
+  if (pool.length === 0) return undefined;
+  const cultural = filterCulturalEntities(pool);
+  const order = cultural
+    .map((entity, index) => ({
+      index,
+      affinity: entity.affinity ?? 0,
+      popularity: entity.popularity ?? 0,
+    }))
+    .sort((a, b) => b.affinity - a.affinity || b.popularity - a.popularity)
+    .map((entry) => entry.index);
+  const selection = order.slice(0, Math.min(TOUCHPOINTS_SHOWN, cultural.length));
+  return computeTasteGap(cultural, selection);
+}
+
+/**
  * Compare the reference market against every other named market.
  *
  * The markets are fetched in parallel. Localisation runs as the final stage of
@@ -137,10 +199,17 @@ export async function localiseBrief(
   const markets = [referenceMarket, ...otherMarkets.filter((market) => market !== referenceMarket)];
 
   const fetched = await Promise.all(
-    markets.map(async (market) => ({
-      market,
-      touchpoints: toTouchpoints(await marketTouchpoints(market, anchors, tags, receipts)),
-    })),
+    markets.map(async (market) => {
+      const pool = await marketTouchpoints(market, anchors, tags, receipts);
+      return {
+        market,
+        // The raw, unfiltered pool is kept so the touchpoint list and any other
+        // venue use reads the full Qloo response; the cultural measurement takes
+        // its own filtered copy.
+        pool,
+        touchpoints: toTouchpoints(pool),
+      };
+    }),
   );
 
   const reference = fetched[0].touchpoints;
@@ -152,7 +221,8 @@ export async function localiseBrief(
     );
   }
 
-  const results: MarketResult[] = fetched.map(({ market, touchpoints }, index) => {
+  const results: MarketResult[] = fetched.map(({ market, pool, touchpoints }, index) => {
+    const culturalCoverage = culturalCoverageFor(pool);
     if (index === 0) {
       return {
         market,
@@ -160,6 +230,7 @@ export async function localiseBrief(
         overlapWithReference: 1,
         uniqueToMarket: [],
         failed: touchpoints.length === 0,
+        culturalCoverage,
       };
     }
 
@@ -176,6 +247,7 @@ export async function localiseBrief(
       overlapWithReference: overlapRatio(referenceNames, marketNames),
       uniqueToMarket: marketNames.filter((name) => !referenceNames.includes(name)),
       failed: touchpoints.length === 0,
+      culturalCoverage,
     };
   });
 

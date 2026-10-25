@@ -2,7 +2,7 @@
  * Reproduce the Taste Gap figures quoted in the README, with no network access.
  *
  * The index is pool-relative, so a figure is only meaningful alongside the pool
- * it was measured on. `src/data/reference-pool.json` holds the raw entities Qloo
+ * it was measured on. `docs/reference-pool.json` holds the raw entities Qloo
  * returned for each documented brief, recorded from the hackathon API. This
  * script rebuilds the pool from that file, applies the documented selection rule
  * (the top 8 by measured affinity), and recomputes the index with the production

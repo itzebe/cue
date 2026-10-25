@@ -40,7 +40,7 @@ Everything the submission needs, in one place:
 | **Live demo** | [cue-nine-iota.vercel.app](https://cue-nine-iota.vercel.app/) — hosted on Vercel, no signup, no key |
 | **Source** | [github.com/itzebe/cue](https://github.com/itzebe/cue) — public, MIT |
 | **Run it locally** | `npm install && npm run dev` → [localhost:12000](http://localhost:12000). Works with no keys at all (see [Run it](#run-it)) |
-| **Verify it** | `npm run verify` (152 checks) · `npm run reproduce` (rebuilds the Taste Gap figures offline) |
+| **Verify it** | `npm run verify` (167 checks) · `npm run reproduce` (rebuilds the Taste Gap figures offline) |
 | **The Qloo difference** | [The Taste Gap](#the-taste-gap) — a measurement no LLM can produce, on a feature that would not exist without the taste graph |
 
 **The sixty-second read.** A brief goes in; Qloo ranks artists by measured audience affinity and
@@ -371,6 +371,8 @@ Two findings shaped the design and are worth stating plainly:
    would be fabricating its result, so Cue localises what the data actually supports —
    `urn:entity:place`, where markets diverge completely (Big Ben for London, the Ghibli Museum for
    Tokyo, zero overlap between markets). The music stays global because the data says it is global.
+   Each market's places are then measured with the *same* Taste Gap the cue sheet uses, over their
+   cultural dimensions only — which is the concrete proof that the metric is not music-specific.
 2. **Clearance data is not available through Qloo.** Fees and splits are therefore produced by a
    transparent model with every input and multiplier shown in the UI, not presented as quotes.
    Inventing a real number would be the same failure as inventing a track title.
@@ -391,7 +393,8 @@ React and Next — the pipeline is plain TypeScript in `src/lib/`.
 | `src/lib/cues.ts` | Anchor/tag resolution, affinity ranking, momentum |
 | `src/lib/crossdomain.ts` | Cross-domain taste map across destinations, podcasts, places |
 | `src/lib/casting.ts`, `comparables.ts` | People/brands and "what is this like" |
-| `src/lib/localise.ts` | Market touchpoints (opt-in endpoint) |
+| `src/lib/localise.ts` | Market touchpoints and per-market cultural coverage (opt-in endpoint) |
+| `src/lib/cultural.ts` | The cultural vocabulary for venue localisation (fail-closed allowlist) |
 | `src/lib/rights.ts` | Transparent fee and clearance model |
 | `src/lib/substitute.ts` | Budget-aware substitution via audience overlap |
 | `src/lib/audit.ts` | The domain-agnostic coverage engine: measurable dimensions, selection scoring, greedy revision. Equal weighting by default, explicit weights supported |
@@ -411,14 +414,14 @@ React and Next — the pipeline is plain TypeScript in `src/lib/`.
 ## Verification
 
 ```bash
-npm run verify      # 152 checks
+npm run verify      # 167 checks
 npm run reproduce   # 3 checks: rebuilds the README's Taste Gap table offline
 npm run typecheck   # tsc --noEmit
 npm run build       # production build
 ```
 
 `npm run verify` prints a `passed`/`failed` line and exits non-zero on any failure. It currently
-reports **152 passed, 0 failed**. The only thing stubbed is `fetch` — the real HTTP boundary. Every
+reports **167 passed, 0 failed**. The only thing stubbed is `fetch` — the real HTTP boundary. Every
 layer under test is the production code path, exercised with response bodies shaped like real Qloo
 payloads. Coverage includes normalisation, affinity extraction, explainability parsing, momentum
 derivation, failure degradation, cue assembly, concurrency limits, request-budget accounting,
@@ -426,7 +429,10 @@ place-based localisation, casting, cross-domain comparables, the cross-domain ta
 audience brief, licence pricing, and the coverage audit (vocabulary thresholding, duplicate
 handling, malformed evidence, determinism, the revision's seed invariant, the unmeasurable-pool
 state, equal versus explicit weighting, and the separation of a failed measurement from a
-legitimate empty one).
+legitimate empty one). The cultural vocabulary and the venue Taste Gap are covered too: the
+allowlist's inclusions and exclusions, fail-closed behaviour for unknown namespaces, malformed tag
+handling, the per-market measurement, and that a revision which cannot improve is never reported as
+one.
 
 ## Known limitations
 
