@@ -9,6 +9,7 @@ import { ReceiptsPanel } from "@/components/ReceiptsPanel";
 import { DirectionPanel, RegionPanel } from "@/components/SignalPanels";
 import { MarketplacePanel } from "@/components/MarketplacePanel";
 import { ComparablesPanel } from "@/components/ComparablesPanel";
+import { TasteGapPanel } from "@/components/TasteGapPanel";
 import { TasteMapPanel } from "@/components/TasteMapPanel";
 import { WorkflowBand } from "@/components/WorkflowBand";
 import { SectionNav } from "@/components/SectionNav";
@@ -157,8 +158,10 @@ export default function StudioPage() {
           <p className="mt-1.5 max-w-2xl text-[12.5px] leading-[1.45] text-haze-300 sm:mt-3 sm:text-sm sm:leading-relaxed">
             A creative brief goes in. A grounded answer comes out — the cue, the cast, the
             market fit, the price and the path to signature — every ranking traced to measured
-            audience affinity in the Qloo Taste Graph. A language model cannot produce any of
-            it, because it has no idea what anyone actually likes.
+            audience affinity in the Qloo Taste Graph. Then Cue does the thing a ranking cannot
+            do for itself: it measures how much of the brief&rsquo;s cultural taste space the slate
+            actually reaches, and rebalances it when eight defensible picks still serve one
+            corner of the audience.
           </p>
         </div>
         <dl className="grid shrink-0 grid-cols-3 gap-1.5 sm:gap-4 lg:grid-cols-1 lg:text-right">
@@ -534,6 +537,11 @@ export default function StudioPage() {
               </div>
               <MarketplacePanel sheet={sheet} />
               <ComparablesPanel sheet={sheet} />
+              {/* The Taste Gap sits immediately after the cue sheet's own
+                  sections: it is the critique of that ranking, so it should read
+                  while the ranking is still on the reader's mind. It costs no API
+                  calls — it measures tags Qloo already returned. */}
+              <TasteGapPanel sheet={sheet} />
               {/* The taste map sits directly after comparables: both answer
                   "what else is this like", and together they read as one
                   widening of the same audience measurement. */}
