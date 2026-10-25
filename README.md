@@ -127,6 +127,50 @@ cultural layer. A supervisor working a scene is often also answering "where woul
 shoot", "which podcast would carry it", and "who does this audience actually follow". The taste map
 answers those from the same measurement instead of a second, ungrounded guess.
 
+## The Taste Gap
+
+A cue sheet can rank eight individually defensible picks and still circle one corner of the
+audience. Every other panel here measures picks one at a time; none measures what the slate as a
+whole covers. The Taste Gap asks that question and answers it with Qloo data.
+
+![The Taste Gap: tag coverage index, both slates side by side, and the taste tags the pool reaches that the slate does not](docs/screenshots/07-taste-gap.jpg)
+
+- **What it measures:** how much of a brief's *shared* taste vocabulary the slate reaches, as a
+  **Tag Coverage Index**. Each candidate entity Qloo returns carries its own tags; the index is the
+  share of the pool's shared tags the slate's entities collectively carry.
+- **What it is not:** a share of listeners, a share of any population, a probability, or a count of
+  taste clusters. The denominator is the union of tags across the candidates Qloo returned *for this
+  brief*. The panel says so in as many words, because a coverage number is easy to overstate.
+- **Why the vocabulary is restricted to tags shared by 2+ candidates.** Raw tag counts track how
+  richly Qloo has catalogued an artist, not how broad their cultural reach is — measured range was
+  44 to 100 tags *within a single pool*. Ranking on the raw universe made the optimiser simply pick
+  the most-documented entities and call it coverage. The threshold removes that bias.
+- **The revised slate.** It seeds the brief's top-ranked pick and never discards it — the affinity
+  ranking is the brief's strongest answer, and a "revision" that dropped it would be answering a
+  different brief. Remaining slots take whichever candidate adds the most uncovered tags, holding
+  slate size fixed. Improvement is only ever reported when the index actually rose.
+- **No extra API calls.** The metric is computed from the `tags[]` Qloo already returns on the
+  affinity call (`feature.explainability=true`). Live probing confirmed those tags are a superset of
+  what `/v2/analysis/compare` reports for the same entity, so no second request is needed. The
+  feature adds no latency.
+- **Unmeasurable is reported as unmeasurable.** A pool too small or too sparse to measure shows the
+  limitation, never a zero. A zero would read as "this slate reaches nothing", which is a different
+  and false claim.
+
+Measured on live Qloo:
+
+| Brief | Index | After revision | Concentration |
+|---|---|---|---|
+| Massive Attack + Portishead | 84.6% | 95.3% (+10.7) | 27.3% → 23.9% |
+| Sault | 69.1% | 97.1% (+28.1) | 17.8% → 14.6% |
+| Nils Frahm | 89.5% | 96.8% (+7.3) | 28.5% → 24.2% |
+
+**What it contributes to the central use case:** it is the difference between a ranking and a
+judgement. A supervisor is not only asking "what is the best track"; they are asking whether the
+eight tracks they have chosen reach the audience they promised the client. This is the only panel
+that answers that, and an LLM cannot: it knows two artists sound alike, not which taste tags each
+one carries or how many of them the other picks already cover.
+
 ## What Qloo contributes
 
 The hackathon's test is whether a project would work the same without Qloo. Here it plainly would
@@ -138,6 +182,7 @@ not.
 | Which artists share this scene's taste profile? | `GET /v2/insights` | No — requires measured affinity |
 | Why was this artist chosen? | `feature.explainability=true` | No — requires the signal graph |
 | Does it land with this audience? | `signal.demographics.*` | No — requires demographic data |
+| Does the slate as a whole reach this brief's taste space? | `feature.explainability=true` tags, already returned | No — an LLM knows two artists sound alike, not which tags each carries or what the others already cover |
 | Is this artist rising or cooling? | `GET /v2/trending` | No — requires a time series |
 | Do these two directions share an audience? | `GET /v2/analysis/compare` | No — requires cross-group analysis |
 | Which people and brands fit this audience? | `urn:entity:person`, `urn:entity:brand` insights | No — requires cross-domain affinity |
@@ -180,6 +225,7 @@ stated in the product rather than blurred.
 | Market touchpoints | Qloo (`urn:entity:place` + location) | Measured |
 | Casting and brand candidates | Qloo (`urn:entity:person`, `urn:entity:brand`) | Measured |
 | Audience overlap between two artists | Qloo (`/v2/analysis/compare`) | Measured |
+| Tag Coverage Index and the revised slate | Qloo (`feature.explainability=true` tags) | Measured, over the returned pool only |
 | Track titles | Optional LLM, else left for the supervisor | Never invented |
 | Fees, splits, clearance timelines | Cue's own model | Estimated, labelled as such |
 
@@ -214,6 +260,7 @@ React and Next — the pipeline is plain TypeScript in `src/lib/`.
 | `src/lib/localise.ts` | Market touchpoints (opt-in endpoint) |
 | `src/lib/rights.ts` | Transparent fee and clearance model |
 | `src/lib/substitute.ts` | Budget-aware substitution via audience overlap |
+| `src/lib/coverage.ts` | The Taste Gap: tag coverage index and the rebalanced slate. Pure computation, no API calls |
 | `src/lib/llm.ts` | Provider resolution, fallback chain, tool-calling |
 
 ### Endpoints
@@ -229,18 +276,19 @@ React and Next — the pipeline is plain TypeScript in `src/lib/`.
 ## Verification
 
 ```bash
-npm run verify      # 107 checks
+npm run verify      # 132 checks
 npm run typecheck   # tsc --noEmit
 npm run build       # production build
 ```
 
 `npm run verify` prints a `passed`/`failed` line and exits non-zero on any failure. It currently
-reports **107 passed, 0 failed**. The only thing stubbed is `fetch` — the real HTTP boundary. Every
+reports **132 passed, 0 failed**. The only thing stubbed is `fetch` — the real HTTP boundary. Every
 layer under test is the production code path, exercised with response bodies shaped like real Qloo
 payloads. Coverage includes normalisation, affinity extraction, explainability parsing, momentum
 derivation, failure degradation, cue assembly, concurrency limits, request-budget accounting,
 place-based localisation, casting, cross-domain comparables, the cross-domain taste map, the
-audience brief and licence pricing.
+audience brief, licence pricing, and the Taste Gap measurement (vocabulary thresholding,
+determinism, the revision's seed invariant, and the unmeasurable-pool state).
 
 ## Known limitations
 
