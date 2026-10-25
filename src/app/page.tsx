@@ -9,7 +9,7 @@ import { ReceiptsPanel } from "@/components/ReceiptsPanel";
 import { DirectionPanel, RegionPanel } from "@/components/SignalPanels";
 import { MarketplacePanel } from "@/components/MarketplacePanel";
 import { ComparablesPanel } from "@/components/ComparablesPanel";
-import { TasteGapPanel } from "@/components/TasteGapPanel";
+import { TasteGapHeadline, TasteGapPanel } from "@/components/TasteGapPanel";
 import { TasteMapPanel } from "@/components/TasteMapPanel";
 import { WorkflowBand } from "@/components/WorkflowBand";
 import { SectionNav } from "@/components/SectionNav";
@@ -291,8 +291,17 @@ export default function StudioPage() {
 
         {/* Output */}
         <div className="space-y-8">
-          {/* The pipeline is the pitch, so it opens the page rather than sitting in
-              a panel further down. It shares the first screen with the input. */}
+          {/* The audit opens the results column, ahead of everything else.
+              The Taste Gap is the product's differentiator, and on a phone the
+              workflow band alone is about a thousand pixels tall — enough to
+              push the measurement a full two screens down. Leading with it means
+              the number a judge should read first is the first thing the page
+              shows once a sheet exists. The full evidence panel stays below, and
+              the headline links to it. */}
+          {sheet ? <TasteGapHeadline sheet={sheet} /> : null}
+
+          {/* The pipeline explains how the sheet was built, so it follows the
+              result rather than preceding it. */}
           <WorkflowBand sheet={sheet} />
 
           {sheet ? <SectionNav /> : null}

@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
  * where the reader actually is, rather than where they were last sent.
  */
 const SECTIONS = [
+  { id: "audit", label: "Audit" },
   { id: "audience", label: "Audience" },
   { id: "comparison", label: "Comparison" },
   { id: "cue-sheet", label: "Cue sheet" },
