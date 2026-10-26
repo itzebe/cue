@@ -5705,6 +5705,364 @@ await check("an empty genre filter still falls back with an explicit label", asy
 });
 
 // ---------------------------------------------------------------------------
+// Bounded parent-genre fallback.
+//
+// The hackathon key's music catalogue is thin at the leaves: the live
+// `/v2/insights` call for `urn:tag:genre:music:punk_rock` returns zero artists
+// while the broader `urn:tag:genre:music:punk` returns fourteen. `/v2/tags`
+// carries no genre tree to walk (`parents` is a list of *entity* types, and the
+// per-tag detail routes 404), so the broader reading is whatever Qloo's own
+// index resolves from the tag's name. These tests pin the bounded retry, the
+// honesty of the disclosure, and that nothing else about scoping moved.
+// ---------------------------------------------------------------------------
+
+/** The live shape: the leaf genre tag holds no artists. */
+const PUNK_LEAF_TAGS = [
+  {
+    tag_id: "urn:tag:genre:music:punk_rock",
+    name: "Punk - Rock",
+    type: "urn:tag:genre:music",
+  },
+];
+
+const PUNK_MOOD_TAG = {
+  tag_id: "urn:tag:style:qloo:energetic",
+  name: "Energetic",
+  type: "urn:tag:style:qloo",
+};
+
+/** The broader readings Qloo's index resolves from "Punk - Rock". */
+const PUNK_GENRE_TABLE: Record<string, { tag_id: string; name: string; type: string }> = {
+  punk: { tag_id: "urn:tag:genre:music:punk", name: "Punk", type: "urn:tag:genre:music" },
+  rock: { tag_id: "urn:tag:genre:music:rock", name: "Rock", type: "urn:tag:genre:music" },
+};
+
+/**
+ * A Qloo stub with a name→tag lookup and a set of tag ids that hold artists.
+ * Anything not in `populated` comes back empty, so the fallback path is driven
+ * by the same request the production code makes.
+ */
+function genreFallbackStub(config: {
+  table: Record<string, { tag_id: string; name: string; type: string }>;
+  populated?: string[];
+}): typeof fetch {
+  const populated = new Set(config.populated ?? []);
+  return (async (input: RequestInfo | URL) => {
+    const url = typeof input === "string" ? input : input.toString();
+    calls.push({ url, headers: {} });
+    const parsed = new URL(url);
+    if (parsed.pathname === "/v2/tags") {
+      const query = (parsed.searchParams.get("filter.query") ?? "").toLowerCase();
+      const hit = config.table[query];
+      return jsonResponse({ results: { tags: hit ? [hit] : [] } });
+    }
+    if (parsed.pathname === "/v2/insights") {
+      const filter = parsed.searchParams.get("filter.tags");
+      if (filter !== null) {
+        const tags = filter.split(",");
+        if (!tags.some((tag) => populated.has(tag))) {
+          return jsonResponse({ results: { entities: [] } });
+        }
+      }
+      return jsonResponse(QLOO_INSIGHTS);
+    }
+    if (parsed.pathname === "/v2/trending") return jsonResponse(QLOO_TRENDING);
+    if (parsed.pathname === "/v2/analysis/compare") return jsonResponse(QLOO_COMPARE);
+    return jsonResponse({ error: "unexpected path" }, 404);
+  }) as typeof fetch;
+}
+
+/** The artist-affinity calls that carried a genre filter, in order. */
+function scopedAffinityCalls(all: { url: string }[]): string[] {
+  return affinityCalls(all).filter((url) => url.includes("filter.tags="));
+}
+
+await check("a populated genre tag is never broadened", async () => {
+  calls.length = 0;
+  const { warnings } = await groundWith(
+    PUNK_LEAF_TAGS,
+    genreFallbackStub({
+      table: PUNK_GENRE_TABLE,
+      populated: ["urn:tag:genre:music:punk_rock"],
+    }),
+  );
+  const scoped = scopedAffinityCalls(calls);
+  assert.equal(scoped.length, 1, "a successful exact query must not be retried");
+  assert.deepEqual(
+    filterTagsOf(scoped[0]),
+    ["urn:tag:genre:music:punk_rock"],
+    "the exact tag must be the one that scoped the pool",
+  );
+  assert.equal(
+    calls.filter((call) => call.url.includes("/v2/tags")).length,
+    0,
+    "no broader-genre lookup may run when the exact tag matched",
+  );
+  assert.ok(
+    !warnings.some((w) => /broader genre/i.test(w)),
+    `a successful exact query has nothing to disclose, got: ${warnings.join(" | ")}`,
+  );
+});
+
+await check("an empty leaf genre is retried with a verified broader genre", async () => {
+  calls.length = 0;
+  const { warnings, receipts } = await groundWith(
+    PUNK_LEAF_TAGS,
+    genreFallbackStub({ table: PUNK_GENRE_TABLE, populated: ["urn:tag:genre:music:punk"] }),
+  );
+  const scoped = scopedAffinityCalls(calls);
+  assert.equal(scoped.length, 2, "the exact query plus one broader retry");
+  assert.deepEqual(
+    filterTagsOf(scoped[0]),
+    ["urn:tag:genre:music:punk_rock"],
+    "the exact tag must still be tried first",
+  );
+  assert.deepEqual(
+    filterTagsOf(scoped[1]),
+    ["urn:tag:genre:music:punk"],
+    "the retry must use the broader genre Qloo resolved from the tag's name",
+  );
+  assert.ok(
+    warnings.some((w) => /broader genre/i.test(w) && /Punk/i.test(w)),
+    `the broader scope must be disclosed, got: ${warnings.join(" | ")}`,
+  );
+  assert.ok(
+    !warnings.some((w) => /unscoped ranking/i.test(w)),
+    "a broadened slate is still genre-scoped and must not be called unscoped",
+  );
+  assert.ok(
+    receipts.some((r) => /broader genre/i.test(r.note ?? "")),
+    "the receipt must record which filter actually produced the candidates",
+  );
+});
+
+await check("a broadened slate is never labelled as an exact genre match", async () => {
+  const { warnings } = await groundWith(
+    PUNK_LEAF_TAGS,
+    genreFallbackStub({ table: PUNK_GENRE_TABLE, populated: ["urn:tag:genre:music:punk"] }),
+  );
+  const disclosure = warnings.find((w) => /broader genre/i.test(w)) ?? "";
+  assert.ok(
+    /matched no artists/i.test(disclosure),
+    `the disclosure must name the exact-genre miss, got: ${disclosure}`,
+  );
+  assert.ok(
+    /broader than the brief asked for/i.test(disclosure),
+    `the disclosure must not imply the exact genre was matched, got: ${disclosure}`,
+  );
+  assert.ok(
+    !warnings.some((w) => /scoped by genre tag Punk - Rock/i.test(w)),
+    "the sheet must not claim the empty exact tag scoped the pool",
+  );
+});
+
+await check("when every broader genre is empty the run stays bounded and honest", async () => {
+  calls.length = 0;
+  const { warnings } = await groundWith(
+    PUNK_LEAF_TAGS,
+    genreFallbackStub({ table: PUNK_GENRE_TABLE, populated: [] }),
+  );
+  const scoped = scopedAffinityCalls(calls);
+  assert.ok(
+    scoped.length <= 3,
+    `at most the exact query plus two broadenings, got ${scoped.length}`,
+  );
+  assert.ok(
+    affinityCalls(calls).some((url) => !url.includes("filter.tags=")),
+    "an unscoped retry must still happen",
+  );
+  assert.ok(
+    warnings.some((w) => /fell back to an unscoped ranking/i.test(w)),
+    "the unscoped fallback must stay disclosed",
+  );
+});
+
+await check("the fallback depth is bounded even when every lookup yields a new tag", async () => {
+  // A chain that never terminates on its own: each tag's name resolves to a
+  // further tag. The loop must stop at the cap rather than walking forever.
+  const chain: Record<string, { tag_id: string; name: string; type: string }> = {
+    alpha: { tag_id: "urn:tag:genre:music:gamma", name: "Gamma Delta", type: "urn:tag:genre:music" },
+    delta: { tag_id: "urn:tag:genre:music:epsilon", name: "Epsilon", type: "urn:tag:genre:music" },
+  };
+  calls.length = 0;
+  const { warnings } = await groundWith(
+    [
+      {
+        tag_id: "urn:tag:genre:music:alpha_beta",
+        name: "Alpha Beta",
+        type: "urn:tag:genre:music",
+      },
+    ],
+    genreFallbackStub({ table: chain, populated: [] }),
+  );
+  const scoped = scopedAffinityCalls(calls);
+  assert.equal(
+    scoped.length,
+    3,
+    `the exact query plus exactly two broadenings, got ${scoped.length}`,
+  );
+  assert.deepEqual(filterTagsOf(scoped[1]), ["urn:tag:genre:music:gamma"]);
+  assert.deepEqual(filterTagsOf(scoped[2]), ["urn:tag:genre:music:epsilon"]);
+  assert.ok(
+    warnings.some((w) => /fell back to an unscoped ranking/i.test(w)),
+    "a chain that never finds artists must still end honestly",
+  );
+});
+
+await check("a tag that resolves back to itself cannot loop", async () => {
+  calls.length = 0;
+  const { warnings } = await groundWith(
+    PUNK_LEAF_TAGS,
+    // "Punk - Rock" broadens to `punk`, whose own name resolves back to `punk`.
+    genreFallbackStub({ table: PUNK_GENRE_TABLE, populated: [] }),
+  );
+  const scoped = scopedAffinityCalls(calls);
+  assert.equal(scoped.length, 2, "a self-resolving token is not a further step");
+  assert.deepEqual(filterTagsOf(scoped[1]), ["urn:tag:genre:music:punk"]);
+  assert.ok(
+    warnings.some((w) => /fell back to an unscoped ranking/i.test(w)),
+    "the run must still terminate honestly",
+  );
+});
+
+await check("malformed parent metadata terminates safely", async () => {
+  const original = globalThis.fetch;
+  let tagLookups = 0;
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = typeof input === "string" ? input : input.toString();
+    calls.push({ url, headers: {} });
+    const parsed = new URL(url);
+    if (parsed.pathname === "/v2/tags") {
+      tagLookups += 1;
+      // No name, no type: nothing to broaden from and nothing eligible.
+      return jsonResponse({ results: { tags: [{ id: "urn:tag:genre:music:punk_rock" }] } });
+    }
+    if (parsed.pathname === "/v2/insights") {
+      if (parsed.searchParams.get("filter.tags") !== null) {
+        return jsonResponse({ results: { entities: [] } });
+      }
+      return jsonResponse(QLOO_INSIGHTS);
+    }
+    if (parsed.pathname === "/v2/trending") return jsonResponse(QLOO_TRENDING);
+    if (parsed.pathname === "/v2/analysis/compare") return jsonResponse(QLOO_COMPARE);
+    return jsonResponse({ error: "unexpected path" }, 404);
+  }) as typeof fetch;
+
+  try {
+    calls.length = 0;
+    // A leaf tag with no display name has nothing to broaden from.
+    const { warnings } = await groundWith(
+      [{ tag_id: "urn:tag:genre:music:punk_rock", type: "urn:tag:genre:music" } as never],
+      globalThis.fetch,
+    );
+    assert.equal(tagLookups, 0, "a nameless tag must not trigger a lookup");
+    assert.ok(
+      warnings.some((w) => /fell back to an unscoped ranking/i.test(w)),
+      "a nameless tag must still fall back honestly",
+    );
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("a broader reading with no genre classification is rejected", async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = typeof input === "string" ? input : input.toString();
+    calls.push({ url, headers: {} });
+    const parsed = new URL(url);
+    if (parsed.pathname === "/v2/tags") {
+      // A lookup that yields a tag with no genre classification at all.
+      return jsonResponse({
+        results: { tags: [{ id: "urn:tag:style:qloo:punk", name: "Punk", type: "urn:tag:style:qloo" }] },
+      });
+    }
+    if (parsed.pathname === "/v2/insights") {
+      if (parsed.searchParams.get("filter.tags") !== null) {
+        return jsonResponse({ results: { entities: [] } });
+      }
+      return jsonResponse(QLOO_INSIGHTS);
+    }
+    if (parsed.pathname === "/v2/trending") return jsonResponse(QLOO_TRENDING);
+    if (parsed.pathname === "/v2/analysis/compare") return jsonResponse(QLOO_COMPARE);
+    return jsonResponse({ error: "unexpected path" }, 404);
+  }) as typeof fetch;
+
+  try {
+    calls.length = 0;
+    const { warnings } = await groundWith(PUNK_LEAF_TAGS, globalThis.fetch);
+    assert.ok(
+      warnings.some((w) => /fell back to an unscoped ranking/i.test(w)),
+      "a lookup that yields no eligible genre must fall back honestly",
+    );
+    assert.ok(
+      !scopedAffinityCalls(calls).some((url) =>
+        (filterTagsOf(url) ?? []).some((tag) => tag.startsWith("urn:tag:style:")),
+      ),
+      "an unclassified or non-genre reading must never scope the pool",
+    );
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("mood and style signals survive the broadening", async () => {
+  calls.length = 0;
+  await groundWith(
+    [...PUNK_LEAF_TAGS, PUNK_MOOD_TAG],
+    genreFallbackStub({ table: PUNK_GENRE_TABLE, populated: ["urn:tag:genre:music:punk"] }),
+  );
+  const scoped = scopedAffinityCalls(calls);
+  assert.equal(scoped.length, 2, "the exact query and the broader retry");
+  for (const url of scoped) {
+    const signal = decodeURIComponent(url.split("signal.interests.tags=")[1].split("&")[0]);
+    assert.ok(
+      signal.includes("urn:tag:style:qloo:energetic"),
+      `the mood signal must keep scoring on both attempts, got: ${signal}`,
+    );
+    const filter = filterTagsOf(url) ?? [];
+    assert.ok(
+      !filter.some((tag) => tag.startsWith("urn:tag:style:")),
+      `a mood tag must never join the candidate filter: ${filter.join(",")}`,
+    );
+  }
+});
+
+await check("discovery broadens with the primary slate, not the empty leaf genre", async () => {
+  calls.length = 0;
+  await groundWith(
+    PUNK_LEAF_TAGS,
+    genreFallbackStub({ table: PUNK_GENRE_TABLE, populated: ["urn:tag:genre:music:punk"] }),
+    true,
+  );
+  const backfill = calls
+    .map((call) => call.url)
+    .filter((url) => url.includes("backfill.cross_domain.take") && url.includes("filter.tags="));
+  assert.ok(backfill.length > 0, "discovery must be scoped for an anchor-less brief");
+  for (const url of backfill) {
+    assert.deepEqual(
+      filterTagsOf(url),
+      ["urn:tag:genre:music:punk"],
+      "discovery must not be filtered by a genre the primary slate proved empty",
+    );
+  }
+});
+
+await check("an unscoped slate after broadening is still disclosed as unscoped", async () => {
+  // The honesty invariant PR #27 established: a popularity slate is never
+  // labelled genre-filtered. The broadening path must not weaken it.
+  calls.length = 0;
+  const { warnings } = await groundWith(
+    PUNK_LEAF_TAGS,
+    genreFallbackStub({ table: PUNK_GENRE_TABLE, populated: [] }),
+  );
+  assert.ok(
+    warnings.some((w) => /not filtered to the brief/i.test(w)),
+    `the unscoped slate must say it is not filtered, got: ${warnings.join(" | ")}`,
+  );
+});
+
+// ---------------------------------------------------------------------------
 // The Qloo ON/OFF counterfactual.
 //
 // The hackathon's eligibility test is "would this work the same without Qloo?".

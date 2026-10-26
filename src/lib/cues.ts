@@ -99,6 +99,109 @@ export function selectFilterTags(tags: TagResult[]): TagResult[] {
   return tags.filter(isGenreTag);
 }
 
+/**
+ * How many broader-genre attempts a single brief may make.
+ *
+ * The hackathon key's music catalogue is thin at the leaves: `punk_rock` and
+ * `death_metal` each hold zero artists while their broader readings hold
+ * fourteen. Retrying once with the broader genre recovers those briefs without
+ * letting a brief wander the genre space.
+ */
+const MAX_GENRE_BROADENING_STEPS = 2;
+
+/**
+ * The tokens of a genre tag's display name that could name a broader reading.
+ *
+ * There is no genre tree to walk: `/v2/tags` reports `parents` as *entity* types
+ * (`urn:entity:artist`), and the per-tag detail routes 404 on the hackathon key.
+ * What the endpoint does give is the tag's display name, and Qloo's own index
+ * resolves a broader reading from it — `Punk - Rock` resolves `Punk`, `Death
+ * Metal` resolves `Metal`, both populated. So the candidate parents are the
+ * Qloo-resolved genre readings of the tag's own name, which is a lookup in
+ * Qloo's index rather than a hierarchy this code invents.
+ */
+function broaderGenreTokens(tag: TagResult): string[] {
+  return (tag.name ?? "")
+    .split(/[\s\-/&,]+/)
+    .map((token) => token.trim())
+    .filter((token) => token.length > 2)
+    // Longest first: a multi-word reading is more specific than its parts, so
+    // "hardcore punk" is preferred over "hardcore" or "punk".
+    .sort((a, b) => b.length - a.length);
+}
+
+/**
+ * The candidate pool for a brief's genre tags, broadened only as far as needed.
+ *
+ * Runs the exact scoped query first. If it matches nothing, it walks a bounded
+ * number of broader readings, stopping at the first that returns candidates.
+ * Tokens are resolved one at a time and only when the previous one failed, so a
+ * brief never pays for a lookup it does not need.
+ *
+ * Mood and style signals are untouched throughout — they travel in
+ * `signal.interests.tags`, which `request` supplies, so the fallback changes
+ * only what *restricts* the pool, never what scores it.
+ *
+ * Returns the filter that actually produced the candidates, so the caller can
+ * say which scope the slate came from rather than assuming the exact one.
+ */
+async function resolveCandidatePool(
+  exactTags: TagResult[],
+  request: (filterTags: string[] | undefined) => Promise<QlooCallResult<QlooEntity[]>>,
+  receipts: Receipt[],
+  warnings: string[],
+): Promise<{
+  call: QlooCallResult<QlooEntity[]>;
+  filters?: TagResult[];
+  broadenedFrom?: string;
+}> {
+  const tried = new Set(exactTags.map((tag) => tag.tag_id));
+  let filters: TagResult[] = exactTags;
+  let current: TagResult | undefined = filters[0];
+  let queue: string[] = [];
+  let call = await request(filters.map((tag) => tag.tag_id));
+
+  for (let step = 0; step < MAX_GENRE_BROADENING_STEPS; step += 1) {
+    if (!call.ok || call.data.length > 0 || !current) break;
+    if (queue.length === 0) queue = broaderGenreTokens(current);
+
+    // Resolve the next token Qloo recognises as a music genre, skipping any
+    // reading already tried. A token that resolves back to the current tag is
+    // not a broadening step, so it cannot extend the walk.
+    let next: TagResult | undefined;
+    while (queue.length > 0 && !next) {
+      const token = queue.shift() as string;
+      const lookup = await searchTags(token, MUSIC_GENRE_TYPE_PREFIXES, 5);
+      receipts.push(
+        receiptFrom(lookup, "GET /v2/tags", `Broader genre for "${current.name}" via "${token}"`),
+      );
+      const reading = lookup.ok ? lookup.data.find(isMusicGenreTag) : undefined;
+      if (reading && !tried.has(reading.tag_id)) next = reading;
+    }
+    if (!next) break;
+
+    receipts.push(receiptFrom(call, "GET /v2/insights", "Artist affinity (tag filter, no match)"));
+    tried.add(next.tag_id);
+
+    const retry = await request([next.tag_id]);
+    if (retry.ok && retry.data.length > 0) {
+      warnings.push(
+        `Qloo matched no artists for this brief's genre tag${exactTags.length === 1 ? "" : "s"} ` +
+          `(${exactTags.map((tag) => tag.name).join(", ")}). The slate below uses the broader genre ` +
+          `"${next.name}", so it is genre-scoped but broader than the brief asked for.`,
+      );
+      return { call: retry, filters: [next], broadenedFrom: current.name };
+    }
+    // The broader reading matched nothing either; carry on within the bound.
+    current = next;
+    filters = [next];
+    call = retry;
+    queue = [];
+  }
+
+  return { call, filters: filters === exactTags ? exactTags : undefined };
+}
+
 /** Map a free-text era hint onto a release-year floor for signal anchoring. */
 export function eraToYearFloor(era: string): number | undefined {
   const text = era.toLowerCase();
@@ -215,6 +318,13 @@ export interface GroundingContext {
   tags: TagResult[];
   receipts: Receipt[];
   warnings: string[];
+  /**
+   * Set by `groundArtistCues` when the brief's exact genre tags matched no
+   * artists and a broader genre was used instead. Read by the discovery pass so
+   * both halves of the sheet are scoped the same way, and so the sheet can say
+   * which filter actually produced the candidates.
+   */
+  appliedGenreFilter?: TagResult[];
 }
 
 /** Names for every entity/tag that can appear in an explainability block. */
@@ -251,9 +361,7 @@ export async function groundArtistCues(
   // `urn:tag:style:qloo:energetic`, say) pulled the generic pool back in, which
   // is why the filter is built from `selectFilterTags` rather than every tag.
   // Mood and style tags still travel in `signal.interests.tags` for scoring.
-  const scopedTags = signalEntities.length === 0 ? selectFilterTags(tags) : [];
-  const tagFilter =
-    scopedTags.length > 0 ? scopedTags.map((tag) => tag.tag_id) : undefined;
+  const exactTags = signalEntities.length === 0 ? selectFilterTags(tags) : [];
 
   const request = (filterTags: string[] | undefined) =>
     insights({
@@ -272,21 +380,40 @@ export async function groundArtistCues(
       take: 14,
     });
 
-  const tagScoped = tagFilter !== undefined;
-  let call = await request(tagFilter);
+  let call: QlooCallResult<QlooEntity[]>;
+  let appliedTags: TagResult[] | undefined;
+  let broadenedFrom: string | undefined;
 
-  if (tagScoped && call.ok && call.data.length === 0) {
-    // The brief's own genre tags matched no artist. Record the empty scoped
-    // attempt so the evidence shows what was tried, then fall back to the
-    // unscoped ranking and say plainly that the slate is not filtered.
+  if (exactTags.length > 0) {
+    // The brief's own genre tags are tried first and only broadened if they
+    // match nothing, so a successful exact query is never widened.
+    const resolved = await resolveCandidatePool(exactTags, request, receipts, warnings);
+    call = resolved.call;
+    appliedTags = resolved.filters;
+    broadenedFrom = resolved.broadenedFrom;
+  } else {
+    call = await request(undefined);
+  }
+
+  const tagScoped = appliedTags !== undefined;
+  // Discovery must scope with whatever actually produced the primary slate, so a
+  // broadened brief does not get an exact-genre discovery half.
+  context.appliedGenreFilter = appliedTags;
+
+  if (exactTags.length > 0 && call.ok && call.data.length === 0) {
+    // Every scoped attempt — the exact genre and each bounded broadening —
+    // matched nothing. Record the empty scoped attempt so the evidence shows
+    // what was tried, then fall back to the unscoped ranking and say plainly
+    // that the slate is not filtered.
     receipts.push(
       receiptFrom(call, "GET /v2/insights", "Artist affinity (tag filter, no match)"),
     );
     call = await request(undefined);
+    context.appliedGenreFilter = undefined;
     warnings.push(
       "Qloo matched no artists for this brief's genre tags, so the slate fell back to an unscoped ranking. It is not filtered to the brief.",
     );
-  } else if (signalEntities.length === 0 && !tagScoped) {
+  } else if (signalEntities.length === 0 && exactTags.length === 0) {
     // No anchor and no genre tag to scope by: the slate is a popularity ranking
     // over the whole catalogue. Say so rather than implying it is brief-specific.
     warnings.push(
@@ -295,10 +422,16 @@ export async function groundArtistCues(
   }
 
   let filterNote: string | undefined;
-  if (scopedTags.length > 0) {
-    const names = scopedTags.map((tag) => tag.name).join(", ");
+  if (broadenedFrom !== undefined) {
+    const names = exactTags.map((tag) => tag.name).join(", ");
     filterNote =
-      `Candidate pool scoped by genre tag${scopedTags.length === 1 ? "" : "s"} ${names}. ` +
+      `Candidate pool scoped by the broader genre ${appliedTags!.map((tag) => tag.name).join(", ")}, ` +
+      `because the brief's own genre tag${exactTags.length === 1 ? "" : "s"} (${names}) matched no artists. ` +
+      "Mood and style tags informed affinity only, because filter.tags is a union and a broad mood tag would widen the pool.";
+  } else if (tagScoped) {
+    const names = exactTags.map((tag) => tag.name).join(", ");
+    filterNote =
+      `Candidate pool scoped by genre tag${exactTags.length === 1 ? "" : "s"} ${names}. ` +
       "Mood and style tags informed affinity only, because filter.tags is a union and a broad mood tag would widen the pool.";
   } else if (signalEntities.length === 0) {
     filterNote =
@@ -440,15 +573,21 @@ export async function discoveryBackfill(
   context: GroundingContext,
   excludeIds: string[],
 ): Promise<QlooEntity[]> {
-  const { brief, anchorEntities, tags, receipts } = context;
+  const { brief, anchorEntities, tags, receipts, appliedGenreFilter } = context;
   // Same reason as the primary call: tag *signals* do not scope the candidate
   // set, so without a filter two different briefs were handed the same discovery
   // picks. Applied only when the brief resolved no anchor, matching the primary
   // call, and limited to genre tags for the same union reason — a broad mood tag
   // would widen the pool and hand back the generic set. A filter that matches
   // nothing simply yields no discovery rows; the sheet keeps its primary picks.
+  //
+  // `appliedGenreFilter` is the scope the primary slate actually came from. When
+  // the primary had to broaden a leaf genre, discovery broadens with it; using
+  // the brief's exact tag here would filter the discovery half by a genre the
+  // primary half already proved empty.
   const signalEntities = anchorEntities.map((entity) => entity.entity_id);
-  const scopedTags = signalEntities.length === 0 ? selectFilterTags(tags) : [];
+  const scopedTags =
+    signalEntities.length === 0 ? (appliedGenreFilter ?? selectFilterTags(tags)) : [];
   const tagFilter = scopedTags.length > 0 ? scopedTags.map((tag) => tag.tag_id) : undefined;
 
   const call = await insights({
