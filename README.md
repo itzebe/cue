@@ -836,7 +836,7 @@ key and Cue infers the rest:
 | Provider | Key variable | Default model | Where to get a key |
 |---|---|---|---|
 | Groq | `GROQ_API_KEY` | `openai/gpt-oss-120b` | [console.groq.com](https://console.groq.com/keys) |
-| Google Gemini | `GEMINI_API_KEY` | `gemini-2.5-flash` | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) |
+| Google Gemini | `GEMINI_API_KEY` | `gemini-3.8-flash` | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) |
 | OpenRouter | `OPENROUTER_API_KEY` | `openai/gpt-oss-120b` | [openrouter.ai/keys](https://openrouter.ai/keys) |
 
 Any other OpenAI-compatible endpoint also works with no code change: set all three of `LLM_API_KEY`,
@@ -847,6 +847,14 @@ retired ID fails in a way that looks like an outage. Two that were wrong and are
 reintroducing: `gemini-3.5-flash` is not in Google's published model table (only
 `gemini-3.5-flash-lite` is), and OpenRouter's `:free` suffix is a rotating allowance rather than a
 modifier — `openai/gpt-oss-120b:free` is not in the catalogue and 404s, while the bare slug is real.
+
+A third case is subtler, because the ID is real and still served. Google limits its 2.5 models to
+projects that already used them — *"we are limiting access to the 2.5 models to users who have
+actively used them in the past … For any new projects, use our latest models: 3.5 Flash-Lite or 3.8
+Flash"* ([models](https://ai.google.dev/gemini-api/docs/models)). A fresh key pointed at
+`gemini-2.5-flash` therefore answers `404 model_not_permitted`. That is a model-*access* restriction
+rather than a bad identifier, so it is reported as `model_not_permitted` and the chain moves on
+rather than blaming the key.
 
 Groq, Gemini and OpenRouter's free tier need no credit card. Free model lineups rotate and models do
 get retired, so check the provider's deprecation list before pinning an ID —
