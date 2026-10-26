@@ -2488,6 +2488,14 @@ await check("every provider failing reports failure, never Gemini success via Gr
       ["gemini:model_not_permitted", "groq:rate_limited"],
       "the probe must report both legs with their own reasons",
     );
+    // Each attempt keeps its own body. Reporting only the last one discards the
+    // primary's reason exactly when a fallback answered and hid it.
+    assert.match(
+      probe.attempts[0].detail,
+      /not permitted/i,
+      "the primary's own message must survive alongside the fallback's",
+    );
+    assert.match(probe.attempts[1].detail, /rate limit/i, "the fallback keeps its own message");
     const serialised = JSON.stringify(probe);
     assert.ok(!serialised.includes("AIza-restricted"), "no key may be serialised");
     assert.ok(!serialised.includes("gsk-exhausted"), "no fallback key may be serialised");
