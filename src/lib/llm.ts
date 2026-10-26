@@ -552,7 +552,13 @@ export async function probeLlm(): Promise<{
   status: number | null;
   reason?: LlmFailureReason;
   provider: LlmSource | null;
-  attempts: Array<{ source: LlmSource; ok: boolean; status: number | null; reason?: LlmFailureReason }>;
+  attempts: Array<{
+    source: LlmSource;
+    ok: boolean;
+    status: number | null;
+    reason?: LlmFailureReason;
+    detail: string;
+  }>;
   detail: string;
 }> {
   const candidates = detectCandidates();
@@ -560,18 +566,28 @@ export async function probeLlm(): Promise<{
     return { ok: false, status: null, provider: null, attempts: [], detail: "No LLM configured." };
   }
 
-  const attempts: Array<{ source: LlmSource; ok: boolean; status: number | null; reason?: LlmFailureReason }> = [];
+  const attempts: Array<{
+    source: LlmSource;
+    ok: boolean;
+    status: number | null;
+    reason?: LlmFailureReason;
+    detail: string;
+  }> = [];
   let lastStatus: number | null = null;
   let lastReason: LlmFailureReason | undefined;
   let lastDetail = "";
 
   for (const candidate of candidates) {
     const result = await probeOne(candidate.config);
+    // Each attempt carries its own detail. When a fallback answers, the reason
+    // the primary did not is exactly what an operator needs, and reporting only
+    // the last attempt's body silently discards it.
     attempts.push({
       source: candidate.source,
       ok: result.ok,
       status: result.status,
       reason: result.reason,
+      detail: result.detail,
     });
     if (result.ok) {
       return {
@@ -620,7 +636,7 @@ async function probeOne(config: LlmConfig): Promise<{
       signal: controller.signal,
     });
     const text = await res.text().catch(() => "");
-    if (res.ok) return { ok: true, status: res.status, detail: text.slice(0, 300) };
+    if (res.ok) return { ok: true, status: res.status, detail: sanitiseDiagnostic(text) };
     // Reuse the same classifier as the pipeline so the health check and the
     // cue-sheet warning can never disagree about why a call failed.
     const failure = classifyFailure(res.status, text);
@@ -628,7 +644,7 @@ async function probeOne(config: LlmConfig): Promise<{
       ok: false,
       status: res.status,
       reason: failure.reason,
-      detail: text.slice(0, 300),
+      detail: failure.detail || sanitiseDiagnostic(text),
     };
   } catch (error) {
     const aborted = error instanceof Error && error.name === "AbortError";
@@ -636,7 +652,7 @@ async function probeOne(config: LlmConfig): Promise<{
       ok: false,
       status: null,
       reason: aborted ? "timeout" : "transport",
-      detail: error instanceof Error ? error.message : "Unknown transport error",
+      detail: error instanceof Error ? sanitiseDiagnostic(error.message) : "Unknown transport error",
     };
   } finally {
     clearTimeout(timer);
