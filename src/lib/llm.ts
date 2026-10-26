@@ -79,10 +79,14 @@ const PROVIDER_PRESETS: ProviderPreset[] = [
   {
     source: "gemini",
     baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai/",
-    // `gemini-3.5-flash` is not in the published model table (only
-    // `gemini-3.5-flash-lite` is), so it resolves to a model the key cannot serve.
-    // 2.5-flash is long-standing GA, free-tier eligible and function-calling capable.
-    model: "gemini-2.5-flash",
+    // Google restricts the 2.5 family to projects that already used them: "we are
+    // limiting access to the 2.5 models to users who have actively used them in the
+    // past ... For any new projects, use our latest models: 3.5 Flash-Lite or 3.8
+    // Flash" (ai.google.dev/gemini-api/docs/models). A fresh key therefore gets a 404
+    // `model_not_permitted` for `gemini-2.5-flash` — a model-access restriction, not a
+    // bad id. 3.8 Flash is the current Stable model Google's own OpenAI-compatibility
+    // guide uses, and it is free of charge on the free tier.
+    model: "gemini-3.8-flash",
     keyVars: ["GEMINI_API_KEY", "GOOGLE_API_KEY"],
   },
   {

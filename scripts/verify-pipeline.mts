@@ -2316,6 +2316,187 @@ await check("a failed primary hands the request to the next provider", async () 
   }
 });
 
+await check("Gemini answers first when it is permitted, and Groq is not called", async () => {
+  // The point of putting Gemini ahead of Groq is that a permitted Gemini key is
+  // actually used, not skipped. This is the success path the production 404 was
+  // masking.
+  const { chatWithFallback, llmDiagnostics } = await import("../src/lib/llm.ts");
+  const saved = { ...process.env };
+  const original = globalThis.fetch;
+  const called: string[] = [];
+  try {
+    delete process.env.LLM_API_KEY;
+    delete process.env.LLM_BASE_URL;
+    delete process.env.LLM_MODEL;
+    delete process.env.OPENAI_API_KEY;
+    delete process.env.OPENROUTER_API_KEY;
+    process.env.GEMINI_API_KEY = "AIza-working";
+    process.env.GROQ_API_KEY = "gsk-working";
+
+    assert.deepEqual(
+      llmDiagnostics().providerChain,
+      ["gemini", "groq"],
+      "Gemini must be offered ahead of Groq when both keys are present",
+    );
+
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url.startsWith("https://generativelanguage.googleapis.com")) {
+        called.push("gemini");
+        return jsonResponse({
+          choices: [{ message: { content: "pong" } }],
+        });
+      }
+      if (url.startsWith("https://api.groq.com")) {
+        called.push("groq");
+        return jsonResponse({ choices: [{ message: { content: "pong" } }] });
+      }
+      return original(input as RequestInfo, init);
+    }) as typeof fetch;
+
+    const result = await chatWithFallback([{ role: "user", content: "hi" }]);
+
+    assert.deepEqual(called, ["gemini"], "the working primary must answer and stop the chain");
+    assert.equal(result.provider, "gemini", "the result must name Gemini as the provider");
+    assert.equal(result.message?.content, "pong");
+    assert.equal(result.failure, null, "a successful chain has no failure");
+    assert.deepEqual(
+      result.attempts.map((attempt) => attempt.source),
+      ["gemini"],
+      "Groq must not be attempted once Gemini answers",
+    );
+  } finally {
+    process.env = saved;
+    globalThis.fetch = original;
+  }
+});
+
+await check("a Gemini 404 model_not_permitted falls through to Groq", async () => {
+  // Reproduces the live production fault exactly: a valid Gemini key that is not
+  // permitted to serve the configured model returns 404 `model_not_permitted`.
+  // It must be classified as a model-access fault, must not be reported as a bad
+  // key, and must hand the request to Groq.
+  const { chatWithFallback, llmDiagnostics } = await import("../src/lib/llm.ts");
+  const saved = { ...process.env };
+  const original = globalThis.fetch;
+  const called: string[] = [];
+  try {
+    delete process.env.LLM_API_KEY;
+    delete process.env.LLM_BASE_URL;
+    delete process.env.LLM_MODEL;
+    delete process.env.OPENAI_API_KEY;
+    delete process.env.OPENROUTER_API_KEY;
+    process.env.GEMINI_API_KEY = "AIza-restricted";
+    process.env.GROQ_API_KEY = "gsk-working";
+
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url.startsWith("https://generativelanguage.googleapis.com")) {
+        called.push("gemini");
+        return jsonResponse(
+          {
+            error: {
+              code: 404,
+              message: "This model models/gemini-2.5-flash is not permitted for this project.",
+              status: "NOT_FOUND",
+            },
+          },
+          404,
+        );
+      }
+      if (url.startsWith("https://api.groq.com")) {
+        called.push("groq");
+        return jsonResponse({ choices: [{ message: { content: "pong" } }] });
+      }
+      return original(input as RequestInfo, init);
+    }) as typeof fetch;
+
+    const result = await chatWithFallback([{ role: "user", content: "hi" }]);
+
+    assert.deepEqual(
+      called,
+      ["gemini", "groq"],
+      "the restricted primary must be tried once, then Groq must answer",
+    );
+    assert.equal(result.provider, "groq", "the working fallback must be the reported provider");
+    assert.equal(result.message?.content, "pong");
+    assert.equal(
+      result.attempts[0].failure?.reason,
+      "model_not_permitted",
+      "a model-access 404 must not be reported as a rejected key",
+    );
+    assert.equal(result.attempts[0].source, "gemini");
+    // The chain must reflect the real order, not a Groq-only shortcut.
+    assert.deepEqual(
+      result.attempts.map((attempt) => attempt.source),
+      ["gemini", "groq"],
+    );
+    assert.equal(llmDiagnostics().source, "gemini", "the configured primary is still Gemini");
+  } finally {
+    process.env = saved;
+    globalThis.fetch = original;
+  }
+});
+
+await check("every provider failing reports failure, never Gemini success via Groq", async () => {
+  // Requirement 6: a Gemini failure must not be laundered into a Gemini success
+  // because Groq happened to answer. With both legs dead, the result must report
+  // failure and name the last real reason.
+  const { chatWithFallback, probeLlm } = await import("../src/lib/llm.ts");
+  const saved = { ...process.env };
+  const original = globalThis.fetch;
+  try {
+    delete process.env.LLM_API_KEY;
+    delete process.env.LLM_BASE_URL;
+    delete process.env.LLM_MODEL;
+    delete process.env.OPENAI_API_KEY;
+    delete process.env.OPENROUTER_API_KEY;
+    process.env.GEMINI_API_KEY = "AIza-restricted";
+    process.env.GROQ_API_KEY = "gsk-exhausted";
+
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url.startsWith("https://generativelanguage.googleapis.com")) {
+        return jsonResponse(
+          { error: { code: 404, message: "This model is not permitted for this project." } },
+          404,
+        );
+      }
+      if (url.startsWith("https://api.groq.com")) {
+        return jsonResponse({ error: { message: "Rate limit reached." } }, 429);
+      }
+      return original(input as RequestInfo, init);
+    }) as typeof fetch;
+
+    const result = await chatWithFallback([{ role: "user", content: "hi" }]);
+    assert.equal(result.message, null, "no provider answered");
+    assert.equal(result.provider, null, "no provider may be named on total failure");
+    assert.equal(result.failure?.reason, "rate_limited", "the last real reason is reported");
+    assert.deepEqual(
+      result.attempts.map((attempt) => `${attempt.source}:${attempt.failure?.reason}`),
+      ["gemini:model_not_permitted", "groq:rate_limited"],
+      "each leg must keep its own truthful reason",
+    );
+
+    // The probe must agree with the pipeline: ok=false, no provider claimed.
+    const probe = await probeLlm();
+    assert.equal(probe.ok, false, "the probe must not claim success when nothing answered");
+    assert.equal(probe.provider, null, "the probe must not name a provider that did not answer");
+    assert.equal(probe.reason, "rate_limited");
+    assert.deepEqual(
+      probe.attempts.map((attempt) => `${attempt.source}:${attempt.reason}`),
+      ["gemini:model_not_permitted", "groq:rate_limited"],
+      "the probe must report both legs with their own reasons",
+    );
+    const serialised = JSON.stringify(probe);
+    assert.ok(!serialised.includes("AIza-restricted"), "no key may be serialised");
+    assert.ok(!serialised.includes("gsk-exhausted"), "no fallback key may be serialised");
+  } finally {
+    process.env = saved;
+    globalThis.fetch = original;
+  }
+});
+
 await check("a fallback that answers is disclosed in the cue sheet", async () => {
   const { buildCueSheet } = await import("../src/lib/planner.ts");
   const saved = { ...process.env };
@@ -2519,6 +2700,13 @@ await check("a provider id is a real id, not a retired one", async () => {
     assert.ok(
       /^gemini-\d/.test(gemini.model ?? ""),
       `the Gemini default must be a real Gemini id: ${gemini.model}`,
+    );
+    // Google restricts the 2.5 family to projects that already used them, so a
+    // fresh key gets a 404 `model_not_permitted`. The default must not be a 2.5
+    // id, or the Gemini leg is dead on arrival for every new deployment.
+    assert.ok(
+      !/^gemini-2\.5/.test(gemini.model ?? ""),
+      `the Gemini default must not be a restricted 2.5 model: ${gemini.model}`,
     );
   } finally {
     process.env = saved;
