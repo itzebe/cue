@@ -4245,6 +4245,29 @@ await check("12. A failed track-naming call degrades a sheet that still ranked",
   }
 });
 
+await check("a partially named sheet says how many cuts are still pending", async () => {
+  // The fixture ranks three artists but the track call names only one, so two
+  // cues stay pending. The status contract is deliberate — a partial naming is
+  // not a workflow failure — but the sheet must not stay silent about rows the
+  // reader has to fill in themselves.
+  const restore = installStack({ artist: { status: 200 }, llm: "ok" });
+  try {
+    const sheet = await buildCueSheet({ scene: STATUS_SCENE });
+    const pending = sheet.cues.filter((cue) => cue.trackUnverified).length;
+    assert.ok(
+      pending > 0 && pending < sheet.cues.length,
+      "the fixture must leave some cues pending for this to be a partial case",
+    );
+    assert.equal(sheet.status?.kind, "live", "a partial naming is still a usable sheet");
+    assert.ok(
+      sheet.warnings.some((w) => /pending selections/i.test(w) && w.includes(String(pending))),
+      `the sheet must disclose its ${pending} pending cuts, got: ${JSON.stringify(sheet.warnings)}`,
+    );
+  } finally {
+    restore();
+  }
+});
+
 // ---------------------------------------------------------------------------
 // The Taste Gap. These assert the measurement's actual contract: it is built
 // only from tags Qloo returned, it is reproducible, it never reports a number
@@ -5497,6 +5520,141 @@ await check("selectFilterTags keys off Qloo's tag type, not the id string", asyn
     { tag_id: "urn:tag:genre:music:polka", name: "Polka" },
   ] as never);
   assert.deepEqual(unclassified, [], "an unclassified tag must not scope the pool");
+});
+
+await check("a term with several readings resolves to Qloo's music genre", async () => {
+  const { resolveTags } = await import("../src/lib/cues.ts");
+  const original = globalThis.fetch;
+  // The live `/v2/tags` payload for "driving": Qloo orders by cross-domain
+  // popularity, so the videogame genre leads and the music genre is third.
+  // Taking `data[0]` scoped a music pool by a videogame genre, matched nothing,
+  // and dropped the slate to an unscoped ranking without changing its badge.
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = typeof input === "string" ? input : input.toString();
+    const parsed = new URL(url);
+    if (parsed.pathname !== "/v2/tags") return jsonResponse({}, 404);
+    const query = parsed.searchParams.get("filter.query") ?? "";
+    if (query === "driving") {
+      return jsonResponse({
+        results: {
+          tags: [
+            { id: "urn:tag:genre:media:driving", name: "Driving", type: "urn:tag:genre:media" },
+            { id: "urn:tag:genre:music:driving", name: "Driving", type: "urn:tag:genre:music" },
+            { id: "urn:tag:style:qloo:driving", name: "Driving", type: "urn:tag:style:qloo" },
+          ],
+        },
+      });
+    }
+    // "energetic" has no genre reading at all, so the top hit must still stand.
+    return jsonResponse({
+      results: {
+        tags: [
+          { id: "urn:tag:style:qloo:energetic", name: "Energetic", type: "urn:tag:style:qloo" },
+          { id: "urn:tag:music:qloo:energetic", name: "Energetic", type: "urn:tag:music:qloo" },
+        ],
+      },
+    });
+  }) as typeof fetch;
+
+  try {
+    const resolved = await resolveTags(["driving", "energetic"], []);
+    assert.equal(
+      resolved[0].tag_id,
+      "urn:tag:genre:music:driving",
+      "a term that has a music genre reading must resolve to it, not to data[0]",
+    );
+    assert.equal(
+      resolved[1].tag_id,
+      "urn:tag:style:qloo:energetic",
+      "a term with no genre reading must keep the previous top-hit behaviour",
+    );
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("a non-music genre is still preferred over a non-genre reading", async () => {
+  const { resolveTags } = await import("../src/lib/cues.ts");
+  const original = globalThis.fetch;
+  // "punk rock" leads with a movie keyword; no music genre exists for it on the
+  // hackathon key, so the genre-classified reading must win over the keyword.
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = typeof input === "string" ? input : input.toString();
+    const parsed = new URL(url);
+    if (parsed.pathname !== "/v2/tags") return jsonResponse({}, 404);
+    return jsonResponse({
+      results: {
+        tags: [
+          { id: "urn:tag:keyword:qloo:punk_rock", name: "Punk Rock", type: "urn:tag:keyword:qloo" },
+          { id: "urn:tag:genre:music:punk_rock", name: "Punk - Rock", type: "urn:tag:genre:music" },
+        ],
+      },
+    });
+  }) as typeof fetch;
+
+  try {
+    const resolved = await resolveTags(["punk rock"], []);
+    assert.equal(
+      resolved[0].tag_id,
+      "urn:tag:genre:music:punk_rock",
+      "a genre reading must beat a keyword reading, even when the keyword is more popular",
+    );
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+await check("a word with a videogame reading never scopes a music pool", async () => {
+  // The end-to-end shape of the live bug. `/v2/tags` orders its hits across
+  // domains, so a word like "driving" led with `urn:tag:genre:media:driving`, a
+  // videogame genre. Scoping a music pool by it matched no artists, and the
+  // sheet dropped to an unscoped popularity ranking while still badged live.
+  // Here every term has a media reading ahead of its music reading, and the
+  // filter must still be built from the music ones.
+  const original = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = typeof input === "string" ? input : input.toString();
+    calls.push({ url, headers: {} });
+    const parsed = new URL(url);
+    if (parsed.pathname === "/v2/tags") {
+      const query = parsed.searchParams.get("filter.query") ?? "x";
+      const slug = query.replace(/\s+/g, "_");
+      return jsonResponse({
+        results: {
+          tags: [
+            { id: `urn:tag:genre:media:${slug}`, name: query, type: "urn:tag:genre:media" },
+            { id: `urn:tag:genre:music:${slug}`, name: query, type: "urn:tag:genre:music" },
+          ],
+        },
+      });
+    }
+    if (parsed.pathname === "/v2/insights") return jsonResponse(QLOO_INSIGHTS);
+    if (parsed.pathname === "/v2/trending") return jsonResponse(QLOO_TRENDING);
+    if (parsed.pathname === "/v2/analysis/compare") return jsonResponse(QLOO_COMPARE);
+    return jsonResponse({ error: "unexpected path" }, 404);
+  }) as typeof fetch;
+
+  try {
+    calls.length = 0;
+    const sheet = await buildCueSheet({ scene: "Driving drums under a fast montage." });
+    const filterTags = affinityFilterTags(calls);
+    assert.ok(filterTags, "the pool must still be scoped");
+    const sent = filterTags.split(",");
+    assert.ok(
+      sent.every((tag) => tag.startsWith("urn:tag:genre:music:")),
+      `only music genres may scope a music pool, got: ${filterTags}`,
+    );
+    assert.ok(
+      !filterTags.includes("urn:tag:genre:media:"),
+      `a videogame genre must never scope a music pool, got: ${filterTags}`,
+    );
+    assert.ok(
+      !sheet.warnings.some((w) => /unscoped ranking/i.test(w)),
+      "the sheet must not report an unscoped fallback when the pool was scoped",
+    );
+  } finally {
+    globalThis.fetch = original;
+  }
 });
 
 await check("an empty genre filter still falls back with an explicit label", async () => {

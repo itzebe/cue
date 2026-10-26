@@ -61,6 +61,25 @@ function isGenreTag(tag: TagResult): boolean {
 }
 
 /**
+ * Qloo's music-genre families. `/v2/tags` returns every domain that shares the
+ * word, so a brief's "driving" matched `urn:tag:genre:media:driving` — a
+ * videogame genre — ahead of the music one. A music artist pool scoped by a
+ * videogame genre matches nothing, so the sheet silently dropped to an
+ * unscoped popularity ranking. Preferring the music reading keeps the pool
+ * about music without hard-coding any genre name.
+ */
+const MUSIC_GENRE_TYPE_PREFIXES = ["urn:tag:genre:music", "urn:tag:subgenre:music"];
+
+function isMusicGenreTag(tag: TagResult): boolean {
+  const type = tagTypeOf(tag);
+  // Qloo writes the family as `urn:tag:genre:music` with no trailing segment,
+  // so a bare `startsWith("urn:tag:genre:music:")` never matches.
+  return MUSIC_GENRE_TYPE_PREFIXES.some(
+    (prefix) => type === prefix || type.startsWith(`${prefix}:`),
+  );
+}
+
+/**
  * Choose which resolved tags may restrict the candidate pool.
  *
  * `filter.tags` is a union, not an intersection: every tag added to it *widens*
@@ -136,18 +155,40 @@ export async function resolveTags(
   const resolved: TagResult[] = [];
   const seen = new Set<string>();
   const scoped = terms.slice(0, 6);
-  const calls = await Promise.all(scoped.map((term) => searchTags(term, [], 3)));
+  // Five, not three: Qloo orders the results by popularity across every domain,
+  // so the music reading of a word often sits behind an unrelated one.
+  const calls = await Promise.all(scoped.map((term) => searchTags(term, [], 5)));
   scoped.forEach((term, i) => {
     const call = calls[i];
     receipts.push(receiptFrom(call, "GET /v2/tags", `Tag "${term}"`));
     if (call.ok && call.data.length > 0) {
-      const tag = call.data[0];
+      const tag = pickTagReading(call.data);
       if (seen.has(tag.tag_id)) return;
       seen.add(tag.tag_id);
       resolved.push(tag);
     }
   });
   return resolved;
+}
+
+/**
+ * Choose which of Qloo's readings of a term is the one a music brief means.
+ *
+ * `/v2/tags` returns the term in every domain that shares the word, ordered by
+ * popularity. The top hit is not always a genre: "driving" led with a videogame
+ * genre and "punk rock" with a movie keyword. Taking `data[0]` therefore fed the
+ * candidate filter a non-music tag, which matched no artists and silently
+ * downgraded the slate to an unscoped popularity ranking.
+ *
+ * When the results include genre tags, the music one is preferred, falling back
+ * to the first genre tag if none is musical. When the term has no genre reading
+ * at all — a mood like "energetic" — the previous choice stands, so mood and
+ * style handling is unchanged.
+ */
+function pickTagReading(tags: TagResult[]): TagResult {
+  const genreTags = tags.filter(isGenreTag);
+  if (genreTags.length === 0) return tags[0];
+  return genreTags.find(isMusicGenreTag) ?? genreTags[0];
 }
 
 function receiptFrom<T>(

@@ -725,6 +725,17 @@ export async function buildCueSheet(
     warnings.push(
       "Qloo returned no artists for this brief. Try adding a named film, show or artist as an anchor.",
     );
+  } else {
+    // Partial track naming. The status panel only calls a sheet degraded when
+    // *no* track was named, so a run that named some but not all used to keep a
+    // clean `live` badge and say nothing about the pending rows. Naming which
+    // ones are pending keeps the badge honest without redefining "live".
+    const pendingTracks = cues.filter((cue) => cue.trackUnverified).length;
+    if (pendingTracks > 0 && pendingTracks < cues.length) {
+      warnings.push(
+        `The scene reader proposed a track for ${cues.length - pendingTracks} of ${cues.length} cues. The remaining ${pendingTracks} are pending selections — pick from the artist's catalogue.`,
+      );
+    }
   }
 
   if (casting.candidates.length === 0) {
